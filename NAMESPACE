@@ -1,0 +1,1 @@
+export(defmacro,FactoAFDM,FactoCA,Factocatdes,FactoDMFA,FactoGPA,FactoHMFA,FactoMCA,FactoMFA,FactoPCA,Factoprefpls)
