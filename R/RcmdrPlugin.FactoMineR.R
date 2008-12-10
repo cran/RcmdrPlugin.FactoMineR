@@ -71,100 +71,214 @@
 
 #############################FIN FONCTION DEFMACRO #############################
 
-FactoPCA<-function()
+###############
+
+readDataSetFacto <- function() {
+    initializeDialog(title=gettextRcmdr("Read Text Data From File, Clipboard, or URL"))
+    optionsFrame <- tkframe(top)
+    dsname <- tclVar(gettextRcmdr("Dataset"))
+    entryDsname <- ttkentry(optionsFrame, width="20", textvariable=dsname)
+    radioButtons(optionsFrame, "location", buttons=c("local", "clipboard", "url"),
+        labels=gettextRcmdr(c("Local file system", "Clipboard", "Internet URL")), title=gettextRcmdr("Location of Data File"))
+    headerVariable <- tclVar("1")
+    nameRows <- tclVar("0")
+    headerCheckBox <- tkcheckbutton(optionsFrame, variable=headerVariable)
+    rowCheckBox <- tkcheckbutton(optionsFrame, variable=nameRows)
+ ##   clipboardVariable <- tclVar("0")
+ ##   clipboardCheckBox <- tkcheckbutton(optionsFrame, variable=clipboardVariable)
+    radioButtons(optionsFrame, "delimiter", buttons=c("whitespace", "commas", "tabs"),
+        labels=gettextRcmdr(c("White space", "Commas", "Tabs")), title=gettextRcmdr("Field Separator"))
+    otherButton <- ttkradiobutton(delimiterFrame, variable=delimiterVariable, value="other")
+    otherVariable <- tclVar("")
+    otherEntry <- ttkentry(delimiterFrame, width="4", textvariable=otherVariable)
+    radioButtons(optionsFrame, "decimal", buttons=c("period", "comma"),
+        labels=gettextRcmdr(c("Period [.]", "Comma [,]")), title=gettextRcmdr("Decimal-Point Character"))
+    missingVariable <- tclVar("NA")
+    missingEntry <- ttkentry(optionsFrame, width="8", textvariable=missingVariable)
+    onOK <- function(){
+        closeDialog()
+        dsnameValue <- trim.blanks(tclvalue(dsname))
+        if (dsnameValue == ""){
+            errorCondition(recall=readDataSet,
+                message=gettextRcmdr("You must enter a name for the data set."))
+                return()
+                }
+        if (!is.valid.name(dsnameValue)){
+            errorCondition(recall=readDataSet,
+                message=paste('"', dsnameValue, '" ', gettextRcmdr("is not a valid name."), sep=""))
+            return()
+            }
+        if (is.element(dsnameValue, listDataSets())) {
+            if ("no" == tclvalue(checkReplace(dsnameValue, gettextRcmdr("Data set")))){
+                readDataSet()
+                return()
+                }
+            }
+##        clip <- tclvalue(clipboardVariable) == "1"
+        location <- tclvalue(locationVariable)
+        file <- if (location == "clipboard") "clipboard"
+            else if (location == "local") tclvalue(tkgetOpenFile(filetypes=
+                gettextRcmdr('{"Text Files" {".txt" ".TXT" ".dat" ".DAT" ".csv" ".CSV"}} {"All Files" {"*"}}')))
+            else {
+                initializeDialog(subdialog, title=gettextRcmdr("Internet URL"))
+                onOKsub <- function(){
+                    closeDialog(subdialog)
+                    }
+                urlFrame <- tkframe(subdialog)
+                urlVar <- tclVar("")
+                url <- ttkentry(urlFrame, font=getRcmdr("logFont"), width="30", textvariable=urlVar)
+                urlXscroll <- ttkscrollbar(urlFrame,
+                        orient="horizontal", command=function(...) tkxview(url, ...))
+                tkconfigure(url, xscrollcommand=function(...) tkset(urlXscroll, ...))
+                subOKCancelHelp()
+                tkgrid(url, sticky="w")
+                tkgrid(urlXscroll, sticky="ew")
+                tkgrid(urlFrame, sticky="nw")
+                tkgrid(subButtonsFrame, sticky="w")
+                dialogSuffix(subdialog, rows=2, columns=1, focus=url, onOK=onOKsub)
+                tclvalue(urlVar)
+                }
+        if (file == "") {
+            if (getRcmdr("grab.focus")) tkgrab.release(top)
+            tkdestroy(top)
+            return()
+            }
+        head <- tclvalue(headerVariable) == "1"
+        row <- tclvalue(nameRows) == "1"
+        delimiter <- tclvalue(delimiterVariable)
+        del <- if (delimiter == "whitespace") ""
+            else if (delimiter == "commas") ","
+            else if (delimiter == "tabs") "\\t"
+            else tclvalue(otherVariable)
+        miss <- tclvalue(missingVariable)
+        dec <- if (tclvalue(decimalVariable) == "period") "." else ","
+        if (row) command <- paste('read.table("', file,'", header=', head,
+            ', sep="', del, '", na.strings="', miss, '", dec="', dec, '", row.names=1, strip.white=TRUE)', sep="")
+        else command <- paste('read.table("', file,'", header=', head,
+            ', sep="', del, '", na.strings="', miss, '", dec="', dec, '", strip.white=TRUE)', sep="")
+        logger(paste(dsnameValue, " <- ", command, sep=""))
+        result <- justDoIt(command)
+        if (class(result)[1] !=  "try-error"){
+            assign(dsnameValue, result, envir=.GlobalEnv)
+            activeDataSet(dsnameValue)
+            }
+        tkfocus(CommanderWindow())
+        }
+    OKCancelHelp(helpSubject="read.table")
+    tkgrid(labelRcmdr(optionsFrame, text=gettextRcmdr("Enter name for data set:")), entryDsname, sticky="w")
+    tkgrid(labelRcmdr(optionsFrame, text=gettextRcmdr("Variable names in file:")), headerCheckBox, sticky="w")
+    tkgrid(labelRcmdr(optionsFrame, text=gettextRcmdr("Row names in the first columns:")), rowCheckBox, sticky="w")
+##    tkgrid(labelRcmdr(optionsFrame, text=gettextRcmdr("Read data from clipboard:")), clipboardCheckBox, sticky="w")
+    tkgrid(labelRcmdr(optionsFrame, text=gettextRcmdr("Missing data indicator:")), missingEntry, sticky="w")
+    tkgrid(locationFrame, sticky="w")
+    tkgrid(labelRcmdr(delimiterFrame, text=gettextRcmdr("Other")), otherButton,
+        labelRcmdr(delimiterFrame, text=gettextRcmdr("  Specify:")), otherEntry, sticky="w")
+    tkgrid(delimiterFrame, sticky="w", columnspan=2)
+    tkgrid(decimalFrame, sticky="w")
+    tkgrid(optionsFrame, sticky="w")
+    tkgrid(buttonsFrame, sticky="w")
+    dialogSuffix(rows=5, columns=1)
+    }
+
+###################### Fin importation
+
+#! version retravaillé par JMA le 14/12/2006 08:58:52
+
+
+FactoPCA<-function()                                                                                        #FactoPCA function which will ba called by OK button of the PCA window
 {
-  require(tcltk)
-  require(FactoMineR)
+  require(tcltk)                                                                                            #Loading of package tcltk
+  require(FactoMineR)                                                                                       #Loading of package FactoMineR
 
 
-#    Création des fonctions pour les options via nouvelle fenêtre graphique   
+#    Création des fonctions pour les options via nouvelle fenêtre graphique
 
 
-  #! fonction pour le choix des variables qualitatives supplémentaires 
+  #! fonction pour le choix des variables qualitatives supplémentaires
   Fillu.funct<-defmacro(label, firstLabel, expr=
-  {
+  {                                                                                                         #function to choose supplementary categorical variables
     env<-environment()
-    variablefact<-NULL
+    variablefact<-NULL                                                                                      #creation of an empty object: variablefact
     .FilluLabel<-tclVar(paste(firstLabel, "", sep=" "))
     .factors<-Factors()
-    OnFillu<-function()
+    OnFillu<-function()                                                                                     #function launched by clicking on button "select supplementary factors"
     {
-      if(length(.factors)==0) errorCondition(recall=NULL, message=gettextRcmdr("No Factor available"))
-          
-      FilluWin<-tktoplevel()
-      tkwm.title(FilluWin,gettextRcmdr("Choice of supplementary factors"))
+      if(length(.factors)==0) errorCondition(recall=NULL, message=gettextRcmdr("No Factor available"))      #message if no factor in the dataset
+
+      FilluWin<-tktoplevel()                                                                                #creation of a new tcltk window
+      tkwm.title(FilluWin,gettextRcmdr("Choice of supplementary factors"))                                  #title of the window
       #création de la fonction FOK.funct
-      FOK.funct<-function()
+      FOK.funct<-function()                                                                                 #function launched by clicking on OK after having chosen sup fact
       {
-        fact.select<-listfact.nom[as.numeric(tkcurselection(listfact))+1]
-        if(length(fact.select)==0) {
+        fact.select<-listfact.nom[as.numeric(tkcurselection(listfact))+1]                                   #creation of a list box with factors
+        if(length(fact.select)==0) {                                                                        #if nothing selected, no factor affected to variablefact and the window is closed
           assign("variablefact", NULL, envir=env)
           tclvalue(.FilluLabel)<-paste(firstLabel, "", sep=" ")
           tkconfigure(Fillu.but, fg="black")
           tkdestroy(FilluWin)
           return()
         }
-        assign("variablefact", fact.select, envir=env)
+        assign("variablefact", fact.select, envir=env)                                                      #else, selected factors are affected to variablefact then the window is closed
         tclvalue(.FilluLabel)<-paste(label, "", sep=" ")
-        tkconfigure(Fillu.but, fg="blue")
+        tkconfigure(Fillu.but, fg="blue")                                                                   #button "select sup fact" becomes blue
         tkdestroy(FilluWin)
       }
-      
+
       # création et mise en page de la fenetre Fillu
-      listfact<-tklistbox(FilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrfact,...)) # Liste vide
-      scrfact <-tkscrollbar(FilluWin,repeatinterval=5,command=function(...)tkyview(listfact,...))
+      listfact<-tklistbox(FilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrfact,...)) #empty list box
+      scrfact <-tkscrollbar(FilluWin,repeatinterval=5,command=function(...)tkyview(listfact,...))                                #scroll bar
       listfact.nom<-NULL
       indice<-0
       for (i in (1:ncol(donnee))) {
-        if (is.factor(donnee[,i])) {
-          tkinsert(listfact,"end",vars[i]) # On renseigne la liste
+        if (is.factor(donnee[,i])) {                                                                                             #we're interested only in categorical variables
+          tkinsert(listfact,"end",vars[i])                                                                                       #list box is completed with all available factors
           listfact.nom<-c(listfact.nom,vars[i])
-          if(vars[i] %in% variablefact) tkselection.set(listfact, indice)
+          if(vars[i] %in% variablefact) tkselection.set(listfact, indice)                                                        #factors' selection
           indice<-indice+1
         }
       }
-  
-      FOK.but<-tkbutton(FilluWin, text="OK", width=16,command=FOK.funct)
 
-      tkgrid(tklabel(FilluWin, text=""))
-        tkgrid(tklabel(FilluWin, text = gettextRcmdr("Select supplementary factor(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")
-        tkgrid(listfact, scrfact, sticky = "nw")
-        tkgrid.configure(scrfact, sticky = "ens", columnspan=1)
-        tkgrid.configure(listfact, sticky = "ew", column=1, columnspan=1)
-        tkgrid(tklabel(FilluWin, text=""))
-        tkgrid(FOK.but, column=1,columnspan=1, sticky="ew")
-        tkgrid(tklabel(FilluWin, text=""))
-        tkgrid.columnconfigure(FilluWin,0, minsize=25)
-      tkgrid.columnconfigure(FilluWin,2, minsize=25)
-  }  
+      FOK.but<-tkbutton(FilluWin, text="OK", width=16,command=FOK.funct)                                                         #OK button to launch the function above
+                                                                                                                                                      #page setting
+      tkgrid(tklabel(FilluWin, text=""))                                                                                                              #blank line
+        tkgrid(tklabel(FilluWin, text = gettextRcmdr("Select supplementary factor(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")        #text
+        tkgrid(listfact, scrfact, sticky = "nw")                                                                                                      #list box and scroll bar side by side
+        tkgrid.configure(scrfact, sticky = "ens", columnspan=1)                                                                                       #scroll bar's configuration
+        tkgrid.configure(listfact, sticky = "ew", column=1, columnspan=1)                                                                             #list box's config
+        tkgrid(tklabel(FilluWin, text=""))                                                                                                            #blank line
+        tkgrid(FOK.but, column=1,columnspan=1, sticky="ew")                                                                                           #OK button
+        tkgrid(tklabel(FilluWin, text=""))                                                                                                            #blank line
+        tkgrid.columnconfigure(FilluWin,0, minsize=25)                                                                                                #window configuration: column nb 0 with size 25
+      tkgrid.columnconfigure(FilluWin,2, minsize=25)                                                                                                  #window configuration: column nb 2 with size 25
+  }
 
-   FilluFrame<-tkframe(IlluFrame)
-   if(length(.factors)==0){
+   FilluFrame<-tkframe(IlluFrame)                                                                                                                     #new frame of main window to put "select sup fact" button
+   if(length(.factors)==0){                                                                                                                           #if no factors in the dataset, grey button with message
      Fillu.but<-tkbutton(FilluFrame, text=gettextRcmdr("No factors available"), borderwidth=3)
      tkconfigure(Fillu.but, fg="grey")
    }
-   else Fillu.but<-tkbutton(FilluFrame, textvariable=.FilluLabel, command=OnFillu, borderwidth=3)
-   tkgrid(Fillu.but, sticky="ew")
+   else Fillu.but<-tkbutton(FilluFrame, textvariable=.FilluLabel, command=OnFillu, borderwidth=3)                                                     #else, function OnFillu is launched
+   tkgrid(Fillu.but, sticky="ew")                                                                                                                     #setting of this button in the new frame
 
 ##   Fillu.but<-tkbutton(FilluFrame, textvariable=.FilluLabel, command=OnFillu, borderwidth=3)
 ##   tkgrid(Fillu.but, sticky="ew")
   })
 
-  #! fonction pour le choix des variables quantitatives supplémentaires 
-  Dillu.funct<-defmacro(label, firstLabel, expr=
+  #! fonction pour le choix des variables quantitatives supplémentaires
+  Dillu.funct<-defmacro(label, firstLabel, expr=                                                                                         #function to choose supplementary continuous variables
   {
     env<-environment()
-    variableillu<-NULL
+    variableillu<-NULL                                                                                                                   #creation of an empty object: variableillu
     .DilluLabel<-tclVar(paste(firstLabel, "", sep=" "))
-    OnDillu<-function()
-    { 
-      DilluWin<-tktoplevel()
-      tkwm.title(DilluWin,gettextRcmdr("Select supplementary variables"))
+    OnDillu<-function()                                                                                                                  #function launched by clicking on "select sup variables"
+    {
+      DilluWin<-tktoplevel()                                                                                                             #creation of a new tcltk window
+      tkwm.title(DilluWin,gettextRcmdr("Select supplementary variables"))                                                                #title of the window
       #création de la fonction DOK.funct
-      DOK.funct<-function()
+      DOK.funct<-function()                                                                                                              #function launched by clicking on OK after habing chosen sup cont variables
       {
-        vsup.select<-listvar.nom[as.numeric(tkcurselection(listvar))+1]
-        if(length(vsup.select)==0)
+        vsup.select<-listvar.nom[as.numeric(tkcurselection(listvar))+1]                                                                  #list box
+        if(length(vsup.select)==0)                                                                                                       #if nothing selected, no variable affected to variableillu and the window is closed
         {
           assign("variableillu", NULL, envir=env)
           tclvalue(.DilluLabel)<-paste(firstLabel, "", sep=" ")
@@ -172,61 +286,61 @@ FactoPCA<-function()
           tkdestroy(DilluWin)
           return()
         }
-        assign("variableillu", vsup.select, envir=env)
+        assign("variableillu", vsup.select, envir=env)                                                                                   #else, chosen variables are affected to variableillu and then the window is closed
         tclvalue(.DilluLabel)<-paste(label, "", sep=" ")
-        tkconfigure(Dillu.but, fg="blue")
+        tkconfigure(Dillu.but, fg="blue")                                                                                                #"select sup var" button  becomes blue
         tkdestroy(DilluWin)
       }
-      
+
       # création et mise en page de la fenetre Dillu
-      listvar<-tklistbox(DilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrvar,...)) # Liste vide
-      scrvar <-tkscrollbar(DilluWin,repeatinterval=5,command=function(...)tkyview(listvar,...)) 
+      listvar<-tklistbox(DilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrvar,...))            #empty list box
+      scrvar <-tkscrollbar(DilluWin,repeatinterval=5,command=function(...)tkyview(listvar,...))                                           #scroll bar
       listvar.nom<-NULL
       indice<-0
       for (i in (1:ncol(donnee))) {
-          if (is.numeric(donnee[,i])) {
-            tkinsert(listvar,"end",vars[i]) # On renseigne la liste
+          if (is.numeric(donnee[,i])) {                                                                                                   #we're interested only in numerical variables
+            tkinsert(listvar,"end",vars[i])                                                                                               #continuous variables are put in list box
             listvar.nom<-c(listvar.nom,vars[i])
-            if(vars[i] %in% variableillu) tkselection.set(listvar, indice)
+            if(vars[i] %in% variableillu) tkselection.set(listvar, indice)                                                                #selected cont var
             indice<-indice+1
           }
       }
-  
-      DOK.but<-tkbutton(DilluWin, text="OK", width=16,command=DOK.funct)
 
-      tkgrid(tklabel(DilluWin, text=""))
-        tkgrid(tklabel(DilluWin, text = gettextRcmdr("Select supplementary variable(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")
-        tkgrid(listvar, scrvar, sticky = "nw")
-        tkgrid.configure(scrvar, sticky = "ens", columnspan=1)
-        tkgrid.configure(listvar, sticky = "ew", column=1, columnspan=1)
-        tkgrid(tklabel(DilluWin, text=""))
-        tkgrid(DOK.but, column=1,columnspan=1, sticky="ew")
-        tkgrid(tklabel(DilluWin, text=""))
-        tkgrid.columnconfigure(DilluWin,0, minsize=25)
-      tkgrid.columnconfigure(DilluWin,2, minsize=25)
-  }  
+      DOK.but<-tkbutton(DilluWin, text="OK", width=16,command=DOK.funct)                                                                  #OK button to launch the function above
 
-   DilluFrame<-tkframe(IlluFrame)
-   Dillu.but<-tkbutton(DilluFrame, textvariable=.DilluLabel, command=OnDillu, borderwidth=3)
-   tkgrid(Dillu.but, sticky="ew")
+        tkgrid(tklabel(DilluWin, text=""))                                                                                                           #page setting: blank line
+        tkgrid(tklabel(DilluWin, text = gettextRcmdr("Select supplementary variable(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")     #text
+        tkgrid(listvar, scrvar, sticky = "nw")                                                                                                       #list box and scroll bar side by side
+        tkgrid.configure(scrvar, sticky = "ens", columnspan=1)                                                                                       #scroll bar's configuration
+        tkgrid.configure(listvar, sticky = "ew", column=1, columnspan=1)                                                                             #list box's configuration
+        tkgrid(tklabel(DilluWin, text=""))                                                                                                           #blank line
+        tkgrid(DOK.but, column=1,columnspan=1, sticky="ew")                                                                                          #OK button
+        tkgrid(tklabel(DilluWin, text=""))                                                                                                           #blank line
+        tkgrid.columnconfigure(DilluWin,0, minsize=25)                                                                                               #window configuration: column 0 will be of size 25
+        tkgrid.columnconfigure(DilluWin,2, minsize=25)                                                                                               #window configuration: column 2 will be of size 25
+  }
+
+   DilluFrame<-tkframe(IlluFrame)                                                                                                                    #new frame on the main window to put "select sup var" button
+   Dillu.but<-tkbutton(DilluFrame, textvariable=.DilluLabel, command=OnDillu, borderwidth=3)                                                         #"select sup var" button
+   tkgrid(Dillu.but, sticky="ew")                                                                                                                    #"select sup var" button put in its frame
   })
-  
-  
-  #! fonction pour le choix des individus supplémentaires 
-  Iillu.funct<-defmacro(label, firstLabel, expr=
+
+
+  #! fonction pour le choix des individus supplémentaires
+  Iillu.funct<-defmacro(label, firstLabel, expr=                                                                                  #function to choose sup individuals
   {
     env<-environment()
-    individuillu<-NULL
+    individuillu<-NULL                                                                                                            #creation of an empty object: individuillu
     .IilluLabel<-tclVar(paste(firstLabel, "", sep=" "))
-    OnIillu<-function()
-    {   
-      IilluWin<-tktoplevel()
-      tkwm.title(IilluWin,gettextRcmdr("Select supplementary individuals"))
+    OnIillu<-function()                                                                                                           #function launched by clicking on "select sup ind"
+    {
+      IilluWin<-tktoplevel()                                                                                                      #creation of a new tcltk window
+      tkwm.title(IilluWin,gettextRcmdr("Select supplementary individuals"))                                                       #title of the window
       #création de la fonction IOK.funct
-      IOK.funct<-function()
+      IOK.funct<-function()                                                                                                       #function to select sup ind
       {
-        ind.select<-rows[as.numeric(tkcurselection(listind))+1]
-        if(length(ind.select)==0)
+        ind.select<-rows[as.numeric(tkcurselection(listind))+1]                                                                   #list box
+        if(length(ind.select)==0)                                                                                                 #if no ind selected, nothing put in individuillu and the window is closed
         {
           assign("individuillu", NULL, envir=env)
           tclvalue(.IilluLabel)<-paste(firstLabel, "", sep=" ")
@@ -234,218 +348,218 @@ FactoPCA<-function()
           tkdestroy(IilluWin)
           return()
         }
-        assign("individuillu", ind.select, envir=env)
+        assign("individuillu", ind.select, envir=env)                                                                             #else selected ind are put in individuillu then the window is closed
 #        tclvalue(.IilluLabel)<-paste(label, ": OK", sep=" ")
         tclvalue(.IilluLabel)<-paste(label, "", sep=" ")
-        tkconfigure(Iillu.but, fg="blue")
+        tkconfigure(Iillu.but, fg="blue")                                                                                         #"select sup ind" button becomes blue
         tkdestroy(IilluWin)
       }
-      
+
       # création et mise en page de la fenetre Fillu
-      listind<-tklistbox(IilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrind,...)) # Liste vide
-      scrind <-tkscrollbar(IilluWin,repeatinterval=5,command=function(...)tkyview(listind,...)) 
+      listind<-tklistbox(IilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrind,...))    #empty list box
+      scrind <-tkscrollbar(IilluWin,repeatinterval=5,command=function(...)tkyview(listind,...))                                   #scroll bar
       indice<-0
       for (i in (1:nrow(donnee))) {
-          tkinsert(listind,"end",rows[i]) # On renseigne la liste
-          if(rows[i] %in% individuillu) tkselection.set(listind,indice)
+          tkinsert(listind,"end",rows[i]) # On renseigne la liste                                                                 #list box is completed with individuals
+          if(rows[i] %in% individuillu) tkselection.set(listind,indice)                                                           #selected individuals
           indice<-indice+1
       }
-  
-      IOK.but<-tkbutton(IilluWin, text="OK", width=16,command=IOK.funct)
 
-      tkgrid(tklabel(IilluWin, text=""))
-      tkgrid(tklabel(IilluWin, text = gettextRcmdr("Select supplementary individual(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")
-      tkgrid(listind, scrind, sticky = "nw")
-      tkgrid.configure(scrind, sticky = "ens", columnspan=1)
-      tkgrid.configure(listind, sticky = "ew", column=1, columnspan=1)
-      tkgrid(tklabel(IilluWin, text=""))
-      tkgrid(IOK.but, column=1,columnspan=1, sticky="ew")
-      tkgrid(tklabel(IilluWin, text=""))
-      tkgrid.columnconfigure(IilluWin,0, minsize=25)
-      tkgrid.columnconfigure(IilluWin,2, minsize=25)
-  }  
+      IOK.but<-tkbutton(IilluWin, text="OK", width=16,command=IOK.funct)                                                          #OK button to launch the function above
 
-   IilluFrame<-tkframe(IlluFrame)
-   Iillu.but<-tkbutton(IilluFrame, textvariable=.IilluLabel, command=OnIillu, borderwidth=3)
-   tkgrid(Iillu.but, sticky="ew")
+      tkgrid(tklabel(IilluWin, text=""))                                                                                                             #page setting: blank line
+      tkgrid(tklabel(IilluWin, text = gettextRcmdr("Select supplementary individual(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")     #text
+      tkgrid(listind, scrind, sticky = "nw")                                                                                                         #list box and scroll bar side by side
+      tkgrid.configure(scrind, sticky = "ens", columnspan=1)                                                                                         #scroll bar's config
+      tkgrid.configure(listind, sticky = "ew", column=1, columnspan=1)                                                                               #list box's config
+      tkgrid(tklabel(IilluWin, text=""))                                                                                                             #blank line
+      tkgrid(IOK.but, column=1,columnspan=1, sticky="ew")                                                                                            #OK button
+      tkgrid(tklabel(IilluWin, text=""))                                                                                                             #blank line
+      tkgrid.columnconfigure(IilluWin,0, minsize=25)                                                                                                 #configuration of column nb 0: size 25
+      tkgrid.columnconfigure(IilluWin,2, minsize=25)                                                                                                 #configuration of column nb 2: size 25
+  }
+
+   IilluFrame<-tkframe(IlluFrame)                                                                                                                    #new frame in the main window
+   Iillu.but<-tkbutton(IilluFrame, textvariable=.IilluLabel, command=OnIillu, borderwidth=3)                                                         #creation of "select sup ind" button
+   tkgrid(Iillu.but, sticky="ew")                                                                                                                    #new button put in new frame
   })
-  
 
-  #! fonction pour la gestion des options graphiques 
-  PLOT.PCA<-defmacro(label, firstLabel, expr=
+
+  #! fonction pour la gestion des options graphiques
+  PLOT.PCA<-defmacro(label, firstLabel, expr=                                      #function to choose graphical options
   {
     env<-environment()
-    compteur.graph<-0
+    compteur.graph<-0                                                              #variables initialization
     #déclaration des variables
-    Rchoix<-TRUE
-    RTitle<-NULL
-    Rinvisible<-NULL
-    Rlabel<-c("ind", "ind.sup", "quali")
-    Rcol.ind<-Rcol.ind.tmp<-"black"
-    Rcol.ind.sup<-Rcol.ind.sup.tmp<-"blue"
-    Rcol.quali<-Rcol.quali.tmp<-"magenta"
-    Rhabillage<-"none"
-    RXlimInd<-NULL
-    RYlimInd<-NULL
-    
-    Wchoix=TRUE
-    WTitle<-NULL
-    Wlabel<-c("var", "quanti.sup")
-    Wlim.cos<-0.
-    Wcol.quanti.sup<-Wcol.quanti.sup.tmp<-"blue"
-    Wcol.var<-Wcol.var.tmp<-"black"
-    WXlimVar<-NULL
-    WYlimVar<-NULL
-    
+    Rchoix<-TRUE                                                                   #plotting graph of individuals
+    RTitle<-NULL                                                                   #title for graph of ind
+    Rinvisible<-NULL                                                               #invisible elements for graph of ind
+    Rlabel<-c("ind", "ind.sup", "quali")                                           #different lables for graph of ind
+    Rcol.ind<-Rcol.ind.tmp<-"black"                                                #color for ind
+    Rcol.ind.sup<-Rcol.ind.sup.tmp<-"blue"                                         #color for sup ind
+    Rcol.quali<-Rcol.quali.tmp<-"magenta"                                          #color for sup fact
+    Rhabillage<-"none"                                                             #color according...
+    RXlimInd<-NULL                                                                 #limit for x axes
+    RYlimInd<-NULL                                                                 #limit for y axes
+
+    Wchoix=TRUE                                                                    #plotting graph of variables
+    WTitle<-NULL                                                                   #title of graph of var
+    Wlabel<-c("var", "quanti.sup")                                                 #labels
+    Wlim.cos<-0.                                                                   #selection on cos2
+    Wcol.quanti.sup<-Wcol.quanti.sup.tmp<-"blue"                                   #color for sup var
+    Wcol.var<-Wcol.var.tmp<-"black"                                                #color for var
+    WXlimVar<-NULL                                                                 #limit for x axes
+    WYlimVar<-NULL                                                                 #limit for y axes
+
     .PlotLabel<-tclVar(paste(firstLabel, "", sep=" "))
-    
-    OnPlot<-function()
+
+    OnPlot<-function()                                                                        #function to be launched by clicking on "graphical options" button
     {
-      PlotWin<-tktoplevel()
-      tkwm.title(PlotWin, gettextRcmdr("Graphical options"))
-      tkwm.geometry(PlotWin, "-100+50")
-      
+      PlotWin<-tktoplevel()                                                                   #new tcltk window
+      tkwm.title(PlotWin, gettextRcmdr("Graphical options"))                                  #title
+      tkwm.geometry(PlotWin, "-100+50")                                                       #size
+
       #création de la fonction onOKsub
-      onOKsub<-function()
+      onOKsub<-function()                                                                     #function launched by clicking on OK
       {
-        assign("compteur.graph", compteur.graph+1, envir=env)
+        assign("compteur.graph", compteur.graph+1, envir=env)                                 #after clicking on OK, "graph opt" button becomes blue
 #        if(compteur.graph>0) tclvalue(.PlotLabel)<-paste(label, ": Seen", sep=" ")
         if(compteur.graph>0) tclvalue(.PlotLabel)<-paste(label, "", sep=" ")
         tkconfigure(Plot.but, fg="blue")
 
         # gestion des entrées de la partie graphique des individus
-        if(tclvalue(ind.check.value)==1) assign("Rchoix", TRUE, envir=env)
+        if(tclvalue(ind.check.value)==1) assign("Rchoix", TRUE, envir=env)                    #if the user has chosen to plot the graph of individuals, TRUE is affected to Rchoix, else FALSE is affected
         else assign("Rchoix", FALSE, envir=env)
 
-        if(Rchoix)
+        if(Rchoix)                                                                            #if Rchoix is TRUE
         {
-          if (tclvalue(Titre)==" ") assign("RTitle", NULL, envir=env)
+          if (tclvalue(Titre)==" ") assign("RTitle", NULL, envir=env)                         #if the user did not write anything for the title, then RTitle becomes NULL, else it takes what the user wrote
           assign("RTitle", tclvalue(Titre), envir=env)
 
           label.tmp.ind<-tclvalue(label.ind.checkValue)
           label.tmp.ind.sup<-tclvalue(label.ind.sup.checkValue)
           label.tmp.quali.sup<-tclvalue(label.quali.sup.checkValue)
-          assign("Rlabel", NULL, envir=env)
+          assign("Rlabel", NULL, envir=env)                                                   #at first Rlabel is NULL, then it is completed with "ind", "ind.sup" and "quali" if the user has chosen to plot those labels
           if(label.tmp.ind==1) assign("Rlabel", c(Rlabel, "ind"), envir=env)
           if(label.tmp.ind.sup==1) assign("Rlabel", c(Rlabel, "ind.sup"), envir=env)
           if(label.tmp.quali.sup==1) assign("Rlabel", c(Rlabel, "quali"), envir=env)
 
-          assign("Rcol.ind", Rcol.ind.tmp, envir=env)
-          assign("Rcol.ind.sup", Rcol.ind.sup.tmp, envir=env)
-          assign("Rcol.quali", Rcol.quali.tmp, envir=env)
+          assign("Rcol.ind", Rcol.ind.tmp, envir=env)                                         #Rcol.ind takes the color the user has chosen for individuals
+          assign("Rcol.ind.sup", Rcol.ind.sup.tmp, envir=env)                                 #Rcol.ind.sup takes the color the user has chosen for sup individuals
+          assign("Rcol.quali", Rcol.quali.tmp, envir=env)                                     #Rcol.quali takes the color the user has chosen for sup factors
 
           inv.ind.tmp<-tclvalue(inv.ind.checkValue)
           inv.ind.sup.tmp<-tclvalue(inv.ind.sup.checkValue)
           inv.quali.tmp<-tclvalue(inv.quali.checkValue)
-          assign("Rinvisible", NULL, envir=env)
+          assign("Rinvisible", NULL, envir=env)                                               #at first Rinvisible is NULL, then it is completed with "ind", "ind.sup" and "quali" if the user has chosen to hide those elements
           if(inv.ind.tmp=="1") assign("Rinvisible", c(Rinvisible, "ind"), envir=env)
           if(inv.ind.sup.tmp=="1") assign("Rinvisible", c(Rinvisible, "ind.sup"), envir=env)
           if(inv.quali.tmp=="1") assign("Rinvisible", c(Rinvisible, "quali"), envir=env)
 
-          habillage.tmp<-listgraph.nom[as.numeric(tkcurselection(listgraph))+1]
-          if(length(habillage.tmp)==0) assign("Rhabillage","none", envir=env)
+          habillage.tmp<-listgraph.nom[as.numeric(tkcurselection(listgraph))+1]               #individuals are colored according to what the user chose
+          if(length(habillage.tmp)==0) assign("Rhabillage","none", envir=env)                 #if nothing chosen, hbillage ="none"
           else assign("Rhabillage", habillage.tmp, envir=env)
 
-          if(tclvalue(XlimIndMin)=="" | tclvalue(XlimIndMax)=="") assign("RXlimInd", NULL, envir=env)
-          else assign("RXlimInd", c(as.numeric(tclvalue(XlimIndMin)), as.numeric(tclvalue(XlimIndMax))), envir=env)
-          if(tclvalue(YlimIndMin)=="" | tclvalue(YlimIndMax)=="") assign("RYlimInd", NULL, envir=env)
-          else assign("RYlimInd", c(as.numeric(tclvalue(YlimIndMin)), as.numeric(tclvalue(YlimIndMax))), envir=env)
+          if(tclvalue(XlimIndMin)=="" | tclvalue(XlimIndMax)=="") assign("RXlimInd", NULL, envir=env)                   #when no choice for x limits, RXlimInd=NULL
+          else assign("RXlimInd", c(as.numeric(tclvalue(XlimIndMin)), as.numeric(tclvalue(XlimIndMax))), envir=env)     #else RXlimInd is what the user chose
+          if(tclvalue(YlimIndMin)=="" | tclvalue(YlimIndMax)=="") assign("RYlimInd", NULL, envir=env)                   #when no choice for y limits, RYlimInd=NULL
+          else assign("RYlimInd", c(as.numeric(tclvalue(YlimIndMin)), as.numeric(tclvalue(YlimIndMax))), envir=env)     #else RYlimInd is what the user chose
         }
-        
-        
+
+
         # gestion des entrées de la partie graphique des variables
-        if(tclvalue(var.check.value)==1) assign("Wchoix", TRUE, envir=env)
+        if(tclvalue(var.check.value)==1) assign("Wchoix", TRUE, envir=env)                     #if the user has chosen to plot the graph of variables, TRUE is affected to Wchoix, else FALSE is affected
         else assign("Wchoix", FALSE, envir=env)
 
-        if(Wchoix)
+        if(Wchoix)                                                                             #if Wchoix=T
         {
-          if (tclvalue(WTitre)==" ") assign("WTitle", NULL, envir=env)
+          if (tclvalue(WTitre)==" ") assign("WTitle", NULL, envir=env)                         #if the user did not write anything for the title, then WTitle becomes NULL, else it takes what the user wrote
           assign("WTitle", tclvalue(WTitre), envir=env)
 
-          assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
+          assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)                                #Wlim.cos takes the value the user chose
 
           label.tmp.var<-tclvalue(label.var.checkValue)
           label.tmp.quanti.sup<-tclvalue(label.quanti.sup.checkValue)
-          assign("Wlabel", NULL, envir=env)
+          assign("Wlabel", NULL, envir=env)                                                    #at first Wlabel is NULL, then it is completed with "var" and "quanti.sup" if the user has chosen to plot those labels
           if(label.tmp.var==1) assign("Wlabel", c(Wlabel, "var"), envir=env)
           if(label.tmp.quanti.sup==1) assign("Wlabel", c(Wlabel, "quanti.sup"), envir=env)
 
-          assign("Wcol.var", Wcol.var.tmp, envir=env)
-          assign("Wcol.quanti.sup", Wcol.quanti.sup.tmp, envir=env)
-               
+          assign("Wcol.var", Wcol.var.tmp, envir=env)                                          #Wcol.var takes the color the user has chosen for active variables
+          assign("Wcol.quanti.sup", Wcol.quanti.sup.tmp, envir=env)                            #Wcol.quanti.sup takes the color the user has chosen for supplementary variables
+
         }
 
-        tkdestroy(PlotWin)
+        tkdestroy(PlotWin)                                                                     #window is closed
       }
-    
-    # construction de la partie graphique des individus
-    PlotIndFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")
-    
-    RchoixFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    ind.check<-tkcheckbutton(RchoixFrame)
-    if(Rchoix) ind.check.value<-tclVar("1")
-    else ind.check.value<-tclVar("0")
-    tkconfigure(ind.check, variable=ind.check.value)
-    tkgrid(tklabel(RchoixFrame, text=gettextRcmdr("Plot individuals graph"), font=font2),ind.check)
-    tkgrid(tklabel(RchoixFrame, text="  "))
-    
-    RTitleFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    if (is.null(RTitle)) Titre <- tclVar(" ")
-    else Titre<-tclVar(RTitle)
-    Titre.entry <-tkentry(RTitleFrame,width="40",textvariable=Titre)
-    tkgrid(tklabel(RTitleFrame,text=gettextRcmdr("Title of the graph")),Titre.entry)
-    
-    RinvisibleFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    inv.ind.check<-tkcheckbutton(RinvisibleFrame)
-    if ("ind" %in% Rinvisible) inv.ind.checkValue<-tclVar("1")
-    else inv.ind.checkValue<-tclVar("0")
-    inv.ind.sup.check<-tkcheckbutton(RinvisibleFrame)
-    if ("ind.sup" %in% Rinvisible) inv.ind.sup.checkValue<-tclVar("1")
-    else inv.ind.sup.checkValue<-tclVar("0")
-    inv.quali.check<-tkcheckbutton(RinvisibleFrame)
-    if ("quali" %in% Rinvisible) inv.quali.checkValue<-tclVar("1")
-    else inv.quali.checkValue<-tclVar("0")
-    tkconfigure(inv.ind.check, variable=inv.ind.checkValue)
-    tkconfigure(inv.ind.sup.check, variable=inv.ind.sup.checkValue)
-    tkconfigure(inv.quali.check, variable=inv.quali.checkValue)
-    if (!is.null(variablefact)|!is.null(individuillu)){
-      tkgrid(tklabel(RinvisibleFrame, text=gettextRcmdr("Hide some elements:")), columnspan=6, sticky="w")
-      tkgrid(tklabel(RinvisibleFrame, text="ind"),inv.ind.check, tklabel(RinvisibleFrame, text="ind sup"),inv.ind.sup.check, tklabel(RinvisibleFrame, text="quali"),inv.quali.check, sticky="w")
-    }
-    
-    RlabelFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    label.ind.check<-tkcheckbutton(RlabelFrame)
-    if ("ind" %in% Rlabel) label.ind.checkValue<-tclVar("1")
-    else label.ind.checkValue<-tclVar("0") 
-    tkconfigure(label.ind.check, variable=label.ind.checkValue)
-    tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the active individuals")),label.ind.check)
-    label.ind.sup.check<-tkcheckbutton(RlabelFrame)
-    if ("ind.sup" %in% Rlabel) label.ind.sup.checkValue<-tclVar("1")
-    else label.ind.sup.checkValue<-tclVar("0")
-    tkconfigure(label.ind.sup.check, variable=label.ind.sup.checkValue)
-    if(!is.null(individuillu)) tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the supplementary individuals")),label.ind.sup.check)
-    label.quali.sup.check<-tkcheckbutton(RlabelFrame)
-    if ("quali" %in% Rlabel) label.quali.sup.checkValue<-tclVar("1")
-    else label.quali.sup.checkValue<-tclVar("1")
-    tkconfigure(label.quali.sup.check, variable=label.quali.sup.checkValue)
-    if(!is.null(variablefact)) tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the supplementary factor")), label.quali.sup.check)
 
-    RcolFrame<-tkframe(PlotIndFrame,borderwidth=2)
+    # construction de la partie graphique des individus
+    PlotIndFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")                             #new frame for all the choices concerning graph of individuals
+
+    RchoixFrame<-tkframe(PlotIndFrame,borderwidth=2)                                           #frame for the button to choose whether or not to plot the graph of individuals
+    ind.check<-tkcheckbutton(RchoixFrame)                                                      #creation of a check button
+    if(Rchoix) ind.check.value<-tclVar("1")                                                    #ind.check.value=1 if Rchoix=T
+    else ind.check.value<-tclVar("0")                                                          #else ind.check.value=0
+    tkconfigure(ind.check, variable=ind.check.value)                                           #assigning variable to check button: will appear as clicked  or unclicked according to ind.check.value (1 or 0)
+    tkgrid(tklabel(RchoixFrame, text=gettextRcmdr("Plot individuals graph"), font=font2),ind.check)       #positionning text and check button side by side
+    tkgrid(tklabel(RchoixFrame, text="  "))                                                               #blank line
+
+    RTitleFrame<-tkframe(PlotIndFrame,borderwidth=2)                                            #frame for the title
+    if (is.null(RTitle)) Titre <- tclVar(" ")                                                   #default value is nothing
+    else Titre<-tclVar(RTitle)                                                                  #if the user writes sth, it becomes the value of RTitle
+    Titre.entry <-tkentry(RTitleFrame,width="40",textvariable=Titre)                            #case to enter the title
+    tkgrid(tklabel(RTitleFrame,text=gettextRcmdr("Title of the graph")),Titre.entry)            #positionning text and case side by side
+
+    RinvisibleFrame<-tkframe(PlotIndFrame,borderwidth=2)                                        #frame for invisible elements
+    inv.ind.check<-tkcheckbutton(RinvisibleFrame)                                               #check button for individuals
+    if ("ind" %in% Rinvisible) inv.ind.checkValue<-tclVar("1")                                  #inv.ind.checkValue=1 if "ind" is in Rinvisible
+    else inv.ind.checkValue<-tclVar("0")
+    inv.ind.sup.check<-tkcheckbutton(RinvisibleFrame)                                           #check button for sup individuals
+    if ("ind.sup" %in% Rinvisible) inv.ind.sup.checkValue<-tclVar("1")                          #inv.ind.sup.checkValue=1 if "ind.sup" is in Rinvisible
+    else inv.ind.sup.checkValue<-tclVar("0")
+    inv.quali.check<-tkcheckbutton(RinvisibleFrame)                                             #check button for sup individuals
+    if ("quali" %in% Rinvisible) inv.quali.checkValue<-tclVar("1")                              #inv.quali.checkValue<=1 if "quali" is in Rinvisible
+    else inv.quali.checkValue<-tclVar("0")
+    tkconfigure(inv.ind.check, variable=inv.ind.checkValue)                                     #assigning inv.ind.checkValue to check button, button will appear clicked or unclicked according to it
+    tkconfigure(inv.ind.sup.check, variable=inv.ind.sup.checkValue)                             #assigning inv.ind.sup.checkValue to check button
+    tkconfigure(inv.quali.check, variable=inv.quali.checkValue)                                 #assigning inv.ind.sup.checkValue to check button
+    if (!is.null(variablefact)|!is.null(individuillu)){                                         #if there are supplementary factors or individuals
+      tkgrid(tklabel(RinvisibleFrame, text=gettextRcmdr("Hide some elements:")), columnspan=6, sticky="w")           #positionning text
+      tkgrid(tklabel(RinvisibleFrame, text="ind"),inv.ind.check, tklabel(RinvisibleFrame, text="ind sup"),inv.ind.sup.check, tklabel(RinvisibleFrame, text="quali"),inv.quali.check, sticky="w")       #and check buttons
+    }
+
+    RlabelFrame<-tkframe(PlotIndFrame,borderwidth=2)                                                 #frame for labels
+    label.ind.check<-tkcheckbutton(RlabelFrame)                                                      #check button for labels of individuals
+    if ("ind" %in% Rlabel) label.ind.checkValue<-tclVar("1")                                         #label.ind.checkValue=1 if "ind" is in Rlabel
+    else label.ind.checkValue<-tclVar("0")
+    tkconfigure(label.ind.check, variable=label.ind.checkValue)                                      #assigning label.ind.checkValue to the button
+    tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the active individuals")),label.ind.check)    #positionning text and button
+    label.ind.sup.check<-tkcheckbutton(RlabelFrame)                                                        #check button for labels of sup individuals
+    if ("ind.sup" %in% Rlabel) label.ind.sup.checkValue<-tclVar("1")                                       #label.ind.sup.checkValue=1 if "ind.sup" is in Rlabel
+    else label.ind.sup.checkValue<-tclVar("0")
+    tkconfigure(label.ind.sup.check, variable=label.ind.sup.checkValue)                                    #assigning label.ind.sup.heckValue to the button
+    if(!is.null(individuillu)) tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the supplementary individuals")),label.ind.sup.check) #positionning text and button
+    label.quali.sup.check<-tkcheckbutton(RlabelFrame)                                                         #check button for labels of sup fact
+    if ("quali" %in% Rlabel) label.quali.sup.checkValue<-tclVar("1")                                          #label.quali.sup.checkValue=1 if "ind.sup" is in Rlabel
+    else label.quali.sup.checkValue<-tclVar("1")
+    tkconfigure(label.quali.sup.check, variable=label.quali.sup.checkValue)                                   #assigning label.quali.sup.checkValue to the button
+    if(!is.null(variablefact)) tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Label for the supplementary factor")), label.quali.sup.check) #positionning text and button
+
+    RcolFrame<-tkframe(PlotIndFrame,borderwidth=2)                                                             #frame for choice of colors
     Rcol.ind.value <- Rcol.ind
-    canvas.ind <- tkcanvas(RcolFrame,width="80",height="25",bg=Rcol.ind.value)
-    ChangeColor.ind <- function()
+    canvas.ind <- tkcanvas(RcolFrame,width="80",height="25",bg=Rcol.ind.value)                                 #button to change color of individuals
+    ChangeColor.ind <- function()                                                                              #function to change color of individuals
     {
-      Rcol.ind.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Rcol.ind.value,title=gettextRcmdr("Choose a color")))
+      Rcol.ind.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Rcol.ind.value,title=gettextRcmdr("Choose a color")))   #assigning chosen color to Rcol.ind.value
       if (nchar(Rcol.ind.value)>0)
       {
-        tkconfigure(canvas.ind,bg=Rcol.ind.value)
-        assign("Rcol.ind.tmp", Rcol.ind.value, envir=env)
+        tkconfigure(canvas.ind,bg=Rcol.ind.value)                                                                        #canva's color becomes the chosen one
+        assign("Rcol.ind.tmp", Rcol.ind.value, envir=env)                                                                #assigning Rcol.ind.value to Rcol.ind.tmp
       }
     }
-    ChangeColor.ind.button <- tkbutton(RcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.ind)
-    tkgrid(tklabel(RcolFrame, text=gettextRcmdr("Color of the active individuals")),canvas.ind,ChangeColor.ind.button)
-    
-    Rcol.ind.sup.value<-Rcol.ind.sup
+    ChangeColor.ind.button <- tkbutton(RcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.ind)              #button to launch function above
+    tkgrid(tklabel(RcolFrame, text=gettextRcmdr("Color of the active individuals")),canvas.ind,ChangeColor.ind.button)   #settings: text, canva and button
+
+    Rcol.ind.sup.value<-Rcol.ind.sup                                                                                     #same for supplementary individuals
     canvas.ind.sup <- tkcanvas(RcolFrame,width="80",height="25",bg=Rcol.ind.sup.value)
     ChangeColor.ind.sup <- function()
     {
@@ -458,8 +572,8 @@ FactoPCA<-function()
     }
     ChangeColor.ind.sup.button <- tkbutton(RcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.ind.sup)
     if(!is.null(individuillu)) tkgrid(tklabel(RcolFrame, text=gettextRcmdr("color for supplementary individuals")),canvas.ind.sup,ChangeColor.ind.sup.button)
-         
-    Rcol.quali.value<- Rcol.quali
+
+    Rcol.quali.value<- Rcol.quali                                                                                          #same for sup factors
     canvas.quali <- tkcanvas(RcolFrame,width="80",height="25",bg=Rcol.quali.value)
     ChangeColor.quali <- function()
     {
@@ -473,12 +587,12 @@ FactoPCA<-function()
     ChangeColor.quali.button <- tkbutton(RcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.quali)
     if(!is.null(variablefact)) tkgrid(tklabel(RcolFrame, text=gettextRcmdr("Color for factors")),canvas.quali,ChangeColor.quali.button)
 
-    RhabillageFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    listgraph<-tklistbox(RhabillageFrame,height=4, selectmode="single",exportselection="FALSE",yscrollcommand=function(...) tkset(scrgraph,...))
-    scrgraph <-tkscrollbar(RhabillageFrame,repeatinterval=5,command=function(...)tkyview(listgraph,...))
+    RhabillageFrame<-tkframe(PlotIndFrame,borderwidth=2)                                                                                               #new frame for coloring individuals according to sth
+    listgraph<-tklistbox(RhabillageFrame,height=4, selectmode="single",exportselection="FALSE",yscrollcommand=function(...) tkset(scrgraph,...))       #empty list box
+    scrgraph <-tkscrollbar(RhabillageFrame,repeatinterval=5,command=function(...)tkyview(listgraph,...))            #scroll bar
     listgraph.nom<-"ind"
-    tkinsert(listgraph,"end",gettextRcmdr("by.individual"))
-    if(Rhabillage=="ind") tkselection.set(listgraph, 0)
+    tkinsert(listgraph,"end",gettextRcmdr("by.individual"))                                                         #putting "by.individual" in the list box
+    if(Rhabillage=="ind") tkselection.set(listgraph, 0)                                                             #color by individual if the user chose it
     indice<-1
 ##    for (i in 1:ncol(donnee)) {
 ##      if(is.factor(donnee[,i])) {
@@ -488,29 +602,29 @@ FactoPCA<-function()
 ##        indice<-indice+1
 ##      }
 ##    }
-    if (!is.null(variablefact)){
+    if (!is.null(variablefact)){                                                                                    #if there are supplementary variables, they are added to the list box
       for (j in 1:ncol(donnee)){
        if(vars[j] %in% variablefact){
         tkinsert(listgraph,"end",vars[j])
         listgraph.nom<-c(listgraph.nom,vars[j])
-        if(Rhabillage==vars[j]) tkselection.set(listgraph, indice)
+        if(Rhabillage==vars[j]) tkselection.set(listgraph, indice)                                                  #selection of the chosen factor
         indice<-indice+1
       }}
     }
-    tkgrid(tklabel(RhabillageFrame, text=gettextRcmdr("Coloring for individuals")))
-    tkgrid(listgraph, scrgraph, sticky = "nw")
-    tkgrid.configure(scrgraph, sticky = "wns")
-    tkgrid.configure(listgraph, sticky = "ew")
-    
-    RlimFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    if(is.null(RXlimInd)) XlimIndMin<-tclVar("")
-    else XlimIndMin<-tclVar(paste(RXlimInd[1]))
-    XlimIndMin.entry <-tkentry(RlimFrame,width="5",textvariable=XlimIndMin)
-    if (is.null(RXlimInd)) XlimIndMax<- tclVar("")
+    tkgrid(tklabel(RhabillageFrame, text=gettextRcmdr("Coloring for individuals")))                                #settings: text
+    tkgrid(listgraph, scrgraph, sticky = "nw")                                                                     #list box and scroll bar
+    tkgrid.configure(scrgraph, sticky = "wns")                                                                     #configuration for scroll bar
+    tkgrid.configure(listgraph, sticky = "ew")                                                                     #config for list box
+
+    RlimFrame<-tkframe(PlotIndFrame,borderwidth=2)                                                                 #new frame for x and y limits
+    if(is.null(RXlimInd)) XlimIndMin<-tclVar("")                                                                   #if nothing is written, XlimIndMin=NULL
+    else XlimIndMin<-tclVar(paste(RXlimInd[1]))                                                                    #else it equal to RXlimInd
+    XlimIndMin.entry <-tkentry(RlimFrame,width="5",textvariable=XlimIndMin)                                        #entry for x minimum limit value
+    if (is.null(RXlimInd)) XlimIndMax<- tclVar("")                                                                 #same for x maximum limit
     else XlimIndMax<-tclVar(paste(RXlimInd[1]))
     XlimIndMax.entry <-tkentry(RlimFrame,width="5",textvariable=XlimIndMax)
-    tkgrid(tklabel(RlimFrame,text=gettextRcmdr("x limits of the graph:")),XlimIndMin.entry, XlimIndMax.entry)
-    if(is.null(RYlimInd)) YlimIndMin<- tclVar("")
+    tkgrid(tklabel(RlimFrame,text=gettextRcmdr("x limits of the graph:")),XlimIndMin.entry, XlimIndMax.entry)      #positionning of text, entry for min and entry for max limits for axis x
+    if(is.null(RYlimInd)) YlimIndMin<- tclVar("")                                                                  #same for y axis
     else YlimIndMin<-tclVar(paste(RYlimInd[1]))
     YlimIndMin.entry <-tkentry(RlimFrame,width="5",textvariable=YlimIndMin)
     if (is.null(RYlimInd)) YlimIndMax<- tclVar("")
@@ -519,40 +633,40 @@ FactoPCA<-function()
     tkgrid(tklabel(RlimFrame,text=gettextRcmdr("y limits of the graph:")),YlimIndMin.entry,YlimIndMax.entry)
 
     #mise en page des différents frames de PlotIndFrame
-    tkgrid(RchoixFrame)
-    tkgrid(RTitleFrame)
-    tkgrid(RinvisibleFrame)
-    tkgrid(RlabelFrame)
-    tkgrid(tklabel(PlotIndFrame, text=" "))
-    tkgrid(RcolFrame)
-    tkgrid(RhabillageFrame)
-    tkgrid(tklabel(PlotIndFrame, text=" "))
-    tkgrid(RlimFrame)
-    tkgrid(tklabel(PlotIndFrame, text=" "))
+    tkgrid(RchoixFrame)                                                                                            #positionning of the different frames:
+    tkgrid(RTitleFrame)                                                                                            #title frame
+    tkgrid(RinvisibleFrame)                                                                                        #invisible elements frame
+    tkgrid(RlabelFrame)                                                                                            #labels frame
+    tkgrid(tklabel(PlotIndFrame, text=" "))                                                                        #blank line
+    tkgrid(RcolFrame)                                                                                              #colors frame
+    tkgrid(RhabillageFrame)                                                                                        #coloring frame
+    tkgrid(tklabel(PlotIndFrame, text=" "))                                                                        #blank line
+    tkgrid(RlimFrame)                                                                                              #axes limits frame
+    tkgrid(tklabel(PlotIndFrame, text=" "))                                                                        #blank line
 
     # construction de la partie graphique des variables
-    PlotVarFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")
+    PlotVarFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")                                                 #frame for all the choices for the variables graph
 
     WchoixFrame<-tkframe(PlotVarFrame,borderwidth=2)
-    var.check<-tkcheckbutton(WchoixFrame)
-    if(Wchoix) var.check.value<-tclVar("1")
-    else var.check.value<-tclVar("0")
-    tkconfigure(var.check, variable=var.check.value)
-    tkgrid(tklabel(WchoixFrame, text=gettextRcmdr("Plot variables graph"), font=font2),var.check)
-    tkgrid(tklabel(WchoixFrame, text="  "))
+    var.check<-tkcheckbutton(WchoixFrame)                                                                          #frame for choosing whether or not to plot the variables graph
+    if(Wchoix) var.check.value<-tclVar("1")                                                                        #1 if yes
+    else var.check.value<-tclVar("0")                                                                              #else 0
+    tkconfigure(var.check, variable=var.check.value)                                                               #assigning value to check button (appears clicked or unclicked
+    tkgrid(tklabel(WchoixFrame, text=gettextRcmdr("Plot variables graph"), font=font2),var.check)                  #positionning
+    tkgrid(tklabel(WchoixFrame, text="  "))                                                                        #blank line
 
-    WTitleFrame<-tkframe(PlotVarFrame,borderwidth=2)
+    WTitleFrame<-tkframe(PlotVarFrame,borderwidth=2)                                                               #title frame
     if (is.null(WTitle)) WTitre <- tclVar(" ")
     else WTitre<-tclVar(WTitle)
     WTitre.entry <-tkentry(WTitleFrame,width="40",textvariable=WTitre)
     tkgrid(tklabel(WTitleFrame,text=gettextRcmdr("Title of the graph")),WTitre.entry)
 
-    WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
-    WlimCosValue<-tclVar(paste(Wlim.cos))
-    WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)
-    tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)
+    WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)                                                                 #cos2 frame
+    WlimCosValue<-tclVar(paste(Wlim.cos))                                                                          #WlimCosValue=default value at first
+    WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)                                          #creation of the entry for the user to type a value
+    tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)                    #positionning text and entry in the frame
 
-    WlabelFrame<-tkframe(PlotVarFrame,borderwidth=2)
+    WlabelFrame<-tkframe(PlotVarFrame,borderwidth=2)                                                               #labels frame
     label.var.check<-tkcheckbutton(WlabelFrame)
     if ("var" %in% Wlabel) label.var.checkValue<-tclVar("1")
     else label.var.checkValue<-tclVar("0")
@@ -564,7 +678,7 @@ FactoPCA<-function()
     tkconfigure(label.quanti.sup.check, variable=label.quanti.sup.checkValue)
     if(!is.null(variableillu)) tkgrid(tklabel(WlabelFrame, text=gettextRcmdr("Labels for the supplementary variables")),label.quanti.sup.check)
 
-    WcolFrame<-tkframe(PlotVarFrame,borderwidth=2)
+    WcolFrame<-tkframe(PlotVarFrame,borderwidth=2)                                                                  #color frame
     Wcol.var.value <- Wcol.var
     canvas.var <- tkcanvas(WcolFrame,width="80",height="25",bg=Wcol.var.value)
     ChangeColor.var <- function()
@@ -591,100 +705,96 @@ FactoPCA<-function()
     ChangeColor.quanti.sup.button <- tkbutton(WcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.quanti.sup)
     if(!is.null(variableillu)) tkgrid(tklabel(WcolFrame, text=gettextRcmdr("Color for supplementary variables")),canvas.quanti.sup,ChangeColor.quanti.sup.button)
 
-    #mise en page des différents frames de PlotVarFrame
-    tkgrid(WchoixFrame)
-    tkgrid(WTitleFrame)
-    tkgrid(WcosFrame)
-    tkgrid(WlabelFrame)
-    tkgrid(tklabel(PlotVarFrame, text=" "))
-    tkgrid(WcolFrame)
-    tkgrid(tklabel(PlotVarFrame, text=" "))
-    
-    subOKCancelHelp(PlotWin, "plot.PCA")
-    tkgrid(PlotIndFrame,PlotVarFrame)
-    tkgrid.configure(PlotVarFrame, sticky="n")
-    tkgrid(subButtonsFrame, sticky="ew", columnspan=2)
-    }
-    
-    PlotFrame<-tkframe(IlluFrame)
-    Plot.but<-tkbutton(PlotFrame, textvariable=.PlotLabel, command=OnPlot, borderwidth=3)
-    tkgrid(Plot.but, sticky="ew")
-  })  
+    #mise en page des différents frames de PlotVarFrame                                                          #positionning all frames
+    tkgrid(WchoixFrame)                                                                                          #plotting or not frame
+    tkgrid(WTitleFrame)                                                                                          #title frame
+    tkgrid(WcosFrame)                                                                                            #cos2 frame
+    tkgrid(WlabelFrame)                                                                                          #labels frame
+    tkgrid(tklabel(PlotVarFrame, text=" "))                                                                      #blank line
+    tkgrid(WcolFrame)                                                                                            #color frame
+    tkgrid(tklabel(PlotVarFrame, text=" "))                                                                      #blank line
 
-         
+    subOKCancelHelp(PlotWin, "plot.PCA")                                                                         #creating OK, Cancel and Help buttons. Help being associated to ?plot.PCA
+    tkgrid(PlotIndFrame,PlotVarFrame)                                                                            #positionning of individuals and variables frames side by side
+    tkgrid.configure(PlotVarFrame, sticky="n")
+    tkgrid(subButtonsFrame, sticky="ew", columnspan=2)                                                           #positionning buttons OK, Cancel and Help
+    }
+
+    PlotFrame<-tkframe(IlluFrame)                                                                                #new frame in the main window
+    Plot.but<-tkbutton(PlotFrame, textvariable=.PlotLabel, command=OnPlot, borderwidth=3)                        #creation of a new button in that new frame. Clicking on this button will open the window with graphical options
+    tkgrid(Plot.but, sticky="ew")                                                                                #positionning the new button
+  })
+
+
   #! fonction pour la réinitialisation des paramètres
-  Reinitializ.funct<-function()
+  Reinitializ.funct<-function()                                                                                  #function to re-initialize everything
   {
-    tkdestroy(top)
-    FactoPCA()
+    tkdestroy(top)                                                                                               #window is closed
+    FactoPCA()                                                                                                   #and re-opened
   }
 
 
-  #! fonction pour le choix des éléments de sortie
+  #! fonction pour le choix des éléments de sortie                                                               #choice of output options
   Sortie.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
     compteur.sortie<-0
     #déclaration des variables
-    RRFichier <- ""
-    RFichier <- FALSE
-    Rpropre<-FALSE
-    Rvariable<-FALSE
-    Rindividu<-FALSE
-    Rindsup<-FALSE
-    Rquantisup<-FALSE
-    Rqualisup<-FALSE
-    Rdescdim<-FALSE
+    RFichier <- ""                                                                                               #write results in a file
+    Rpropre<-FALSE                                                                                               #print eigenvalues
+    Rvariable<-FALSE                                                                                             #print results for active variables
+    Rindividu<-FALSE                                                                                             #print results for active individuals
+    Rindsup<-FALSE                                                                                               #print results for supplementary individuals
+    Rquantisup<-FALSE                                                                                            #print results for supplementary variables
+    Rqualisup<-FALSE                                                                                             #print results for supplementary factors
+    Rdescdim<-FALSE                                                                                              #print results of the description of dimensions
 
     .SortieLabel<-tclVar(paste(firstLabel, "", sep=" "))
 
-    OnSortie<-function()
+    OnSortie<-function()                                                                                         #function launched by clicking on the "outputs" button
     {
-      SortieWin<-tktoplevel()
-      tkwm.title(SortieWin,"Outputs")
+      SortieWin<-tktoplevel()                                                                                    #new tcltk window
+      tkwm.title(SortieWin,"Outputs")                                                                            #title
 
       #création de la fonction onOKsub
-      onOK.sortie<-function()
+      onOK.sortie<-function()                                                                                    #function launched by clicking on OK
       {
-        assign("compteur.sortie", compteur.sortie+1, envir=env)
+        assign("compteur.sortie", compteur.sortie+1, envir=env)                                                  #when clicking on OK, "compteur.sortie" goes from 0 to 1 and the "output" button of the main window becomes blue
         if(compteur.sortie>0) tclvalue(.SortieLabel)<-paste(label, "", sep=" ")
         tkconfigure(Sortie.but, fg="blue")
-        
-        if(tclvalue(eigValue)=="1") assign("Rpropre", TRUE, envir=env)
-        else assign("Rpropre", FALSE, envir=env)
-        
-        if(tclvalue(varValue)=="1") assign("Rvariable", TRUE, envir=env)
+
+        if(tclvalue(eigValue)=="1") assign("Rpropre", TRUE, envir=env)                                           #if "eigenvalues" check button is checked, Rpropre is TRUE
+        else assign("Rpropre", FALSE, envir=env)                                                                 #else it is FALSE
+
+        if(tclvalue(varValue)=="1") assign("Rvariable", TRUE, envir=env)                                         
         else assign("Rvariable", FALSE, envir=env)
-        
+
         if(tclvalue(indValue)=="1") assign("Rindividu", TRUE, envir=env)
         else assign("Rindividu", FALSE, envir=env)
-        
+
         if(tclvalue(ind.sup.Value)=="1") assign("Rindsup", TRUE, envir=env)
         else assign("Rindsup", FALSE, envir=env)
-        
+
         if(tclvalue(quanti.sup.Value)=="1") assign("Rquantisup", TRUE, envir=env)
         else assign("Rquantisup", FALSE, envir=env)
-        
+
         if(tclvalue(quali.sup.Value)=="1") assign("Rqualisup", TRUE, envir=env)
         else assign("Rqualisup", FALSE, envir=env)
-        
+
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
 
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
-        tkdestroy(SortieWin)      
+        tkdestroy(SortieWin)
       }
-      
-      eig.lab <-tklabel(SortieWin, text=gettextRcmdr("Eigenvalues"))
-        eig.check <- tkcheckbutton(SortieWin)
-        if(Rpropre) eigValue <- tclVar("1")
+                                                                                                                
+      eig.lab <-tklabel(SortieWin, text=gettextRcmdr("Eigenvalues"))                                            #label for the "eigenvalues" check button
+        eig.check <- tkcheckbutton(SortieWin)                                                                   #creation of the check button
+        if(Rpropre) eigValue <- tclVar("1")                                                                     #variable eigValue is equal to 1 or 0 according to the value or Rpropre
         else eigValue <- tclVar("0")
-        tkconfigure(eig.check,variable=eigValue)
+        tkconfigure(eig.check,variable=eigValue)                                                                #the button appears checked or unchecked according to eigValue
 
       var.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for active variables"))
         var.check <- tkcheckbutton(SortieWin)
@@ -715,47 +825,172 @@ FactoPCA<-function()
         if(Rqualisup) quali.sup.Value <- tclVar("1")
         else quali.sup.Value <- tclVar("0")
         tkconfigure(quali.sup.check,variable=quali.sup.Value)
-        
+
       descdim.lab<-tklabel(SortieWin, text=gettextRcmdr("Description of the dimensions"))
         descdim.check<-tkcheckbutton(SortieWin)
         if(Rdescdim) descdimValue<-tclVar("1")
         else descdimValue<-tclVar("0")
         tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
-      SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
+      SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)                                                #OK button associated to the function above
 
-        tkgrid(tklabel(SortieWin, text = gettextRcmdr("Select output options"), fg ="blue"),  columnspan = 2, sticky = "w")
-        tkgrid(tklabel(SortieWin, text = " "))
-        tkgrid(eig.lab,eig.check,sticky="w")
-        tkgrid(var.lab,var.check,sticky="w")
-        tkgrid(ind.lab,ind.check,sticky="w")
-        if (!is.null(individuillu)) tkgrid(ind.sup.lab,ind.sup.check,sticky="w")
-        if (!is.null(variableillu)) tkgrid(quanti.sup.lab,quanti.sup.check,sticky="w")
-        if (!is.null(variablefact)) tkgrid(quali.sup.lab,quali.sup.check,sticky="w")
-        tkgrid(descdim.lab,descdim.check,sticky="w")
-        tkgrid(tklabel(SortieWin, text = " "))
-        tkgrid(Fichier.lab,Fichier.check,sticky="w")
-        tkgrid(SortieOK.but)
+        tkgrid(tklabel(SortieWin, text = gettextRcmdr("Select output options"), fg ="blue"),  columnspan = 2, sticky = "w")   #settings. Text
+        tkgrid(tklabel(SortieWin, text = " "))                                                                                #blank line
+        tkgrid(eig.lab,eig.check,sticky="w")                                                                                  #"eigenvalues" check button
+        tkgrid(var.lab,var.check,sticky="w")                                                                                  #"results for var" check button
+        tkgrid(ind.lab,ind.check,sticky="w")                                                                                  #"results for ind" check button
+        if (!is.null(individuillu)) tkgrid(ind.sup.lab,ind.sup.check,sticky="w")                                              #"results for sup ind" check button if sup ind have been selected
+        if (!is.null(variableillu)) tkgrid(quanti.sup.lab,quanti.sup.check,sticky="w")                                        #"results for sup var" check button if sup var have been selected
+        if (!is.null(variablefact)) tkgrid(quali.sup.lab,quali.sup.check,sticky="w")                                          #"results for sup fact" check button if sup fact have been selected
+        tkgrid(descdim.lab,descdim.check,sticky="w")                                                                          #"results for description of the dimension" check button
+        tkgrid(tklabel(SortieWin, text = " "))                                                                                #blank line
+        tkgrid(RFichierFrame)                                                                                                 #frame for the option to print or not results in a file
+        tkgrid(SortieOK.but)                                                                                                  #OK button
    }
-    
-    SortieFrame<-tkframe(IlluFrame)
-    Sortie.but<-tkbutton(SortieFrame, textvariable=.SortieLabel, command=OnSortie, borderwidth=3)
-    tkgrid(Sortie.but, sticky="ew")
+
+    SortieFrame<-tkframe(IlluFrame)                                                                                           #new frame in the main window
+    Sortie.but<-tkbutton(SortieFrame, textvariable=.SortieLabel, command=OnSortie, borderwidth=3)                             #"output" button
+    tkgrid(Sortie.but, sticky="ew")                                                                                           #new button positionned in the new frame
   })
 
+  #! fonction HCPC                                                                                           
 
-
-
-  #! fonction associer au bouton Appliquer, execute sans détruire la fenêtre top
-  OnAppliquer<-function()
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
   {
-  
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))
+    compteur.hcpc<-0
+    Rclassif<-0                                                                                      #variable for the choice: perform HCPC or not
+    Rmeth <- -1                                                                                      #variable for the choice of the method
+    Rconsolid<-0                                                                                     #variable for the choice of consolidation
+    Rgraphhcpc<-1                                                                                    #variable for graphs
+    Rreshcpc<-0                                                                                      #variable for printing results
+    Rminhcpc<-3                                                                                      #variable for the minimum nb of clusters
+    Rmaxhcpc<-10                                                                                     #variable for the maximum nb of clusters
+
+    OnHCPC <- function()                                                                             #function launched by clicking on "perform HCPC after PCA"
+    {
+
+      HcpcWin<-tktoplevel()                                                                          #creation of a tcltk window
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))                                              #title of the window
+
+      onOKHcpc <- function()                                                                         #function launched by clicking on OK
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env)                                          #"perform HCPC after PCA" button becomes blue after licking on OK
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)                         #assigning value to Rmeth: 0 or -1
+        else assign("Rmeth", -1, envir=env)
+
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)                         #assigning value to Rconsolid: TRUE or FALSE
+        else assign("Rconsolid",FALSE,envir=env)
+
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)                        #assigning value to Rgraphhcpc: TRUE or FALSE
+        else assign("Rgraphhcpc",FALSE,envir=env)
+
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)                            #assigning value to Rreshcpc: TRUE or FALSE
+        else assign("Rreshcpc",FALSE,envir=env)
+
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)                                   #assigning value to Rminhcpc: numeric value
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)                                   #assigning value to Rmaxhcpc: numeric value
+
+        assign("Rclassif",TRUE,envir=env)                                                            #assigning value to Rclassif: TRUE
+        tkdestroy(HcpcWin)                                                                           #window is closed
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)  #OK button
+
+      onCancelHcpc <- function()                                          #function launched by clicking on Cancel button
+      {
+        assign("Rclassif",FALSE,envir=env)                                #Rclassif=FALSE
+        tkdestroy(HcpcWin)                                                #the window is closed
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)   #Cancel button
+
+      tkgrid(tklabel(HcpcWin, text=""))                                   #settings: blank line
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")                   #settings: text
+
+      meth1 <- tkradiobutton (HcpcWin)                                    #creation of a radio button
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))      #label of the button
+      meth2 <- tkradiobutton (HcpcWin)                                    #other radio button
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))        #label
+      methValue <- tclVar("interactive")                                  #variable associated with the radio buttons
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))  #main label
+      tkconfigure(meth1,variable=methValue,value="interactive")                             #assigning value to the first radio button
+      tkconfigure(meth2,variable=methValue,value="automatic")                               #assigning value to the second radio button
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))                                                              #text for the choice of the nb of clusters
+
+      minhcpc<-tclVar("3")                                                #default value for min nb
+      maxhcpc<-tclVar("10")                                               #default value for max nb
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)     #text zone for the min nb
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)     #text zone for the max nb
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))   #label for consolidation
+      consolid.check <- tkcheckbutton(HcpcWin)                                      #check button
+      if(Rconsolid) consolidValue<-tclVar("1")                                      #assigning value according to Rconsolid's value
+      else consolidValue<-tclVar("0")                                               
+      tkconfigure(consolid.check,variable=consolidValue)                            #assigning consolidValue to the check button
+
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))          #label for graphs
+      graphhcpc.check <- tkcheckbutton(HcpcWin)                                     #check button
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")                                  #value depending on Rgraphhcpc
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)                          #assigning graphhcpcValue to the check button
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))  #label
+      reshcpc.check <- tkcheckbutton(HcpcWin)                                           #check button
+      if(Rreshcpc) reshcpcValue<-tclVar("1")                                            #value depending on Rreshcpc
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)                                  #assigning reshcpcValue to the check button
+
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")                                                       #settings: text
+      tkgrid(tklabel(HcpcWin,text=""))                                            #blank line
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the PCA',sep=""))),column=1,columnspan=4,sticky="w")   #text which takes the nb of dimensions chosen in the main window
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")                                     #text
+      tkgrid(tklabel(HcpcWin,text=""))                                            #blank line
+      tkgrid(meth.lab,meth1.lab,meth1)                                            #positionning text concerning the choice of the method and the first radio button side by side)
+      tkgrid(meth2.lab,meth2)                                                     #positionning radio button nb 2 and its label
+      tkgrid(tklabel(HcpcWin,text=""))                                            #blank line
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)                      #positionning everything that concerns the nb of clusters
+      tkgrid(tklabel(HcpcWin,text=""))                                            #blank line
+      tkgrid(consolid.lab,consolid.check)                                         #positionning text and button for consolidation
+      tkgrid(graphhcpc.lab,graphhcpc.check)                                       #positionning label and button for graphs
+      tkgrid(reshcpc.lab,reshcpc.check)                                           #positionning label and button for results
+      tkgrid(tklabel(HcpcWin,text=""))                                            #blank line
+      tkgrid(OKHcpc.but, CancelHcpc.but)                                          #OK and Cancel buttons
+      tkgrid(tklabel(HcpcWin, text=""))                                           #blank line
+
+      tkgrid.configure(minmaxhcpc.label,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")                                                         #configuration of everything with the number of the column it will appear in (8 columns in a window) and the position in the column (w: west, e: east)
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)                                #configuration of the size of some columns
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3)
+
+}
+    Hcpc2Frame<-tkframe(HcpcFrame)                                                #new frame in the HCPC frame
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)  #button in this new frame
+    tkgrid(Hcpc.but, sticky="ew")                                                 #positionning the button
+})
+
+
+  #! fonction associée au bouton Appliquer, execute sans détruire la fenêtre top
+  OnAppliquer<-function()                                                         #funtion launched by clicking on "Apply"
+  {
+
     # liste de toutes les variables interne créées      (** mise en forme incomplète)
       # sur la fenetre principale
 #         listdesc         **
@@ -793,24 +1028,24 @@ FactoPCA<-function()
 #           Rindsup
 #           Rquantisup
 #           Rqualisup
-  
+
 
     # récupération des paramètres de la fenêtre principale
-    nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    nom.res<-tclvalue(resu.val)                                                   #putting resu.val in nom.res
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))                                                                    #if object res already exists, it's removed
     if(length(as.numeric(tkcurselection(listdesc)))<2) varActives<-listdesc.nom
     else varActives<-listdesc.nom[as.numeric(tkcurselection(listdesc))+1]
-    varActives <- varActives[!(varActives%in%variableillu)]
-    reduction<-TRUE
-    if(tclvalue(reduitValue)=="0") reduction<-FALSE
-    ncp<-as.numeric(tclvalue(ncp.val))
-    Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
-    
+    varActives <- varActives[!(varActives%in%variableillu)]                       #varActives is the list of selected active variables
+    reduction<-TRUE                                                               #scaling=T by default
+    if(tclvalue(reduitValue)=="0") reduction<-FALSE                               #if "sclaing" check button is unchecked, scaling=F
+    ncp<-as.numeric(tclvalue(ncp.val))                                            #putting chosen nb of dim in ncp
+    Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))                #putting chosen axes in Axe
+
     # gestion du tableau de données pour l'ACP
 
-    if(!is.null(individuillu)) {
+    if(!is.null(individuillu)) {                                                  #if sup ind have been chosen, active ind are the remaining ones
       ind.actif<-rows[-which(rows %in% individuillu)]
-      if(!is.null(variableillu)) {
+      if(!is.null(variableillu)) {                                                #a new dataset is created by the function commande.data which uses everything concerning active and supplementary variables and individuals. Different cases are separated according to presence or absence of those elements
         if(!is.null(variablefact)) commande.data<-paste(activeDataSet(),'.', 'PCA', '<-', activeDataSet(), '[c("', paste(ind.actif, collapse='", "'), '", "', paste(individuillu, collapse='", "'), '") ,c("', paste(varActives, collapse='", "'), '", "', paste(variableillu, collapse='", "'), '", "', paste(variablefact, collapse='", "'), '")]', sep="")
         else commande.data<-paste(activeDataSet(),'.', 'PCA', '<-', activeDataSet(), '[c("', paste(ind.actif, collapse='", "'), '", "', paste(individuillu, collapse='", "'), '") ,c("', paste(varActives, collapse='", "'), '", "', paste(variableillu, collapse='", "'), '")]', sep="")
       }
@@ -830,15 +1065,15 @@ FactoPCA<-function()
         else commande.data<-paste(activeDataSet(),'.', 'PCA', '<-', activeDataSet(), '[, c("', paste(varActives, collapse='", "'), '")]', sep="")
       }
     }
-    justDoIt(commande.data)
+    justDoIt(commande.data)                                       #commande.data is launched
     logger(commande.data)
     donnee.depart<-activeDataSet()
-    activeDataSet(paste(activeDataSet(),'.', 'PCA', sep=""))
+    activeDataSet(paste(activeDataSet(),'.', 'PCA', sep=""))      #the new dataset (where columns and rows have been re-ordered) is called dataset_name.PCA
 
     # gestion de la commande réalisant l'ACP
     if(!is.null(individuillu)) {
       ind.actif<-rows[-which(rows %in% individuillu)]
-      if(!is.null(variableillu)) {
+      if(!is.null(variableillu)) {                               #PCA is performed by commande.acp which uses the name of the active dataset (created right above), scale.unit, ncp, ind.sup, quanti.sup and quali.sup. graph is FALSE by default
         if(!is.null(variablefact)) commande.acp<-paste(nom.res, '<-PCA(', activeDataSet(), ', scale.unit=', reduction, ', ncp=', ncp, ', ind.sup=c(', nrow(get(.activeDataSet))-length(individuillu)+1, ': ', nrow(get(.activeDataSet)), '), quanti.sup=c(', length(varActives)+1, ': ', length(varActives)+ length(variableillu), '), quali.sup=c(', length(varActives)+length(variableillu)+1, ': ', length(varActives)+length(variableillu)+length(variablefact), '), graph = FALSE)', sep="")
         else commande.acp<-paste(nom.res, '<-PCA(', activeDataSet(), ', scale.unit=', reduction, ', ncp=', ncp, ', ind.sup=c(', nrow(get(.activeDataSet))-length(individuillu)+1, ': ', nrow(get(.activeDataSet)), '), quanti.sup=c(', length(varActives)+1, ': ', length(varActives)+ length(variableillu), '), graph = FALSE)', sep="")
       }
@@ -857,14 +1092,28 @@ FactoPCA<-function()
         else commande.acp<-paste(nom.res, '<-PCA(', activeDataSet(), ' , scale.unit=', reduction, ', ncp=', ncp, ', graph = FALSE)', sep="")
       }
     }
-    justDoIt(commande.acp)
+    justDoIt(commande.acp)                         #commande.acp is performed
     logger(commande.acp)
+
+
+    #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){                            #if Rclassif is TRUE then HCPC is performed with options chosen by the user
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)
+      if(Rreshcpc==TRUE){                          #if Rreshcpc is TRUE then results are printed
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }
+    }
 
     # gestion des graphiques
 
-#    if (length(ls(pat=nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-    if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-    if((Rchoix)&(nom.res%in%ls(pos=1))){
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}     #error message in case data are unidimensional
+    if((Rchoix)&length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0){  #command for the graph of individuals
     if (get(nom.res)$eig[1,2]!=100) {
       if ((Rhabillage!="none") & (Rhabillage!="ind")) {
         Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
@@ -887,7 +1136,7 @@ FactoPCA<-function()
     }}
 
 
-    if((Wchoix)&(nom.res%in%ls(pos=1))){
+    if((Wchoix)&length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0){  #command for the graph of variables
     if (get(nom.res)$eig[1,2]!=100) {
       commande.plotVar<-paste('plot.PCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel, collapse='", "'), '"), lim.cos2.var=', Wlim.cos, sep="")
       if (is.null(WTitle)) commande.plotVar <- paste(commande.plotVar,')', sep="")
@@ -898,8 +1147,10 @@ FactoPCA<-function()
       justDoIt(commande.plotVar)
       logger(commande.plotVar)
     }}
-    # gestion de l'édition de certains resultats
-    if (!RFichier){
+
+
+    # gestion de l'édition de certains resultats                             
+    if (RFichier==""){                                                       #printing the results
       if(Rpropre) doItAndPrint(paste( nom.res, '$eig', sep=""))
       if(Rvariable) doItAndPrint(paste( nom.res, '$var', sep=""))
       if(Rindividu) doItAndPrint(paste( nom.res, '$ind', sep=""))
@@ -908,11 +1159,10 @@ FactoPCA<-function()
       if(Rqualisup) doItAndPrint(paste( nom.res, '$quali.sup', sep=""))
       if(Rdescdim) doItAndPrint( paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
-    else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+    else {                                                                  #or saving them in a file
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -941,126 +1191,137 @@ FactoPCA<-function()
       if(Rdescdim) doItAndPrint(paste('write.infile(dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), ')), file =',Fich,',append=',append,')', sep=""))
     }
 
-    # Re-chargement du tableau de départ et suppression du tableau temporaire
-    activeDataSet(donnee.depart)
-    justDoIt(paste('remove(',activeDataSet(),'.PCA)',sep=""))
+    # Re-chargement du tableau de départ et supression du tableau temporaire
+    activeDataSet(donnee.depart)                                                    #reloading of the "real" dataset
+    justDoIt(paste('remove(',activeDataSet(),'.PCA)',sep=""))                       #the new one is removed
     logger(paste('remove(',activeDataSet(),'.PCA)',sep=""))
   }
 
 
-    #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique    #function associated with the OK button
   onOK<-function()
   {
-    OnAppliquer()
+    OnAppliquer()                                                                 #OnAppliquer function is performed
     # destuction de la fenêtre Top
-    closeDialog(top)
+    closeDialog(top)                                                              #then window is closed
   }
 
 
-  
+
 ################################################################################
-#                   Création de la fenêtre top                                 #
+#                   Création de la fenêtre top                                 #  #creation of the main window
 ################################################################################
-  top<-tktoplevel(borderwidth=10)
-  tkwm.title(top, gettextRcmdr("PCA"))
-  tkwm.geometry(top, "-100+50")
-        
+  top<-tktoplevel(borderwidth=10)                                                 #tcltk window
+  tkwm.title(top, gettextRcmdr("PCA"))                                            #title
+  tkwm.geometry(top, "-100+50")                                                   #size
+
   # définition des polices
-  font2<-tkfont.create(family="times",size=12,weight="bold")
-  fontheading<-tkfont.create(family="times",size=18,weight="bold")
+  font2<-tkfont.create(family="times",size=12,weight="bold")                      #font for subtitles
+  fontheading<-tkfont.create(family="times",size=18,weight="bold")                #font for titles
 
   # récupération du jeu de données actif
-  donnee<-get(.activeDataSet)
-  vars<-colnames(donnee)
-  rows<-rownames(donnee)
-  
+  donnee<-get(.activeDataSet)                                                     #getting active dataset
+  vars<-colnames(donnee)                                                          #getting variables names
+  rows<-rownames(donnee)                                                          #getting individuals names
+
   # création de la liste pour le choix des variables acives
-  listdesc<-tklistbox(top,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scr,...))
-  scr <-tkscrollbar(top,repeatinterval=5,command=function(...)tkyview(listdesc,...))
+  listdesc<-tklistbox(top,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scr,...))                                                                  #empty list box for active variables
+  scr <-tkscrollbar(top,repeatinterval=5,command=function(...)tkyview(listdesc,...))  #scroll bar
   listdesc.nom<-NULL
-  for (i in (1:ncol(donnee))) {
+  for (i in (1:ncol(donnee))) {                                                   #putting variables in the list box
       if (is.numeric(donnee[,i])) {
           tkinsert(listdesc,"end",vars[i])
           listdesc.nom<-c(listdesc.nom, vars[i])
       }
   }
-  
+
   # création de tous les boutons d'options dans IlluFrame
-  IlluFrame<- tkframe(top, borderwidth=2)
-  Reinitializ.but<-tkbutton(IlluFrame, text=gettextRcmdr("Restart"),width=18,command=Reinitializ.funct, borderwidth=3)
+  IlluFrame<- tkframe(top, borderwidth=2)                                         #new frame in the top window
+  Reinitializ.but<-tkbutton(IlluFrame, text=gettextRcmdr("Restart"),width=18,command=Reinitializ.funct, borderwidth=3)                                                                   #"Reinitialize" button
        # mise en page de IlluFrame
 
-  Fillu.funct(label=gettextRcmdr("Modify supplementary factors"), firstLabel=gettextRcmdr("Select supplementary factors"))
-  Dillu.funct(label=gettextRcmdr("Modify supplementary variables"), firstLabel=gettextRcmdr("Select supplementary variables"))
-  Iillu.funct(label=gettextRcmdr("Modify supplementary individuals"), firstLabel=gettextRcmdr("Select supplementary individuals"))    
-  PLOT.PCA(label=gettextRcmdr("Graphical options"), firstLabel=gettextRcmdr("Graphical options"))
-  Sortie.funct(label=gettextRcmdr("Outputs"), firstLabel=gettextRcmdr("Outputs"))
-  tkgrid(FilluFrame, DilluFrame, IilluFrame, columnspan=7)
-  tkgrid(tklabel(IlluFrame, text=""))
-  tkgrid(PlotFrame, SortieFrame, Reinitializ.but, columnspan=7)
-  tkgrid.configure(FilluFrame, column=1, columnspan=1)
+  Fillu.funct(label=gettextRcmdr("Modify supplementary factors"), firstLabel=gettextRcmdr("Select supplementary factors"))                                                         #labels for the "select sup fact" button: firstlabel is the default label, label is the label which appears after the selection of sup fact(after clicking on OK)
+  Dillu.funct(label=gettextRcmdr("Modify supplementary variables"), firstLabel=gettextRcmdr("Select supplementary variables"))                                                       #same for sup var
+  Iillu.funct(label=gettextRcmdr("Modify supplementary individuals"), firstLabel=gettextRcmdr("Select supplementary individuals"))                                                     #same for sup ind
+  PLOT.PCA(label=gettextRcmdr("Graphical options"), firstLabel=gettextRcmdr("Graphical options"))  
+                                                                                  #same for graphical options
+  Sortie.funct(label=gettextRcmdr("Outputs"), firstLabel=gettextRcmdr("Outputs")) #same for outputs
+  tkgrid(FilluFrame, DilluFrame, IilluFrame, columnspan=7)                        #positionning buttons for supplementary elements
+  tkgrid(tklabel(IlluFrame, text=""))                                             #blank line
+  tkgrid(PlotFrame, SortieFrame, Reinitializ.but, columnspan=7)                   #buttons for graphical and output options and "reinitialize" button
+  tkgrid.configure(FilluFrame, column=1, columnspan=1)                            #configuration of each button
   tkgrid.configure(PlotFrame, column=1, columnspan=1)
   tkgrid.configure(DilluFrame, column=3, columnspan=1)
   tkgrid.configure(SortieFrame, column=3, columnspan=1)
   tkgrid.configure(IilluFrame, column=5, columnspan=1)
-  tkgrid.configure(Reinitializ.but, column=5, columnspan=1)      
-  tkgrid.columnconfigure(IlluFrame,0, minsize=25)
+  tkgrid.configure(Reinitializ.but, column=5, columnspan=1)
+  tkgrid.columnconfigure(IlluFrame,0, minsize=25)                                 #configuration of columns
   tkgrid.columnconfigure(IlluFrame,7, minsize=25)
-  tkgrid.columnconfigure(IlluFrame,2, minsize=40)  
-  tkgrid.columnconfigure(IlluFrame,4, minsize=40)  
-  
-  # création des options dans OptionFrame  
-  OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
-  resu.lab<-tklabel(OptionFrame,text=gettextRcmdr("Name of the result object: "))
-  resu.val<-tclVar("res")
-  resu<-tkentry(OptionFrame,width=10,textvariable=resu.val)
-  ncp.lab<-tklabel(OptionFrame,text=gettextRcmdr("Number of dimensions: "))
-  ncp.val<-tclVar("5") 
-  ncp<-tkentry(OptionFrame,width=5,textvariable=ncp.val)
-  reduit.lab<-tklabel(OptionFrame,text=gettextRcmdr("Scale the variables: "))
-  reduit.check <- tkcheckbutton(OptionFrame)
-  reduitValue <- tclVar("1")
-  tkconfigure(reduit.check,variable=reduitValue)
-  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:"))
-  Axe1<-tclVar("1")
-  Axe2<-tclVar("2")
-  Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)
-  Axe2.entry <-tkentry(OptionFrame,width="5",textvariable=Axe2)
-  
-    # mise en page de OptionFrame
-  tkgrid(tklabel(OptionFrame,text=gettextRcmdr("Main options"), fg = "darkred"), columnspan=8, sticky="we") 
-  tkgrid(tklabel(OptionFrame,text="")) # Ligne de blanc
+  tkgrid.columnconfigure(IlluFrame,2, minsize=40)
+  tkgrid.columnconfigure(IlluFrame,4, minsize=40)
+
+  # création des options dans OptionFrame                                         #options frame
+  OptionFrame<-tkframe(top, borderwidth=2, relief="groove")                       #creation of a new frame
+  resu.lab<-tklabel(OptionFrame,text=gettextRcmdr("Name of the result object: ")) #label for result's name
+  resu.val<-tclVar("res")                                                         #default value for result's name
+  resu<-tkentry(OptionFrame,width=10,textvariable=resu.val)                       #entry for result's name
+  ncp.lab<-tklabel(OptionFrame,text=gettextRcmdr("Number of dimensions: "))       #label for the choice of the nb of dimensions
+  ncp.val<-tclVar("5")                                                            #default value
+  ncp<-tkentry(OptionFrame,width=5,textvariable=ncp.val)                          #entry
+  reduit.lab<-tklabel(OptionFrame,text=gettextRcmdr("Scale the variables: "))     #label for scaling
+  reduit.check <- tkcheckbutton(OptionFrame)                                      #checkbutton
+  reduitValue <- tclVar("1")                                                      #default value
+  tkconfigure(reduit.check,variable=reduitValue)                                  #configuration
+  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:")) #label for axes
+  Axe1<-tclVar("1")                                                               #default value for first axes
+  Axe2<-tclVar("2")                                                               #default value for second axes
+  Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)                   #entry for first axes
+  Axe2.entry <-tkentry(OptionFrame,width="5",textvariable=Axe2)                   #entry for second axes
+
+    # mise en page de OptionFrame                                                 #settings
+  tkgrid(tklabel(OptionFrame,text=gettextRcmdr("Main options"), fg = "darkred"), columnspan=8, sticky="we")                                                                             #text
+  tkgrid(tklabel(OptionFrame,text=""))                                            #blank line
   tkgrid(resu.lab, resu)
   tkgrid(ncp.lab, ncp)
   tkgrid(reduit.lab,reduit.check)
   tkgrid(Axe.label,Axe1.entry , Axe2.entry, sticky="w")
-  tkgrid.configure(ncp.lab, reduit.lab, resu.lab, Axe.label, column=1, columnspan=4, sticky="w")
+
+  tkgrid.configure(ncp.lab, reduit.lab, resu.lab, Axe.label, column=1, columnspan=4, sticky="w")  #configuration
   tkgrid.configure(ncp, reduit.check, resu, column=6, columnspan=2, sticky="e")
   tkgrid.configure(Axe1.entry, column=6, columnspan=1, sticky="w")
   tkgrid.configure(Axe2.entry, column=7, columnspan=1, sticky="e")
-  tkgrid.columnconfigure(OptionFrame,0, minsize=25)
+
+  tkgrid.columnconfigure(OptionFrame,0, minsize=25)                              #columns' configuration
   tkgrid.columnconfigure(OptionFrame,5, minsize=40)
   tkgrid.columnconfigure(OptionFrame,8, minsize=25)
 
-  appliquer.but<-tkbutton(top, text=gettextRcmdr("Apply"),width=12,command=OnAppliquer, borderwidth=3, fg="#690f96")
-  OKCancelHelp(helpSubject="PCA")
- 
-  #TOP
-  tkgrid(tklabel(top, text=gettextRcmdr("Principal Components Analysis (PCA)"),font=fontheading),columnspan=3)
-  tkgrid(tklabel(top,text=""))
-  tkgrid(tklabel(top, text = gettextRcmdr("Select active variables (by default all the variables are active)"),fg = "darkred"), column=1,columnspan=2, sticky = "w")
-  tkgrid(listdesc, scr, sticky = "nw")
+  #Frame pour HCPC                                                               #HCPC frame
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after PCA"), firstLabel=gettextRcmdr("Perform Clustering after PCA"))
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
+
+  appliquer.but<-tkbutton(top, text=gettextRcmdr("Apply"),width=12,command=OnAppliquer, borderwidth=3, fg="#690f96")                                                                   #"Apply" button
+  OKCancelHelp(helpSubject="PCA")                                                #OK, Cancel and Help button. Help leads to ?PCA
+
+  #TOP                                                                           #settings of the main window
+  tkgrid(tklabel(top, text=gettextRcmdr("Principal Components Analysis (PCA)"),font=fontheading),columnspan=3)                                                                   #title
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(tklabel(top, text = gettextRcmdr("Select active variables (by default all the variables are active)"),fg = "darkred"), column=1,columnspan=2, sticky = "w")                 #text
+  tkgrid(listdesc, scr, sticky = "nw")                                           #list box with available continuous variables and scroll bar
   tkgrid.configure(scr, sticky = "ens",column=2)
   tkgrid.configure(listdesc, sticky = "ew", column=1, columnspan=2)
-  tkgrid(tklabel(top,text="")) # Ligne de blanc
-  tkgrid(IlluFrame, column=1, columnspan=1)
-  tkgrid(tklabel(top,text="")) # Ligne de blanc
-  tkgrid(OptionFrame, column=1, columnspan=1)
-  tkgrid(tklabel(top,text="")) # Ligne de blanc
-  tkgrid(appliquer.but, column=1, columnspan=1)
-  tkgrid(tklabel(top,text="")) # Ligne de blanc
-  tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )
-  tkgrid(tklabel(top,text="")) # Ligne de blanc
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(IlluFrame, column=1, columnspan=1)                                      #buttons for sup elements, graphical and output options and reinitialization
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(OptionFrame, column=1, columnspan=1)                                    #options frame
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(HcpcFrame, column=1, columnspan=1)                                      #HCPC frame
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(appliquer.but, column=1, columnspan=1)                                  #"Apply" button
+  tkgrid(tklabel(top,text=""))                                                   #blank line
+  tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )                     #OK, Cancel and Help buttons
+  tkgrid(tklabel(top,text=""))                                                   #blank line
 
 }
 
@@ -1191,7 +1452,7 @@ FactoCA<-function()
       LOK.but<-tkbutton(LilluWin, text="OK", width=16,command=LOK.funct)
 
       tkgrid(tklabel(LilluWin, text=""))
-        tkgrid(tklabel(LilluWin, text = gettextRcmdr("Selevct supplementary row(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")
+        tkgrid(tklabel(LilluWin, text = gettextRcmdr("Select supplementary row(s)"), fg = "blue"), column=1, columnspan = 1, sticky = "ew")
         tkgrid(listLigne, scrLigne, sticky = "nw")
         tkgrid.configure(scrLigne, sticky = "ens", columnspan=1)
         tkgrid.configure(listLigne, sticky = "ew", column=1, columnspan=1)
@@ -1438,8 +1699,7 @@ FactoCA<-function()
     compteur.sortie<-0
     #déclaration des variables
     Rpropre<-FALSE
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
     Rcol<-FALSE
     Rcolsup<-FALSE
     Rrow<-FALSE
@@ -1479,11 +1739,8 @@ FactoCA<-function()
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
 
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
         
         tkdestroy(SortieWin)
       
@@ -1527,11 +1784,11 @@ FactoCA<-function()
       else descdimValue<-tclVar("0")
       tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -1542,9 +1799,9 @@ FactoCA<-function()
         if (!is.null(variableColIllu)) tkgrid(colsup.lab,colsup.check,sticky="w")
         tkgrid(row.lab,row.check,sticky="w")
         if (!is.null(variableLigneIllu)) tkgrid(rowsup.lab,rowsup.check,sticky="w")
-        tkgrid(descdim.lab,descdim.check,sticky="w")
         tkgrid(tklabel(SortieWin, text = " "))
-        tkgrid(Fichier.lab,Fichier.check,sticky="w")
+        tkgrid(descdim.lab,descdim.check,sticky="w")
+        tkgrid(RFichierFrame)
         tkgrid(SortieOK.but)
    }
     
@@ -1553,6 +1810,149 @@ FactoCA<-function()
     tkgrid(Sortie.but, sticky="ew")
   })
 
+
+  #! fonction HCPC
+  
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
+  {
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))    
+    compteur.hcpc<-0
+    Rclassif<-0
+    RclassifCA<-"rows"
+    Rmeth <- -1
+    Rconsolid<-0 
+    Rgraphhcpc<-1  
+    Rreshcpc<-0
+    Rminhcpc<-3
+    Rmaxhcpc<-10
+
+    OnHCPC <- function()
+    {
+
+      HcpcWin<-tktoplevel()
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))
+
+      onOKHcpc <- function()
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env) 
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+      
+        if(tclvalue(classifCAValue)=="rows") assign("RclassifCA", "rows", envir=env)
+        else assign("RclassifCA", "columns", envir=env)
+      
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)
+        else assign("Rmeth", -1, envir=env)
+        
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)
+        else assign("Rconsolid",FALSE,envir=env)
+        
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)
+        else assign("Rgraphhcpc",FALSE,envir=env)
+        
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)
+        else assign("Rreshcpc",FALSE,envir=env)        
+        
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)
+        
+        assign("Rclassif",TRUE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)
+
+      onCancelHcpc <- function()
+      {
+        assign("Rclassif",FALSE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)
+ 
+      tkgrid(tklabel(HcpcWin, text=""))
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")      
+
+      lignes <- tkradiobutton (HcpcWin)
+      lignes.lab <- tklabel(HcpcWin,text=gettextRcmdr("rows"))
+      colonnes <- tkradiobutton (HcpcWin)
+      colonnes.lab <- tklabel(HcpcWin,text=gettextRcmdr("columns"))
+      classifCAValue <- tclVar("rows")
+      classifCA.lab <- tklabel(HcpcWin,text=gettextRcmdr("Perform clustering on: "))
+      tkconfigure(lignes,variable=classifCAValue,value="rows")
+      tkconfigure(colonnes,variable=classifCAValue,value="columns")
+
+      meth1 <- tkradiobutton (HcpcWin)
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcWin)
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("interactive")
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="interactive")
+      tkconfigure(meth2,variable=methValue,value="automatic")
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcWin)
+      if(Rconsolid) consolidValue<-tclVar("1")
+      else consolidValue<-tclVar("0")      
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)   
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))
+      reshcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rreshcpc) reshcpcValue<-tclVar("1")
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)          
+    
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the CA',sep=""))),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(classifCA.lab,lignes.lab,lignes)  
+      tkgrid(colonnes.lab,colonnes)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcWin,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check)
+      tkgrid(reshcpc.lab,reshcpc.check) 
+      tkgrid(tklabel(HcpcWin,text=""))     
+      tkgrid(OKHcpc.but, CancelHcpc.but)
+      tkgrid(tklabel(HcpcWin, text=""))
+      
+      tkgrid.configure(minmaxhcpc.label,classifCA.lab,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(lignes,colonnes,meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,lignes.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,colonnes.lab,column=6,columnspan=2,sticky="w") 
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3) 
+
+}      
+    Hcpc2Frame<-tkframe(HcpcFrame)
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)
+    tkgrid(Hcpc.but, sticky="ew")
+})   
 
   
   #! fonction pour la réinitialisation des paramètre
@@ -1565,7 +1965,7 @@ FactoCA<-function()
 
 
   
-#! fonction associer au bouton Appliquer, execute sans détruire l'interface graphique
+#! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
   OnAppliquer<-function()
   {
 
@@ -1600,7 +2000,7 @@ FactoCA<-function()
 
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     if(length(as.numeric(tkcurselection(listColonne)))<2) colActives<-listColonne.nom
     else colActives<-listColonne.nom[as.numeric(tkcurselection(listColonne))+1]
     colActives <- colActives[!(colActives%in%variableColIllu)]
@@ -1640,13 +2040,13 @@ FactoCA<-function()
     logger(commande.ca)
 
     # gestion des graphiques
-    if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-    if((Rchoix)&(nom.res%in%ls(pos=1))){
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
+    if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
       commande.plot<-paste('plot.CA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.row="', Rcol.row, '", col.col="', Rcol.col, '", label=c("', paste(Rlabel, collapse='", "'), '")', sep="")
       if (!is.null(RXlimInd)) commande.plot<-paste(commande.plot, ', xlim=c(', paste(RXlimInd, collapse=", "), ')')
       if (!is.null(RYlimInd)) commande.plot<-paste(commande.plot, ', ylim=c(', paste(RYlimInd, collapse=", "), ')')
-      if (Rinvis!=c("")) commande.plot<-paste(commande.plot, ', invisible=c("', paste(Rinvis, collapse='", "'), '")',sep='')
+      if (!is.null(Rinvis)) commande.plot<-paste(commande.plot, ', invisible=c("', paste(Rinvis, collapse='", "'), '")',sep='')
       if(!is.null(variableLigneIllu)) commande.plot<-paste(commande.plot, ', col.row.sup="', Rcol.row.sup, '"',sep='')
       if(!is.null(variableColIllu))  commande.plot<-paste(commande.plot, ', col.col.sup="', Rcol.col.sup, '"',sep='')
       if (is.null(RTitle)) commande.plot <- paste(commande.plot,')', sep="")
@@ -1658,8 +2058,23 @@ FactoCA<-function()
       logger(commande.plot)
     }}
     
+    
+    #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',cluster.CA="',RclassifCA,'",graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)      
+      if(Rreshcpc==TRUE){
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }        
+    }    
+    
     # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(Rpropre) doItAndPrint(paste(nom.res, '$eig', sep=""))
       if(Rcol) doItAndPrint(paste(nom.res, '$col', sep=""))
       if(Rcolsup & !is.null(variableColIllu))doItAndPrint(paste(nom.res, '$col.sup', sep=""))
@@ -1668,10 +2083,9 @@ FactoCA<-function()
       if(Rdescdim) doItAndPrint(paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -1702,7 +2116,7 @@ FactoCA<-function()
     logger(paste('remove(',activeDataSet(),'.CA)',sep=""))    
   }
   
-  #! fonction associer au bouton OK, execute et détruit l'interface graphique
+  #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()   
@@ -1777,6 +2191,11 @@ FactoCA<-function()
   tkgrid.columnconfigure(IlluFrame,6, minsize=25)
   tkgrid.columnconfigure(IlluFrame,3, minsize=35)  
 
+  #Frame pour HCPC
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after CA"), firstLabel=gettextRcmdr("Perform Clustering after CA")) 
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
 
   # création des options dans OptionFrame  
   OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
@@ -1819,6 +2238,8 @@ FactoCA<-function()
   tkgrid(tklabel(top,text=""))
   tkgrid(OptionFrame, column=1, columnspan=1)
   tkgrid(tklabel(top,text="")) # Ligne de blanc
+  tkgrid(HcpcFrame, column=1, columnspan=1)
+  tkgrid(tklabel(top,text=""))  
   tkgrid(appliquer.but, column=1, columnspan=1)
   tkgrid(tklabel(top,text="")) # Ligne de blanc
   tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )
@@ -1827,7 +2248,7 @@ FactoCA<-function()
 }  
 
 #############################FIN FONCTION FactoCA ##############################
-
+############################# FONCTION FactoMCA ##############################
 FactoMCA<-function()
 {
   require(tcltk)
@@ -2034,22 +2455,30 @@ FactoMCA<-function()
     RTitle<-NULL
     Rlabel<-c("ind", "ind.sup", "quali.sup","var","quanti.sup")
     Rinvis<- ""
-    Rhabillage<-"none"
     Rcol.ind<-Rcol.ind.tmp<-"black"
     Rcol.ind.sup<-Rcol.ind.sup.tmp<-"blue"
-    Rcol.quali<-Rcol.quali.tmp<-"magenta"
-    Rcol.qualisup<-Rcol.qualisup.tmp<-"red"
+    Rcol.quali<-Rcol.quali.tmp<-"darkred"
+    Rcol.qualisup<-Rcol.qualisup.tmp<-"darkgreen"
     RXlimInd<-NULL
     RYlimInd<-NULL
 
     Wchoix=TRUE
     WTitle<-NULL
     Wlabel<-c("quanti.sup")
-    Wlim.cos<-0.
+    #Wlim.cos<-0.
     Wcol.quanti.sup<-Wcol.quanti.sup.tmp<-"blue"
     Wcol.var<-Wcol.var.tmp<-"black"
     WXlimVar<-NULL
     WYlimVar<-NULL
+
+    Vchoix=TRUE
+    VTitle<-NULL
+    Vlabel<-c("var","quali.sup")
+    Vinvis<- ""
+    Vcol.quali.sup<-Vcol.quali.sup.tmp<-"darkgreen"
+    Vcol.var<-Vcol.var.tmp<-"darkred"
+    VXlimVar<-NULL
+    VYlimVar<-NULL
 
     .PlotLabel<-tclVar(paste(firstLabel, "", sep=" "))
 
@@ -2085,7 +2514,7 @@ FactoMCA<-function()
           if(label.tmp.ind.sup==1) assign("Rlabel", c(Rlabel, "ind.sup"), envir=env)
           if(label.tmp.quali.sup==1) assign("Rlabel", c(Rlabel, "quali.sup"), envir=env)
           if(label.tmp.var==1) assign("Rlabel", c(Rlabel, "var"), envir=env)
-          if(label.tmp.quanti.sup==1) assign("Rlabel", c(Rlabel, "quanti.sup"), envir=env)
+          if(label.tmp.quanti.sup==1) assign("Wlabel", c(Rlabel, "quanti.sup"), envir=env)
 
           invis.tmp.ind<-tclvalue(invis.ind.checkValue)
           invis.tmp.ind.sup<-tclvalue(invis.ind.sup.checkValue)
@@ -2103,24 +2532,20 @@ FactoMCA<-function()
           assign("Rcol.qualisup", Rcol.qualisup.tmp, envir=env)
           assign("Wcol.var", Wcol.var.tmp, envir=env)
 
-          habillage.tmp<-listgraph.nom[as.numeric(tkcurselection(listgraph))+1]
-          if(length(habillage.tmp)==0) assign("Rhabillage","none", envir=env)
-          else assign("Rhabillage", habillage.tmp, envir=env)
-
           if(tclvalue(XlimIndMin)=="" | tclvalue(XlimIndMax)=="") assign("RXlimInd", NULL, envir=env)
           else assign("RXlimInd", c(as.numeric(tclvalue(XlimIndMin)), as.numeric(tclvalue(XlimIndMax))), envir=env)
           if(tclvalue(YlimIndMin)=="" | tclvalue(YlimIndMax)=="") assign("RYlimInd", NULL, envir=env)
           else assign("RYlimInd", c(as.numeric(tclvalue(YlimIndMin)), as.numeric(tclvalue(YlimIndMax))), envir=env)
         }
 
-        if(tclvalue(var.check.value)==1) assign("Wchoix", TRUE, envir=env)
+        if(tclvalue(quanti.var.check.value)==1) assign("Wchoix", TRUE, envir=env)
         else assign("Wchoix", FALSE, envir=env)
 
         if(Wchoix)
         {
           if (tclvalue(WTitre)==" ") assign("WTitle", NULL, envir=env)
           assign("WTitle", tclvalue(WTitre), envir=env)
-          assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
+          #assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
           label.tmp.quanti.sup<-tclvalue(label.quanti.sup.checkValue)
           assign("Wlabel", NULL, envir=env)
           if(label.tmp.quanti.sup==1) assign("Wlabel", c(Wlabel, "quanti.sup"), envir=env)
@@ -2128,6 +2553,30 @@ FactoMCA<-function()
                
         }
 
+        if(tclvalue(var.check.value)==1) assign("Vchoix", TRUE, envir=env)
+        else assign("Vchoix", FALSE, envir=env)
+
+        if(Vchoix)
+        {
+          if (tclvalue(VTitre)==" ") assign("VTitle", NULL, envir=env)
+          assign("VTitle", tclvalue(VTitre), envir=env)
+
+          labelV.tmp.quali.sup<-tclvalue(labelV.quali.sup.checkValue)
+          labelV.tmp.var<-tclvalue(labelV.var.checkValue)
+          assign("Vlabel", NULL, envir=env)
+          if(labelV.tmp.quali.sup==1) assign("Vlabel", c(Vlabel, "quali.sup"), envir=env)
+          if(labelV.tmp.var==1) assign("Vlabel", c(Vlabel, "var"), envir=env)
+
+          invisV.tmp.quali.sup<-tclvalue(invisV.quali.sup.checkValue)
+          invisV.tmp.var<-tclvalue(invisV.var.checkValue)
+          assign("Vinvis", NULL, envir=env)
+          if(invisV.tmp.quali.sup==0) assign("Vinvis", c(Vinvis, "quali.sup"), envir=env)
+          if(invisV.tmp.var==0) assign("Vinvis", c(Vinvis, "var"), envir=env)
+
+          assign("Vcol.quali.sup", Vcol.quali.sup.tmp, envir=env)
+          assign("Vcol.var", Vcol.var.tmp, envir=env)
+               
+        }
         tkdestroy(PlotWin)
       }
 
@@ -2253,26 +2702,6 @@ FactoMCA<-function()
     ChangeColor.qualisup.button <- tkbutton(RcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.qualisup)
     if(!is.null(variablefact)) tkgrid(tklabel(RcolFrame, text=gettextRcmdr("Color for supplementary factors")),canvas.qualisup,ChangeColor.qualisup.button)
 
-    RhabillageFrame<-tkframe(PlotIndFrame,borderwidth=2)
-    listgraph<-tklistbox(RhabillageFrame,height=4, selectmode="single",exportselection="FALSE",yscrollcommand=function(...) tkset(scrgraph,...))
-    scrgraph <-tkscrollbar(RhabillageFrame,repeatinterval=5,command=function(...)tkyview(listgraph,...))
-    listgraph.nom<-"ind"
-    tkinsert(listgraph,"end",gettextRcmdr("by.individual"))
-    if(Rhabillage=="ind") tkselection.set(listgraph, 0)
-    indice<-1
-      for (j in 1:ncol(donnee)){
-       if(vars[j] %in% .factors){ # all the qualitative variables are proposed but the one whose chosen must be in the active or supplementary ones
-        tkinsert(listgraph,"end",vars[j])
-        listgraph.nom<-c(listgraph.nom,vars[j])
-        if(Rhabillage==vars[j]) tkselection.set(listgraph, indice)
-        indice<-indice+1
-      }}
-    tkgrid(tklabel(RhabillageFrame, text=gettextRcmdr("Coloring for individuals")))
-    tkgrid(listgraph, scrgraph, sticky = "nw")
-    tkgrid.configure(scrgraph, sticky = "wns")
-    tkgrid.configure(listgraph, sticky = "ew")
-
-
     RlimFrame<-tkframe(PlotIndFrame,borderwidth=2)
     if(is.null(RXlimInd)) XlimIndMin<-tclVar("")
     else XlimIndMin<-tclVar(paste(RXlimInd[1]))
@@ -2299,18 +2728,16 @@ FactoMCA<-function()
     tkgrid(tklabel(PlotIndFrame, text=" "))
     tkgrid(RcolFrame)
     tkgrid(tklabel(PlotIndFrame, text=" "))
-    tkgrid(RhabillageFrame)
-    tkgrid(tklabel(PlotIndFrame, text=" "))
     tkgrid(RlimFrame)
     tkgrid(tklabel(PlotIndFrame, text=" "))
 
     PlotVarFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")
     WchoixFrame<-tkframe(PlotVarFrame,borderwidth=2)
-    var.check<-tkcheckbutton(WchoixFrame)
-    if(Wchoix) var.check.value<-tclVar("1")
-    else var.check.value<-tclVar("0")
-    tkconfigure(var.check, variable=var.check.value)
-    tkgrid(tklabel(WchoixFrame, text=gettextRcmdr("Plot variables graph"), font=font2),var.check)
+    quanti.var.check<-tkcheckbutton(WchoixFrame)
+    if(Wchoix) quanti.var.check.value<-tclVar("1")
+    else quanti.var.check.value<-tclVar("0")
+    tkconfigure(quanti.var.check, variable=quanti.var.check.value)
+    tkgrid(tklabel(WchoixFrame, text=gettextRcmdr("Plot supplementary variables graph"), font=font2),quanti.var.check)
     tkgrid(tklabel(WchoixFrame, text="  "))
 
     WTitleFrame<-tkframe(PlotVarFrame,borderwidth=2)
@@ -2319,10 +2746,10 @@ FactoMCA<-function()
     WTitre.entry <-tkentry(WTitleFrame,width="40",textvariable=WTitre)
     tkgrid(tklabel(WTitleFrame,text=gettextRcmdr("Title of the graph")),WTitre.entry)
 
-    WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
-    WlimCosValue<-tclVar(paste(Wlim.cos))
-    WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)
-    tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)
+    #WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
+    #WlimCosValue<-tclVar(paste(Wlim.cos))
+    #WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)
+    #tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)
 
     WlabelFrame<-tkframe(PlotVarFrame,borderwidth=2)
     label.quanti.sup.check<-tkcheckbutton(WlabelFrame)
@@ -2348,25 +2775,103 @@ FactoMCA<-function()
     #mise en page des différents frames de PlotVarFrame
     tkgrid(WchoixFrame)
     tkgrid(WTitleFrame)
-    tkgrid(WcosFrame)
+    #tkgrid(WcosFrame)
     tkgrid(WlabelFrame)
     tkgrid(tklabel(PlotVarFrame, text=" "))
     tkgrid(WcolFrame)
     tkgrid(tklabel(PlotVarFrame, text=" "))
     
+################Début à changer
+    PlotVVarFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")
+    VchoixFrame<-tkframe(PlotVVarFrame,borderwidth=2)
+    var.check<-tkcheckbutton(VchoixFrame)
+    if(Vchoix) var.check.value<-tclVar("1")
+    else var.check.value<-tclVar("0")
+    tkconfigure(var.check, variable=var.check.value)
+    tkgrid(tklabel(VchoixFrame, text=gettextRcmdr("Plot variables graph"), font=font2),var.check)
+    tkgrid(tklabel(VchoixFrame, text="  "))
+
+    VTitleFrame<-tkframe(PlotVVarFrame,borderwidth=2)
+    if (is.null(VTitle)) VTitre <- tclVar(" ")
+    else VTitre<-tclVar(VTitle)
+    VTitre.entry <-tkentry(VTitleFrame,width="40",textvariable=VTitre)
+    tkgrid(tklabel(VTitleFrame,text=gettextRcmdr("Title of the graph")),VTitre.entry)
+
+    VlabelFrame<-tkframe(PlotVVarFrame,borderwidth=2)
+    tkgrid(tklabel(VlabelFrame, text=gettextRcmdr("  ")),tklabel(VlabelFrame,text=gettextRcmdr("Plot")),tklabel(VlabelFrame, text=gettextRcmdr("Label")))
+    labelV.var.check<-tkcheckbutton(VlabelFrame)
+##    label.quali.sup.check<-tkcheckbutton(VlabelFrame)
+##    if ("quali.sup" %in% Vlabel) label.quali.sup.checkValue<-tclVar("1")
+##    else label.quali.sup.checkValue<-tclVar("0")
+##    tkconfigure(label.quali.sup.check, variable=label.quali.sup.checkValue)
+##    tkgrid(tklabel(VlabelFrame, text=gettextRcmdr("Labels for the supplementary variables")),label.quali.sup.check)
+    if ("var" %in% Vlabel) labelV.var.checkValue<-tclVar("1")
+    else labelV.var.checkValue<-tclVar("0")
+    invisV.var.check<-tkcheckbutton(VlabelFrame)
+    if ("var" %in% Vinvis) invisV.var.checkValue<-tclVar("0")
+    else invisV.var.checkValue<-tclVar("1")
+    tkconfigure(labelV.var.check, variable=labelV.var.checkValue)
+    tkconfigure(invisV.var.check, variable=invisV.var.checkValue)
+    tkgrid(tklabel(VlabelFrame, text=gettextRcmdr("Active variables")),invisV.var.check, labelV.var.check)
+    labelV.quali.sup.check<-tkcheckbutton(VlabelFrame)
+    if ("quali.sup" %in% Vlabel) labelV.quali.sup.checkValue<-tclVar("1")
+    else labelV.quali.sup.checkValue<-tclVar("0")
+    invisV.quali.sup.check<-tkcheckbutton(VlabelFrame)
+    if ("quali.sup" %in% Vinvis) invisV.quali.sup.checkValue<-tclVar("0")
+    else invisV.quali.sup.checkValue<-tclVar("1")
+    tkconfigure(labelV.quali.sup.check, variable=labelV.quali.sup.checkValue)
+    tkconfigure(invisV.quali.sup.check, variable=invisV.quali.sup.checkValue)
+    if(!is.null(variablefact)) tkgrid(tklabel(VlabelFrame, text=gettextRcmdr("Supplementary factors")),invisV.quali.sup.check, labelV.quali.sup.check)
+
+    VcolFrame<-tkframe(PlotVVarFrame,borderwidth=2)
+    Vcol.var.value<-Vcol.var
+    canvas.varV <- tkcanvas(VcolFrame,width="80",height="25",bg=Vcol.var.value)
+    ChangeColor.varV <- function()
+    {
+      Vcol.var.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Vcol.var.value,title=gettextRcmdr("Choose a color")))
+      if (nchar(Vcol.var.value)>0) {
+        tkconfigure(canvas.varV,bg=Vcol.var.value)
+        assign("Vcol.var.tmp", Vcol.var.value, envir=env)
+      }
+    }
+    ChangeColor.varV.button <- tkbutton(VcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.varV)
+    tkgrid(tklabel(VcolFrame, text=gettextRcmdr("Color for active variables")),canvas.varV,ChangeColor.varV.button)
+###
+    Vcol.quali.sup.value<-Vcol.quali.sup
+    canvas.quali.sup <- tkcanvas(VcolFrame,width="80",height="25",bg=Vcol.quali.sup.value)
+    ChangeColor.quali.sup <- function()
+    {
+      Vcol.quali.sup.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Vcol.quali.sup.value,title=gettextRcmdr("Choose a color")))
+      if (nchar(Vcol.quali.sup.value)>0) {
+        tkconfigure(canvas.quali.sup,bg=Vcol.quali.sup.value)
+        assign("Vcol.quali.sup.tmp", Vcol.quali.sup.value, envir=env)
+      }
+    }
+    ChangeColor.quali.sup.button <- tkbutton(VcolFrame,text=gettextRcmdr("Change Color"),command=ChangeColor.quali.sup)
+    tkgrid(tklabel(VcolFrame, text=gettextRcmdr("Color for supplementary variables")),canvas.quali.sup,ChangeColor.quali.sup.button)
+
+    #mise en page des différents frames de PlotVarFrame
+    tkgrid(VchoixFrame)
+    tkgrid(VTitleFrame)
+    tkgrid(VlabelFrame)
+    tkgrid(tklabel(PlotVVarFrame, text=" "))
+    tkgrid(VcolFrame)
+    tkgrid(tklabel(PlotVVarFrame, text=" "))
+    
+################Fin à changer
 
     # construction de la partie graphique des variables
 
     subOKCancelHelp(PlotWin, "plot.MCA")
+    tkgrid(PlotIndFrame,PlotVVarFrame)
+    tkgrid.configure(PlotVVarFrame,sticky="ne")
     if (length(variableillu)>0) {
-      tkgrid(PlotIndFrame,PlotVarFrame)
-      tkgrid.configure(PlotVarFrame, sticky="n")
+      tkgrid(PlotVarFrame)
+      tkgrid.configure(PlotVarFrame, sticky="se")
     }
-    else tkgrid(PlotIndFrame)
     tkgrid(subButtonsFrame, sticky="ew", columnspan=2)
 
     }
-
     PlotFrame<-tkframe(IlluFrame)
     Plot.but<-tkbutton(PlotFrame, textvariable=.PlotLabel, command=OnPlot, borderwidth=3)
     tkgrid(Plot.but, sticky="ew")
@@ -2388,8 +2893,7 @@ FactoMCA<-function()
     compteur.sortie<-0
     #déclaration des variables
     Rpropre<-FALSE
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
         Rvariable<-FALSE
         Rindividu<-FALSE
         Rindsup<-FALSE
@@ -2432,11 +2936,8 @@ FactoMCA<-function()
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
 
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
         tkdestroy(SortieWin)
 
@@ -2466,7 +2967,6 @@ FactoMCA<-function()
         else ind.sup.Value <- tclVar("0")
         tkconfigure(ind.sup.check,variable=ind.sup.Value)
 
-
       quanti.sup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for supplementary variables"))
         quanti.sup.check <- tkcheckbutton(SortieWin)
         if(Rquantisup) quanti.sup.Value <- tclVar("1")
@@ -2485,11 +2985,11 @@ FactoMCA<-function()
       else descdimValue<-tclVar("0")
       tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -2503,7 +3003,7 @@ FactoMCA<-function()
         if (!is.null(variablefact)) tkgrid(quali.sup.lab,quali.sup.check,sticky="w")
         tkgrid(descdim.lab,descdim.check,sticky="w")
         tkgrid(tklabel(SortieWin, text = " "))
-        tkgrid(Fichier.lab,Fichier.check,sticky="w")
+        tkgrid(RFichierFrame)
         tkgrid(SortieOK.but)
    }
 
@@ -2512,8 +3012,134 @@ FactoMCA<-function()
     tkgrid(Sortie.but, sticky="ew")
   })
 
+  #! fonction HCPC
+  
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
+  {
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))    
+    compteur.hcpc<-0
+    Rclassif<-0
+    Rmeth <- -1
+    Rconsolid<-0 
+    Rgraphhcpc<-1  
+    Rreshcpc<-0
+    Rminhcpc<-3
+    Rmaxhcpc<-10
 
-  #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    OnHCPC <- function()
+    {
+
+      HcpcWin<-tktoplevel()
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))
+
+      onOKHcpc <- function()
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env) 
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+      
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)
+        else assign("Rmeth", -1, envir=env)
+        
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)
+        else assign("Rconsolid",FALSE,envir=env)
+        
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)
+        else assign("Rgraphhcpc",FALSE,envir=env)
+        
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)
+        else assign("Rreshcpc",FALSE,envir=env)        
+        
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)
+        
+        assign("Rclassif",TRUE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)
+
+      onCancelHcpc <- function()
+      {
+        assign("Rclassif",FALSE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)
+ 
+      tkgrid(tklabel(HcpcWin, text=""))
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")      
+
+      meth1 <- tkradiobutton (HcpcWin)
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcWin)
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("interactive")
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="interactive")
+      tkconfigure(meth2,variable=methValue,value="automatic")
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcWin)
+      if(Rconsolid) consolidValue<-tclVar("1")
+      else consolidValue<-tclVar("0")      
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)   
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))
+      reshcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rreshcpc) reshcpcValue<-tclVar("1")
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)          
+    
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the MCA',sep=""))),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=""))  
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcWin,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check)
+      tkgrid(reshcpc.lab,reshcpc.check) 
+      tkgrid(tklabel(HcpcWin,text=""))     
+      tkgrid(OKHcpc.but, CancelHcpc.but)
+      tkgrid(tklabel(HcpcWin, text=""))
+      
+      tkgrid.configure(minmaxhcpc.label,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,column=6,columnspan=2,sticky="w") 
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3) 
+
+}      
+    Hcpc2Frame<-tkframe(HcpcFrame)
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)
+    tkgrid(Hcpc.but, sticky="ew")
+}) 
+
+  #! fonction associée au bouton OK, execute et détruit l'interface graphique
 onOK <- function(){
   done = OnAppliquer()
   tkdestroy(top)
@@ -2553,7 +3179,7 @@ onOK <- function(){
 
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     if(length(as.numeric(tkcurselection(listdesc)))<2) varActives<-listdesc.nom
     else varActives<-listdesc.nom[as.numeric(tkcurselection(listdesc))+1]
     varActives <- varActives[!(varActives%in%variablefact)]
@@ -2614,22 +3240,29 @@ onOK <- function(){
     justDoIt(commande.acm)
     logger(commande.acm)
 
+    #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)      
+      if(Rreshcpc==TRUE){
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }        
+    }
+
+
     # gestion des graphiques
 
-    if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-    if((Rchoix)&(nom.res%in%ls(pos=1))){
-    
-      if ((Rhabillage!="none") & (Rhabillage!="ind")) {
-        Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
-        if(length(Rhabillage)==0) Rhabillage<-"none"
-      }
-      if (Rhabillage=="none") Rhabillage<-paste('"', Rhabillage, '"', sep="")
-      if (Rhabillage=="ind") Rhabillage<-paste('"', Rhabillage, '"', sep="")
-    
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
+    if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), habillage=', Rhabillage, ', col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.quali.sup="', Rcol.quali, '", label=c("', paste(Rlabel, collapse='", "'), '"), invisible=c("quanti.sup","', paste(Rinvis, collapse='", "'), '")', sep="")
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.var="', Rcol.quali, '", col.quali.sup="', Rcol.qualisup, '", label=c("', paste(Rlabel, collapse='", "'), '"), invisible=c("', paste(Rinvis, collapse='", "'), '")', sep="")
       if (!is.null(RTitle)) {
-        if (RTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', RTitle,'")', sep="")
+        if (RTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', RTitle,'"', sep="")
       }
       if (!is.null(RXlimInd)) commande.plotInd <- paste(commande.plotInd,', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep="")
       if (!is.null(RYlimInd)) commande.plotInd <- paste(commande.plotInd,', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep="")
@@ -2638,20 +3271,31 @@ onOK <- function(){
       logger(commande.plotInd)
     }}
 
-    if((Wchoix)&(nom.res%in%ls(pos=1))&(length(variableillu)>0)){
+    if((Vchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), invisible=c("ind","ind.sup","var","quali.sup"), col.quanti.sup="',Wcol.quanti.sup,'"', sep="")
-      if (!is.null(WTitle)) {
-        if (WTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', WTitle,'")', sep="")
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="',Vcol.var,'", col.quali.sup="',Vcol.quali.sup,'", label=c("', paste(Vlabel, collapse='", "'), '"), invisible=c("', paste(Vinvis, collapse='", "'), '")', sep="")
+      if (!is.null(VTitle)) {
+        if (VTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', VTitle,'"', sep="")
       }
-      if ("quanti.sup"%in%Rlabel) commande.plotInd <- paste(commande.plotInd, ',label=c("quanti.sup")',sep='') 
+      commande.plotInd <- paste(commande.plotInd,')', sep="")
+      justDoIt(commande.plotInd) 
+      logger(commande.plotInd)
+    }}
+
+    if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
+    if (get(nom.res)$eig[1,2]!=100) {
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="quanti.sup", col.quanti.sup="',Wcol.quanti.sup,'"',', label=c("', paste(Wlabel, collapse='", "'),'")', sep="")
+      if (!is.null(WTitle)) {
+        if (WTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', WTitle,'"', sep="")
+      }
+#      if ("quanti.sup"%in%Wlabel) commande.plotInd <- paste(commande.plotInd, ',label=c("quanti.sup")',sep='') 
       commande.plotInd <- paste(commande.plotInd,')', sep="")
       justDoIt(commande.plotInd) 
       logger(commande.plotInd)
     }}
 
     # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(Rpropre) doItAndPrint(paste( nom.res, '$eig', sep=""))
       if(Rvariable) doItAndPrint(paste( nom.res, '$var', sep=""))
       if(Rindividu) doItAndPrint(paste( nom.res, '$ind', sep=""))
@@ -2661,10 +3305,9 @@ onOK <- function(){
       if(Rdescdim) doItAndPrint(paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -2697,8 +3340,6 @@ onOK <- function(){
     activeDataSet(donnee.depart)
     justDoIt(paste('remove(',activeDataSet(),'.MCA)',sep=""))
     logger(paste('remove(',activeDataSet(),'.MCA)',sep=""))
-    # destuction de la fenêtre Top
-    closeDialog(top)
   }
 
 
@@ -2781,6 +3422,13 @@ onOK <- function(){
   tkgrid.columnconfigure(OptionFrame,5, minsize=40)
   tkgrid.columnconfigure(OptionFrame,8, minsize=25)
 
+  #Frame pour HCPC
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after MCA"), firstLabel=gettextRcmdr("Perform Clustering after MCA")) 
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
+  
+
   appliquer.but<-tkbutton(top, text=gettextRcmdr("Apply"),width=12,command=OnAppliquer, borderwidth=3, fg="#690f96")
   OKCancelHelp(helpSubject="MCA")
 
@@ -2796,6 +3444,8 @@ onOK <- function(){
   tkgrid(tklabel(top,text="")) # Ligne de blanc
   tkgrid(OptionFrame, column=1, columnspan=1)
   tkgrid(tklabel(top,text="")) # Ligne de blanc
+  tkgrid(HcpcFrame, column=1, columnspan=1)
+  tkgrid(tklabel(top,text="")) # Ligne de blanc 
   tkgrid(appliquer.but, column=1, columnspan=1)
   tkgrid(tklabel(top,text="")) # Ligne de blanc
   tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )
@@ -3309,7 +3959,7 @@ FactoMFA<-function()
       tkconfigure(etatModif.actif.check,variable=etatModif.Value,value="actif")
       tkconfigure(etatModif.illu.check,variable=etatModif.Value, value="illu")
       
-      # création de la liste pour le choix des variables acives
+      # création de la liste pour le choix des variables actives
       listModifVarQuali<-tklistbox(ModifGpeQualiWin, selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrModifVarQuali,...))
       scrModifVarQuali<-tkscrollbar(ModifGpeQualiWin,repeatinterval=5,command=function(...)tkyview(listModifVarQuali,...))
       listModifVarQuali.nom<-NULL
@@ -3421,8 +4071,7 @@ FactoMFA<-function()
     compteur.sortie<-0
     #déclaration des variables
     Rpropre<-FALSE
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
     Rgroupe<-FALSE
     Rinertie<-FALSE
     Rindividu<-FALSE
@@ -3490,11 +4139,8 @@ FactoMFA<-function()
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
         
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
         tkdestroy(SortieWin)
       
@@ -3578,11 +4224,11 @@ FactoMFA<-function()
       else descdimValue<-tclVar("0")
       tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -3606,7 +4252,7 @@ FactoMFA<-function()
       tkgrid(axepartiel.lab,axepartiel.check,sticky="w")      
       tkgrid(descdim.lab,descdim.check,sticky="w")
       tkgrid(tklabel(SortieWin, text = " "))
-      tkgrid(Fichier.lab,Fichier.check,sticky="w")
+      tkgrid(RFichierFrame)
       tkgrid(SortieOK.but)
    }
     
@@ -3642,7 +4288,7 @@ FactoMFA<-function()
     RXlimInd<-NULL
     RYlimInd<-NULL
     
-    Wchoix=TRUE
+    Wchoix<-TRUE
     WTitle<-NULL
     WAxeVar<-c(1,2)
     Wlabel.var<-TRUE
@@ -3650,7 +4296,7 @@ FactoMFA<-function()
     Winvisible<-NULL
     Wlim.cos<-0.
     
-    Achoix=TRUE
+    Achoix<-TRUE
     ATitle<-NULL
     AAxeAxe<-c(1,2)
     Ahabillage<-"group"
@@ -3703,16 +4349,14 @@ FactoMFA<-function()
 
         if(Wchoix) {
           if (tclvalue(WTitre)==" ") assign("WTitle", NULL, envir=env)
-          assign("WTitle", tclvalue(WTitre), envir=env)
+          else assign("WTitle", tclvalue(WTitre), envir=env)
 
           assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
 
-          label.tmp.var<-tclvalue(label.var.checkValue)
-          if(label.tmp.var==1) assign("Wlabel.var", TRUE, envir=env)
+          if(tclvalue(label.var.checkValue)==1) assign("Wlabel.var", TRUE, envir=env)
           else assign("Wlabel.var", FALSE, envir=env)
 
-          habillage.tmp.var<-tclvalue(Whabillage.checkValue)
-          if(habillage.tmp.var==1) assign("Whabillage", "group", envir=env)
+          if(tclvalue(Whabillage.checkValue)==1) assign("Whabillage", "group", envir=env)
           else assign("Whabillage", "none", envir=env)
           
           if(tclvalue(inv.Value)=="aucun")  assign("Winvisible", NULL, envir=env)
@@ -3805,7 +4449,7 @@ FactoMFA<-function()
       
       
       ##########################
-      # construction de la partie graphique des Axes partielles
+      # construction de la partie graphique des Axes partiels
       PlotAxeFrame<-tkframe(PlotWin2, borderwidth=5, relief="groove")
   
       AchoixFrame<-tkframe(PlotAxeFrame,borderwidth=2)
@@ -3836,6 +4480,7 @@ FactoMFA<-function()
       tkgrid(tklabel(PlotAxeFrame, text=" "))
       
       ########################
+
       # construction de la partie graphique des variables
       PlotVarFrame<-tkframe(PlotWin2, borderwidth=5, relief="groove")
   
@@ -3848,9 +4493,9 @@ FactoMFA<-function()
       tkgrid(tklabel(WchoixFrame, text="  "))
   
       WTitleFrame<-tkframe(PlotVarFrame,borderwidth=2)
-      if (is.null(WTitle)) WTitre <- tclVar(" ")
+      if(is.null(WTitle)) WTitre <- tclVar(" ")
       else WTitre<-tclVar(WTitle)
-      WTitre.entry <-tkentry(WTitleFrame,width="40",textvariable=WTitre)
+      WTitre.entry <-tkentry(WTitleFrame,width="40",textvariable=WTitre) 
       tkgrid(tklabel(WTitleFrame,text=gettextRcmdr("Title of the graph")),WTitre.entry)
   
       WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
@@ -3877,12 +4522,12 @@ FactoMFA<-function()
       inv.act.check<-tkradiobutton(WinvisibleFrame)
       inv.sup.check<-tkradiobutton(WinvisibleFrame)
       if(is.null(Winvisible)) inv.Value<-tclVar("aucun")
-      else inv.Value<-tclVar(Winvisible) 
+      else inv.Value<-tclVar(Winvisible)
       tkconfigure(inv.aucun.check,variable=inv.Value,value="aucun")
       tkconfigure(inv.act.check,variable=inv.Value, value="actif")
       tkconfigure(inv.sup.check,variable=inv.Value, value="sup")
       tkgrid(tklabel(WinvisibleFrame, text=gettextRcmdr("Hide some elements:")), columnspan=6, sticky="w")
-      tkgrid(tklabel(WinvisibleFrame, text="None"),inv.aucun.check, tklabel(WinvisibleFrame, text=gettextRcmdr("active variables")),inv.act.check, tklabel(WinvisibleFrame, text=gettextRcmdr("supplementary variables")),inv.sup.check, sticky="w")
+      tkgrid(tklabel(WinvisibleFrame, text="None"),inv.aucun.check, tklabel(WinvisibleFrame, text=gettextRcmdr("active variables")),inv.act.check, tklabel(WinvisibleFrame, text=gettextRcmdr("supplementary variables")),inv.sup.check, sticky="w")   
         
       #mise en page des différents frames de PlotVarFrame
       tkgrid(WchoixFrame)
@@ -3891,7 +4536,7 @@ FactoMFA<-function()
       tkgrid(WlabelFrame)
       tkgrid(WhabillageFrame)
       tkgrid(WinvisibleFrame)            
-      tkgrid(tklabel(PlotVarFrame, text=" "))
+      tkgrid(tklabel(PlotVarFrame, text=" "))        
         
       ##########################  
       # construction de la partie graphique des individus
@@ -3924,7 +4569,7 @@ FactoMFA<-function()
       tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the partial individuals")),label.indPar.check)
       label.quali.check<-tkcheckbutton(RlabelFrame)
       if (Rlabel.quali) label.quali.checkValue<-tclVar("1")
-      else label.quali.checkValue<-tclVar("1")
+      else label.quali.checkValue<-tclVar("0")
       tkconfigure(label.quali.check, variable=label.quali.checkValue)
       tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the qualitative variables")), label.quali.check)
   
@@ -4055,7 +4700,7 @@ FactoMFA<-function()
       tkgrid(PlotAxeFrame)
       if(length(listQuantiAct.nom)+length(listQuantiIllu.nom)>=1) {
         tkgrid(PlotVarFrame)
-        Wchoix = FALSE
+        Wchoix = TRUE
       }
       tkgrid(PlotIndFrame, PlotWin2, sticky="ns")
       tkgrid(subButtonsFrame, sticky="ew", columnspan=2)
@@ -4067,8 +4712,135 @@ FactoMFA<-function()
   }) 
 
 
+  #! fonction HCPC
+  
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
+  {
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))    
+    compteur.hcpc<-0
+    Rclassif<-0
+    Rmeth <- -1
+    Rconsolid<-0 
+    Rgraphhcpc<-1  
+    Rreshcpc<-0
+    Rminhcpc<-3
+    Rmaxhcpc<-10
 
-    #! fonction associer au bouton Appliquer, execute sans détruire l'interface graphique
+    OnHCPC <- function()
+    {
+
+      HcpcWin<-tktoplevel()
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))
+
+      onOKHcpc <- function()
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env) 
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+      
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)
+        else assign("Rmeth", -1, envir=env)
+        
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)
+        else assign("Rconsolid",FALSE,envir=env)
+        
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)
+        else assign("Rgraphhcpc",FALSE,envir=env)
+        
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)
+        else assign("Rreshcpc",FALSE,envir=env)        
+        
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)
+        
+        assign("Rclassif",TRUE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)
+
+      onCancelHcpc <- function()
+      {
+        assign("Rclassif",FALSE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)
+ 
+      tkgrid(tklabel(HcpcWin, text=""))
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")      
+
+      meth1 <- tkradiobutton (HcpcWin)
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcWin)
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("interactive")
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="interactive")
+      tkconfigure(meth2,variable=methValue,value="automatic")
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcWin)
+      if(Rconsolid) consolidValue<-tclVar("1")
+      else consolidValue<-tclVar("0")      
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)   
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))
+      reshcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rreshcpc) reshcpcValue<-tclVar("1")
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)          
+    
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the MFA',sep=""))),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=""))  
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcWin,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check)
+      tkgrid(reshcpc.lab,reshcpc.check) 
+      tkgrid(tklabel(HcpcWin,text=""))     
+      tkgrid(OKHcpc.but, CancelHcpc.but)
+      tkgrid(tklabel(HcpcWin, text=""))
+      
+      tkgrid.configure(minmaxhcpc.label,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,column=6,columnspan=2,sticky="w") 
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3) 
+
+}      
+    Hcpc2Frame<-tkframe(HcpcFrame)
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)
+    tkgrid(Hcpc.but, sticky="ew")
+})   
+
+
+    #! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
   OnAppliquer<-function()
   {
       #liste de l'ensemble des variables créées
@@ -4131,7 +4903,7 @@ FactoMFA<-function()
   
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(ls(pat=nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     ncp<-as.numeric(tclvalue(ncp.val))
     Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
     
@@ -4214,9 +4986,25 @@ FactoMFA<-function()
       justDoIt(commande.MFA)
       logger(commande.MFA)
 
+
+    #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)      
+      if(Rreshcpc==TRUE){
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }        
+    }
+
+
       #gestion des graphiques   
-      if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-      if((Gchoix)&(nom.res%in%ls(pos=1))){
+      if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
+      if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         commande.plotG<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", lab.grpe=', Glabel, sep="")
         if (is.null(GTitle)) commande.plotG <- paste(commande.plotG,')', sep="")
@@ -4228,7 +5016,7 @@ FactoMFA<-function()
         logger(commande.plotG)
       }}
       
-      if((Achoix)&(nom.res%in%ls(pos=1))){
+      if((Achoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         commande.plotA<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="axes", habillage="', Ahabillage, '"', sep="")
         if (is.null(ATitle)) commande.plotA <- paste(commande.plotA,')', sep="")
@@ -4240,7 +5028,7 @@ FactoMFA<-function()
         logger(commande.plotA) 
       }}
       
-      if((Wchoix)&(nom.res%in%ls(pos=1))&(nb.GQI+nb.GQA>0)){
+      if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)&(nb.GQI+nb.GQA>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         commande.plotW<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", lab.var=', Wlabel.var, ', habillage="', Whabillage, '", lim.cos2.var=', Wlim.cos, sep="")
         if (!is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')
@@ -4253,7 +5041,7 @@ FactoMFA<-function()
         logger(commande.plotW)
       }}
       
-      if((Rchoix)&(nom.res%in%ls(pos=1))){
+      if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         if ((Rhabillage!="none") & (Rhabillage!="ind") & (Rhabillage!="group")) {
           Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
@@ -4264,7 +5052,7 @@ FactoMFA<-function()
         if (Rhabillage=="group") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
         if(RpartialSouris){
-          commande.plotI<-paste('plot.MFApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', habillage=', Rhabillage, sep="")
+          commande.plotI<-paste('plot.MFApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="")
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -4276,7 +5064,7 @@ FactoMFA<-function()
           }
         }
         else {
-          commande.plotI<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', habillage=', Rhabillage, sep="") 
+          commande.plotI<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="") 
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -4293,7 +5081,7 @@ FactoMFA<-function()
       }}
       
       # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(Rpropre) doItAndPrint(paste( nom.res, '$eig', sep=""))
       if(Rgroupe) doItAndPrint(paste( nom.res, '$group', sep=""))
       if(Rinertie) doItAndPrint(paste( nom.res, '$inertia.ratio', sep=""))
@@ -4303,16 +5091,15 @@ FactoMFA<-function()
       if(Rquanti) doItAndPrint(paste( nom.res, '$quanti.var', sep=""))      
       if(Rquantisup) doItAndPrint(paste( nom.res, '$quanti.var.sup', sep=""))
       if(Rqualisummary) doItAndPrint(paste( nom.res, '$summary.quali', sep=""))
-      if(Rquanti) doItAndPrint(paste( nom.res, '$quali.var', sep=""))      
-      if(Rquantisup) doItAndPrint(paste( nom.res, '$quali.var.sup', sep=""))
+      if(Rquali) doItAndPrint(paste( nom.res, '$quali.var', sep=""))      
+      if(Rqualisup) doItAndPrint(paste( nom.res, '$quali.var.sup', sep=""))
       if(Raxepartiel) doItAndPrint(paste( nom.res, '$partial.axes', sep=""))
       if(Rdescdim) doItAndPrint(paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -4372,7 +5159,7 @@ FactoMFA<-function()
   }
 
 
-    #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()
@@ -4521,8 +5308,16 @@ FactoMFA<-function()
   tkgrid.columnconfigure(OptionFrame,5, minsize=40)
   tkgrid.columnconfigure(OptionFrame,8, minsize=25)
 
+  #Frame pour HCPC
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after MFA"), firstLabel=gettextRcmdr("Perform Clustering after MFA")) 
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
+
+
   appliquer.but<-tkbutton(top, text="Apply",width=12,command=OnAppliquer, borderwidth=3, fg="#690f96")
   OKCancelHelp(helpSubject="MFA")
+
 
   # Mise en page de top
   tkgrid(tklabel(top, text=gettextRcmdr("Multiple Factor Analysis (MFA)"),font=fontheading), columnspan=3)
@@ -4538,7 +5333,9 @@ FactoMFA<-function()
   tkgrid(IlluFrame, column=1, columnspan=1)
   tkgrid(tklabel(top,text=""))    
   tkgrid(OptionFrame, column=1, columnspan=1)
-  tkgrid(tklabel(top,text="")) # Ligne de blanc       
+  tkgrid(tklabel(top,text="")) # Ligne de blanc  
+  tkgrid(HcpcFrame, column=1, columnspan=1)
+  tkgrid(tklabel(top,text="")) # Ligne de blanc        
   tkgrid(appliquer.but, column=1, columnspan=1)
   tkgrid(tklabel(top,text="")) # Ligne de blanc  
   tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )
@@ -4776,8 +5573,7 @@ FactoGPA<-function()
     env<-environment()
     compteur.sortie<-0
     #déclaration des variables
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
     Rdep<-FALSE
     RRVs<-FALSE
     Rsimi<-FALSE
@@ -4829,11 +5625,8 @@ FactoGPA<-function()
         if(tclvalue(RVValue)=="1") assign("RRV", TRUE, envir=env)
         else assign("RRV", FALSE, envir=env)
         
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
         tkdestroy(SortieWin)
       
@@ -4893,11 +5686,10 @@ FactoGPA<-function()
         else correlationsValue <- tclVar("0")
         tkconfigure(correlations.check,variable=correlationsValue)
         
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -4913,7 +5705,8 @@ FactoGPA<-function()
       tkgrid(correlations.lab,correlations.check,sticky="w")      
       tkgrid(PANOVA.lab,PANOVA.check,sticky="w")      
       tkgrid(tklabel(SortieWin, text = " "))
-      tkgrid(Fichier.lab,Fichier.check,sticky="w")
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
+      tkgrid(RFichierFrame)
       tkgrid(SortieOK.but)
    }
     
@@ -5116,12 +5909,12 @@ FactoGPA<-function()
 
 
 
-    #! fonction associer au bouton Appliquer, execute sans détruire l'interface graphique
+    #! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
   OnAppliquer<-function()
   {  
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(ls(pat=nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     nbiter<-as.numeric(tclvalue(nbiter.val))
     scaling<-as.logical(as.numeric(tclvalue(scale.bool)))
     tolerance<-as.numeric(tclvalue(tolerance.val))
@@ -5163,7 +5956,7 @@ FactoGPA<-function()
       justDoIt(commande.GPA)
       logger(commande.GPA)
       
-      if((Rchoix)&(nom.res%in%ls(pos=1))){
+      if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
         if ((Rhabillage!="none") & (Rhabillage!="ind") & (Rhabillage!="group")) {
           Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
           if(length(Rhabillage)==0) Rhabillage<-"none"
@@ -5200,7 +5993,7 @@ FactoGPA<-function()
       }
       
       # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(RRV) doItAndPrint(paste(nom.res, '$RV', sep=""))
       if(RRVs) doItAndPrint(paste( nom.res, '$RVs', sep=""))
       if(Rsimi) doItAndPrint(paste( nom.res, '$simi', sep=""))
@@ -5212,10 +6005,9 @@ FactoGPA<-function()
       if(RPANOVA) doItAndPrint(paste( nom.res, '$PANOVA', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(RRV){
         doItAndPrint(paste('write.infile(', nom.res, '$RV, file =',Fich,',append=',append,')', sep=""))
@@ -5259,7 +6051,7 @@ FactoGPA<-function()
   }
 
 
-    #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()
@@ -5391,7 +6183,7 @@ FactoGPA<-function()
 #############################DEBUT FONCTION Factocatdes ##############################
 Factocatdes<-function(){
 require(tcltk)
-require(FactoMineR)
+#require(SensoMineR)
 top<-tktoplevel(borderwidth=10)
 tkwm.title(top,"Description of categories")
 
@@ -5570,20 +6362,16 @@ nbitem2<-unlist(strsplit(nbitemlist2,"\\ "))
                
       if (Gquali==1){                
         if ((length(nbitem2)>0) & (length(variable2)>0 ))  {           
-          justDoIt(paste('Description by qualitative variables',sep=''))
           doItAndPrint(paste(resultat,'$test.chi',sep=''))
         }
         if((length(nbitem2)==0) & (length(vars.desc2)>=1))  {       
-          justDoIt(paste('Description by qualitative variables',sep=''))
           doItAndPrint(paste(resultat,'$test.chi',sep=''))
         }
       }
       if ((Gquanti==1)& (length(vars.desc)>0)){
-        justDoIt(paste('Descrition by quantitative variable',sep=''))
         doItAndPrint(paste(resultat,'$quanti',sep=''))
       }
       if ((Gcateg==1)){
-        justDoIt(paste('Description by category',sep=''))
         doItAndPrint(paste(resultat,'$category',sep=''))
       }
     }
@@ -5914,15 +6702,14 @@ FactoAFDM<-function()
     compteur.sortie<-0
     #déclaration des variables
     Rpropre<-FALSE
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
     Rgroupe<-FALSE
     Rindividu<-FALSE
     Rindsup<-FALSE
-    Rquantisummary<-FALSE
+#    Rquantisummary<-FALSE
     Rquanti<-FALSE
     Rquantisup<-FALSE    
-    Rqualisummary<-FALSE
+#    Rqualisummary<-FALSE
     Rquali<-FALSE
     Rqualisup<-FALSE
     Rdescdim<-FALSE
@@ -5953,8 +6740,8 @@ FactoAFDM<-function()
         if(tclvalue(ind.sup.Value)=="1") assign("Rindsup", TRUE, envir=env)
         else assign("Rindsup", FALSE, envir=env)
         
-        if(tclvalue(quantiSummaryValue)=="1") assign("Rquantisummary", TRUE, envir=env)
-        else assign("Rquantisummary", FALSE, envir=env)
+#        if(tclvalue(quantiSummaryValue)=="1") assign("Rquantisummary", TRUE, envir=env)
+#        else assign("Rquantisummary", FALSE, envir=env)
         
         if(tclvalue(quantiValue)=="1") assign("Rquanti", TRUE, envir=env)
         else assign("Rquanti", FALSE, envir=env)
@@ -5962,8 +6749,8 @@ FactoAFDM<-function()
         if(tclvalue(quantisupValue)=="1") assign("Rquantisup", TRUE, envir=env)
         else assign("Rquantisup", FALSE, envir=env)
         
-        if(tclvalue(qualiSummaryValue)=="1") assign("Rqualisummary", TRUE, envir=env)
-        else assign("Rqualisummary", FALSE, envir=env)
+#        if(tclvalue(qualiSummaryValue)=="1") assign("Rqualisummary", TRUE, envir=env)
+#        else assign("Rqualisummary", FALSE, envir=env)
         
         if(tclvalue(qualiValue)=="1") assign("Rquali", TRUE, envir=env)
         else assign("Rquali", FALSE, envir=env)
@@ -5974,17 +6761,14 @@ FactoAFDM<-function()
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
         
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
         tkdestroy(SortieWin)
       
       }
       
-      eig.lab <-tklabel(SortieWin, text=gettextRcmdr("Eigenvalues"))
+        eig.lab <-tklabel(SortieWin, text=gettextRcmdr("Eigenvalues"))
         eig.check <- tkcheckbutton(SortieWin)
         if(Rpropre) eigValue <- tclVar("1")
         else eigValue <- tclVar("0")
@@ -5996,65 +6780,65 @@ FactoAFDM<-function()
         else groupeValue <- tclVar("0")
         tkconfigure(groupe.check,variable=groupeValue)
         
-      ind.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for the active individuals"))
+        ind.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for the active individuals"))
         ind.check <- tkcheckbutton(SortieWin)
         if(Rindividu) indValue <- tclVar("1")
         else indValue <- tclVar("0")
         tkconfigure(ind.check,variable=indValue)
 
-      ind.sup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for the supplementary individuals"))
+        ind.sup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results for the supplementary individuals"))
         ind.sup.check <- tkcheckbutton(SortieWin)
         if(Rindsup) ind.sup.Value <- tclVar("1")
         else ind.sup.Value <- tclVar("0")
         tkconfigure(ind.sup.check,variable=ind.sup.Value)
         
-      quantiSummary.lab<-tklabel(SortieWin,text=gettextRcmdr("Summary of the quantitative variables"))
-        quantiSummary.check <- tkcheckbutton(SortieWin)
-        if(Rquantisummary) quantiSummaryValue <- tclVar("1")
-        else quantiSummaryValue <- tclVar("0")
-        tkconfigure(quantiSummary.check,variable=quantiSummaryValue)
+#        quantiSummary.lab<-tklabel(SortieWin,text=gettextRcmdr("Summary of the quantitative variables"))
+#        quantiSummary.check <- tkcheckbutton(SortieWin)
+#        if(Rquantisummary) quantiSummaryValue <- tclVar("1")
+#        else quantiSummaryValue <- tclVar("0")
+#        tkconfigure(quantiSummary.check,variable=quantiSummaryValue)
       
-      quanti.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the quantitative variables"))
+        quanti.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the quantitative variables"))
         quanti.check <- tkcheckbutton(SortieWin)
         if(Rquanti) quantiValue <- tclVar("1")
         else quantiValue <- tclVar("0")
         tkconfigure(quanti.check,variable=quantiValue)
 
-      quantisup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the supplementary quantitative variables"))
+        quantisup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the supplementary quantitative variables"))
         quantisup.check <- tkcheckbutton(SortieWin)
         if(Rquantisup) quantisupValue <- tclVar("1")
         else quantisupValue <- tclVar("0")
         tkconfigure(quantisup.check,variable=quantisupValue)
       
-      qualiSummary.lab<-tklabel(SortieWin,text=gettextRcmdr("Summary of the qualitative variables"))
-        qualiSummary.check <- tkcheckbutton(SortieWin)
-        if(Rqualisummary) qualiSummaryValue <- tclVar("1")
-        else qualiSummaryValue <- tclVar("0")
-        tkconfigure(qualiSummary.check,variable=qualiSummaryValue)
+#        qualiSummary.lab<-tklabel(SortieWin,text=gettextRcmdr("Summary of the qualitative variables"))
+#        qualiSummary.check <- tkcheckbutton(SortieWin)
+#        if(Rqualisummary) qualiSummaryValue <- tclVar("1")
+#        else qualiSummaryValue <- tclVar("0")
+#        tkconfigure(qualiSummary.check,variable=qualiSummaryValue)
       
-      quali.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the qualitative variables"))
+        quali.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the qualitative variables"))
         quali.check <- tkcheckbutton(SortieWin)
         if(Rquali) qualiValue <- tclVar("1")
         else qualiValue <- tclVar("0")
         tkconfigure(quali.check,variable=qualiValue)
 
-      qualisup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the supplementary qualitative variables"))
+        qualisup.lab<-tklabel(SortieWin,text=gettextRcmdr("Results of the supplementary qualitative variables"))
         qualisup.check <- tkcheckbutton(SortieWin)
         if(Rqualisup) qualisupValue <- tclVar("1")
         else qualisupValue <- tclVar("0")
         tkconfigure(qualisup.check,variable=qualisupValue)
       
-        descdim.lab<-tklabel(SortieWin, text=gettextRcmdr("Description of the dimensions"))
+      descdim.lab<-tklabel(SortieWin, text=gettextRcmdr("Description of the dimensions"))
       descdim.check<-tkcheckbutton(SortieWin)
       if(Rdescdim) descdimValue<-tclVar("1")
       else descdimValue<-tclVar("0")
       tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -6064,16 +6848,17 @@ FactoAFDM<-function()
       tkgrid(groupe.lab,groupe.check,sticky="w")
       tkgrid(ind.lab,ind.check,sticky="w")
       if (!is.null(individuillu)) tkgrid(ind.sup.lab,ind.sup.check,sticky="w")
-      if (length(variables)+length(variableillu)>0) tkgrid(quantiSummary.lab,quantiSummary.check,sticky="w")
-      if (length(variables)>0) tkgrid(quanti.lab,quanti.check,sticky="w")      
-      if (length(variableillu)>0) tkgrid(quantisup.lab,quantisup.check,sticky="w")
-      if (length(variables.q)+length(variablefact)>0) tkgrid(qualiSummary.lab,qualiSummary.check,sticky="w")
-      if (length(variables.q)>0) tkgrid(quali.lab,quali.check,sticky="w")        
-      if (length(variablefact)>0) tkgrid(qualisup.lab,qualisup.check,sticky="w")
+#      tkgrid(quantiSummary.lab,quantiSummary.check,sticky="w")
+      tkgrid(quanti.lab,quanti.check,sticky="w")      
+      if (!is.null(variableillu)) tkgrid(quantisup.lab,quantisup.check,sticky="w")
+#      tkgrid(qualiSummary.lab,qualiSummary.check,sticky="w")
+      tkgrid(quali.lab,quali.check,sticky="w")        
+      if (!is.null(variablefact)) tkgrid(qualisup.lab,qualisup.check,sticky="w")
       tkgrid(descdim.lab,descdim.check,sticky="w")
       tkgrid(tklabel(SortieWin, text = " "))
-      tkgrid(Fichier.lab,Fichier.check,sticky="w")
+      tkgrid(RFichierFrame)
       tkgrid(SortieOK.but)
+      tkgrid(tklabel(SortieWin, text = " "))
    }
     
     SortieFrame<-tkframe(IlluFrame)
@@ -6398,7 +7183,7 @@ FactoAFDM<-function()
       tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the mean individuals")),label.indMoy.check)
       label.quali.check<-tkcheckbutton(RlabelFrame)
       if (Rlabel.quali) label.quali.checkValue<-tclVar("1")
-      else label.quali.checkValue<-tclVar("1")
+      else label.quali.checkValue<-tclVar("0")
       tkconfigure(label.quali.check, variable=label.quali.checkValue)
       tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the qualitative variables")), label.quali.check)
               
@@ -6489,7 +7274,7 @@ FactoAFDM<-function()
 
 
 
-    #! fonction associer au bouton Appliquer, execute sans détruire l'interface graphique
+    #! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
   OnAppliquer<-function()
   {
       #liste de l'ensemble des variables créées
@@ -6543,10 +7328,10 @@ FactoAFDM<-function()
   
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(ls(pat=nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     ncp<-as.numeric(tclvalue(ncp.val))
-    reduction<-TRUE
-    if(tclvalue(reduitValue)=="0") reduction<-FALSE
+    #reduction<-TRUE
+    #if(tclvalue(reduitValue)=="0") reduction<-FALSE
     Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
     nbitemlist<-c(tclvalue(tkcurselection(listdesc)))
     nbitem<-unlist(strsplit(nbitemlist,"\\ "))
@@ -6577,34 +7362,49 @@ FactoAFDM<-function()
       # gestion de la commande réalisant l'AFM     
       commande.AFDM<-paste(nom.res, '<-AFDM(', activeDataSet(),sep='')
       if(!is.null(individuillu)) commande.AFDM<-paste(commande.AFDM, ', ind.sup=', nrow(get(.activeDataSet))-length(individuillu)+1, ': ', nrow(get(.activeDataSet)),sep='')
-      commande.AFDM<-paste(commande.AFDM, ', type=c(',sep='')
-      if (!is.null(variables)){
-        if (reduction) commande.AFDM<-paste(commande.AFDM, 'rep("s",',length(variables),')',sep='')
-        else commande.AFDM<-paste(commande.AFDM, 'rep("c",',length(variables),')',sep='')
-        if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, ', ',sep='')
-      }
-      if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, 'rep("n",',length(variables.q),')',sep='')
-      if (!is.null(variableillu)){
-        if (reduction) commande.AFDM<-paste(commande.AFDM, ', rep("s",',length(variableillu),')',sep='')
-        else commande.AFDM<-paste(commande.AFDM, ', rep("c",',length(variableillu),')',sep='')
-      }
-      if (!is.null(variablefact)) commande.AFDM<-paste(commande.AFDM, ', rep("n",',length(variablefact),')',sep='')
-      commande.AFDM<-paste(commande.AFDM, '), ncp=', ncp,sep='')
+#      commande.AFDM<-paste(commande.AFDM, ', type=c(',sep='')
+#      if (!is.null(variables)){
+#        if (reduction) commande.AFDM<-paste(commande.AFDM, 'rep("s",',length(variables),')',sep='')
+#        else commande.AFDM<-paste(commande.AFDM, 'rep("c",',length(variables),')',sep='')
+#        if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, ', ',sep='')
+#      }
+#      if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, 'rep("n",',length(variables.q),')',sep='')
+#      if (!is.null(variableillu)){
+#        if (reduction) commande.AFDM<-paste(commande.AFDM, ', rep("s",',length(variableillu),')',sep='')
+#        else commande.AFDM<-paste(commande.AFDM, ', rep("c",',length(variableillu),')',sep='')
+#      }
+#      if (!is.null(variablefact)) commande.AFDM<-paste(commande.AFDM, ', rep("n",',length(variablefact),')',sep='')
+#      else commande.AFDM<-paste(commande.AFDM, '), ncp=', ncp,sep='')
+      commande.AFDM<-paste(commande.AFDM, ', ncp=', ncp,sep='')
       if (!is.null(num.group.sup)) commande.AFDM<-paste(commande.AFDM, ', sup.var=',num.group.sup[1],':',num.group.sup[length(num.group.sup)],sep='')
       commande.AFDM<-paste(commande.AFDM, ', graph=FALSE)',sep='')
       justDoIt(commande.AFDM)
       logger(commande.AFDM)
 
       #gestion des graphiques   
-      if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-      if((Gchoix)&(nom.res%in%ls(pos=1))){
+      if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
+      if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         commande.plotG<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", lab.grpe=', Glabel, sep="")
         commande.plotG <- paste(commande.plotG, ',col.hab = c(',sep='')
-        if (length(variables)>0) commande.plotG <- paste(commande.plotG, 'rep("',Gcol.var,'",',length(variables),'),',sep='')
-        if (length(variableillu)>0) commande.plotG <- paste(commande.plotG, 'rep("',Gcol.quanti.sup,'",',length(variableillu),'),',sep='')
-        if (length(variables.q)>0) commande.plotG <- paste(commande.plotG, 'rep("',Gcol.quali,'",',length(variables.q),'),',sep='')
-        if (length(variablefact)>0) commande.plotG <- paste(commande.plotG, 'rep("',Gcol.quali.sup,'",',length(variablefact),')',sep='')
+        auxi = 0
+        if (length(variables)>0){
+          commande.plotG <- paste(commande.plotG, 'rep("',Gcol.var,'",',length(variables),')',sep='')
+          auxi = 1
+        }
+        if (length(variableillu)>0){
+          if (auxi==1) commande.plotG <- paste(commande.plotG, ',',sep='')
+          commande.plotG <- paste(commande.plotG, 'rep("',Gcol.quanti.sup,'",',length(variableillu),')',sep='')
+        }
+        auxi=0
+        if (length(variables.q)>0){
+          commande.plotG <- paste(commande.plotG, ',rep("',Gcol.quali,'",',length(variables.q),')',sep='')
+          auxi=1
+        }
+        if (length(variablefact)>0){
+          if (auxi==1) commande.plotG <- paste(commande.plotG, ',',sep='')
+          commande.plotG <- paste(commande.plotG, 'rep("',Gcol.quali.sup,'",',length(variablefact),')',sep='')
+        }
         commande.plotG <- paste(commande.plotG, ')',sep='')
         if (is.null(GTitle)) commande.plotG <- paste(commande.plotG,')', sep="")
         else {
@@ -6615,10 +7415,17 @@ FactoAFDM<-function()
         logger(commande.plotG)
       }}
             
-      if((Wchoix)&(nom.res%in%ls(pos=1))&(length(variables)>0)){
+      if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)&(length(variables)>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         commande.plotW<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", lab.var=', Wlabel.var, ', lim.cos2.var=', Wlim.cos, sep="")
-        if (!is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')
+
+        if (!is.null(Winvisible)) {
+          commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')
+          if(Winvisible=="actif") commande.plotW<-paste(commande.plotW, ', col.hab=c(rep("', Wcol.quanti.sup,'",length(rownames(', nom.res, '$quanti.var.sup[[1]]))),rep("', Wcol.var, '",length(rownames(', nom.res,'$quanti.var[[1]]))))', sep='')
+          else commande.plotW<-paste(commande.plotW, ', col.hab=c(rep("', Wcol.var, '",length(rownames(', nom.res,'$quanti.var[[1]]))),rep("', Wcol.quanti.sup,'",length(rownames(', nom.res, '$quanti.var.sup[[1]]))))', sep='')
+        }
+        if(is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', col.hab=c(rep("', Wcol.var, '",length(rownames(', nom.res,'$quanti.var[[1]]))),rep("', Wcol.quanti.sup,'",length(rownames(', nom.res, '$quanti.var.sup[[1]]))))', sep='')
+
         if (is.null(WTitle)) commande.plotW <- paste(commande.plotW,')', sep="")
         else {
           if (WTitle ==" ") commande.plotW <- paste(commande.plotW,')', sep="")
@@ -6628,7 +7435,7 @@ FactoAFDM<-function()
         logger(commande.plotW)
       }}
       
-      if((Rchoix)&(nom.res%in%ls(pos=1))){
+      if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         if ((Rhabillage!="none") & (Rhabillage!="ind")) {
           Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
@@ -6637,7 +7444,7 @@ FactoAFDM<-function()
         if (Rhabillage=="none") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         if (Rhabillage=="ind") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
-          commande.plotI<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind=', Rlabel.indMoy, ', habillage=', Rhabillage, sep="") 
+          commande.plotI<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind=', Rlabel.indMoy, ', lab.var=', Rlabel.quali, ', habillage=', Rhabillage, sep="") 
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -6652,24 +7459,23 @@ FactoAFDM<-function()
       }
       
       # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(Rpropre) doItAndPrint(paste( nom.res, '$eig', sep=""))
       if(Rgroupe) doItAndPrint(paste( nom.res, '$group', sep=""))
       if(Rindividu) doItAndPrint(paste( nom.res, '$ind', sep=""))
       if(Rindsup) doItAndPrint(paste( nom.res, '$ind.sup', sep=""))
-      if(Rquantisummary) doItAndPrint(paste( nom.res, '$summary.quanti', sep=""))
+#      if(Rquantisummary) doItAndPrint(paste( nom.res, '$summary.quanti', sep=""))
       if(Rquanti) doItAndPrint(paste( nom.res, '$quanti.var', sep=""))      
       if(Rquantisup) doItAndPrint(paste( nom.res, '$quanti.var.sup', sep=""))
-      if(Rqualisummary) doItAndPrint(paste( nom.res, '$summary.quali', sep=""))
+#      if(Rqualisummary) doItAndPrint(paste( nom.res, '$summary.quali', sep=""))
       if(Rquali) doItAndPrint(paste( nom.res, '$quali.var', sep=""))      
       if(Rqualisup) doItAndPrint(paste( nom.res, '$quali.var.sup', sep=""))
       if(Rdescdim) doItAndPrint(paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -6687,10 +7493,10 @@ FactoAFDM<-function()
         doItAndPrint(paste('write.infile(', nom.res, '$ind.sup, file =',Fich,',append=',append,')', sep=""))
         append = TRUE
       }
-      if(Rquantisummary){
-        doItAndPrint(paste('write.infile(', nom.res, '$summary.quanti, file =',Fich,',append=',append,')', sep=""))
-        append = TRUE
-      }
+#      if(Rquantisummary){
+#        doItAndPrint(paste('write.infile(', nom.res, '$summary.quanti, file =',Fich,',append=',append,')', sep=""))
+#        append = TRUE
+#      }
       if(Rquanti){
         doItAndPrint(paste('write.infile(', nom.res, '$quanti.var, file =',Fich,',append=',append,')', sep=""))
         append = TRUE
@@ -6699,10 +7505,10 @@ FactoAFDM<-function()
         doItAndPrint(paste('write.infile(', nom.res, '$quanti.var.sup, file =',Fich,',append=',append,')', sep=""))
         append = TRUE
       }
-      if(Rqualisummary){
-        doItAndPrint(paste('write.infile(', nom.res, '$summary.quali, file =',Fich,',append=',append,')', sep=""))
-        append = TRUE
-      }
+#      if(Rqualisummary){
+#        doItAndPrint(paste('write.infile(', nom.res, '$summary.quali, file =',Fich,',append=',append,')', sep=""))
+#        append = TRUE
+#      }
       if(Rquali){
         doItAndPrint(paste('write.infile(', nom.res, '$quali.var, file =',Fich,',append=',append,')', sep=""))
         append = TRUE
@@ -6721,7 +7527,7 @@ FactoAFDM<-function()
   }
 
 
-    #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()
@@ -6777,10 +7583,10 @@ FactoAFDM<-function()
   resu.lab<-tklabel(OptionFrame,text=gettextRcmdr("Name of the result object: "))
   resu.val<-tclVar("res")
   resu<-tkentry(OptionFrame,width=10,textvariable=resu.val)
-  reduit.lab<-tklabel(OptionFrame,text=gettextRcmdr("Scale the quantative variables: "))
-  reduit.check <- tkcheckbutton(OptionFrame)
-  reduitValue <- tclVar("1")
-  tkconfigure(reduit.check,variable=reduitValue)
+#  reduit.lab<-tklabel(OptionFrame,text=gettextRcmdr("Scale the quantative variables: "))
+#  reduit.check <- tkcheckbutton(OptionFrame)
+#  reduitValue <- tclVar("1")
+#  tkconfigure(reduit.check,variable=reduitValue)
   ncp.lab<-tklabel(OptionFrame,text=gettextRcmdr("Number of dimensions: "))
   ncp.val<-tclVar("5") 
   ncp<-tkentry(OptionFrame,width=5,textvariable=ncp.val)
@@ -6793,12 +7599,14 @@ FactoAFDM<-function()
     # mise en page de OptionFrame
   tkgrid(tklabel(OptionFrame,text=gettextRcmdr("Main options"), fg = "darkred"), columnspan=8, sticky="we") 
   tkgrid(tklabel(OptionFrame,text="")) 
-  tkgrid(reduit.lab,reduit.check)
+#  tkgrid(reduit.lab,reduit.check)
   tkgrid(ncp.lab, ncp)
   tkgrid(Axe.label,Axe1.entry , Axe2.entry, sticky="w")
   tkgrid(resu.lab, resu)
-  tkgrid.configure(ncp.lab, reduit.lab, resu.lab, Axe.label, column=1, columnspan=4, sticky="w")
-  tkgrid.configure(ncp, resu, reduit.check, column=6, columnspan=2, sticky="e")
+# tkgrid.configure(ncp.lab, reduit.lab, resu.lab, Axe.label, column=1, columnspan=4, sticky="w")
+# tkgrid.configure(ncp, resu, reduit.check, column=6, columnspan=2, sticky="e")
+  tkgrid.configure(ncp.lab, resu.lab, Axe.label, column=1, columnspan=4, sticky="w")
+  tkgrid.configure(ncp, resu, column=6, columnspan=2, sticky="e")
   tkgrid.configure(Axe1.entry, column=6, columnspan=1, sticky="w")
   tkgrid.configure(Axe2.entry, column=7, columnspan=1, sticky="e")
   tkgrid.columnconfigure(OptionFrame,0, minsize=25)
@@ -7102,8 +7910,7 @@ FactoDMFA<-function()
     compteur.sortie<-0
     #déclaration des variables
     Rpropre<-FALSE
-    RRFichier <- ""
-    RFichier <- FALSE
+    RFichier <- ""
     Rgroupe<-FALSE
     Rindividu<-FALSE
     RXc<-FALSE
@@ -7162,11 +7969,8 @@ FactoDMFA<-function()
         if(tclvalue(descdimValue)=="1") assign("Rdescdim", TRUE, envir=env)
         else assign("Rdescdim", FALSE, envir=env)
         
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("RFichier", NULL, envir=env)
+        assign("RFichier", tclvalue(Fichier), envir=env)
 
         tkdestroy(SortieWin)
       
@@ -7238,11 +8042,11 @@ FactoDMFA<-function()
       else descdimValue<-tclVar("0")
       tkconfigure(descdim.check,variable=descdimValue)
 
-      Fichier.lab<-tklabel(SortieWin, text=gettextRcmdr("Print results on a 'csv' file"))
-        Fichier.check<-tkcheckbutton(SortieWin)
-        if(RFichier) FichierValue<-tclVar("1")
-        else FichierValue<-tclVar("0")
-        tkconfigure(Fichier.check,variable=FichierValue)
+      RFichierFrame<-tkframe(SortieWin,borderwidth=2)
+      if (is.null(RFichier)) Fichier <- tclVar("")
+      else Fichier<-tclVar(RFichier)
+      Fichier.entry <-tkentry(RFichierFrame,width="40",textvariable=Fichier)
+      tkgrid(tklabel(RFichierFrame,text=gettextRcmdr("Print results on a 'csv' file")),Fichier.entry)
 
       SortieOK.but<-tkbutton(SortieWin,text="OK",width=16,command=onOK.sortie)
 
@@ -7259,7 +8063,8 @@ FactoDMFA<-function()
       tkgrid(Xc.lab,Xc.check,sticky="w")
       tkgrid(descdim.lab,descdim.check,sticky="w")
       tkgrid(tklabel(SortieWin, text = " "))
-      tkgrid(Fichier.lab,Fichier.check,sticky="w")
+      tkgrid(RFichierFrame)
+      tkgrid(tklabel(SortieWin, text = " "))
       tkgrid(SortieOK.but)
    }
     
@@ -7280,12 +8085,12 @@ FactoDMFA<-function()
     Gchoix<-TRUE
     GTitle<-NULL
     GAxeGrpe<-c(1,2)
-    Glabel<-TRUE
+    Glabel<-"all"
         
     Rchoix<-TRUE
     RTitle<-NULL
-    Rlabel.indMoy<-TRUE
-    Rlabel.quali<-TRUE    
+    Rlabel.indMoy<-"ind"
+    Rlabel.quali<-NULL    
     Rhabillage<-"none"
     Rinvisible<-NULL
     RXlimInd<-NULL
@@ -7294,11 +8099,11 @@ FactoDMFA<-function()
     Wchoix=TRUE
     WTitle<-NULL
     WAxeVar<-c(1,2)
-    Wlabel.var<-TRUE
-    Wcol.quanti.sup<-Wcol.quanti.sup.tmp<-"blue"
-    Wcol.var<-Wcol.var.tmp<-"black"
-    Winvisible<-NULL
-    Wlim.cos<-0.
+    Wlabel.var<-"all"
+    #Wcol.quanti.sup<-Wcol.quanti.sup.tmp<-"blue"
+    #Wcol.var<-Wcol.var.tmp<-"black"
+    #Winvisible<-NULL
+    #Wlim.cos<-0.
     
         
     OnPlot<-function()
@@ -7324,8 +8129,8 @@ FactoDMFA<-function()
           assign("GTitle", tclvalue(GTitre), envir=env)
 
           label.tmp.grpe<-tclvalue(label.grpe.checkValue)
-          if(label.tmp.grpe==1) assign("Glabel", TRUE, envir=env)
-          else assign("Glabel", FALSE, envir=env)
+          if(label.tmp.grpe==1) assign("Glabel", "all", envir=env)
+          else assign("Glabel", "none", envir=env)
         }
                     
         # gestion des entrées de la partie graphique des variables
@@ -7336,17 +8141,17 @@ FactoDMFA<-function()
           if (tclvalue(WTitre)==" ") assign("WTitle", NULL, envir=env)
           assign("WTitle", tclvalue(WTitre), envir=env)
 
-          assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
+          #assign("Wlim.cos", tclvalue(WlimCosValue), envir=env)
 
           label.tmp.var<-tclvalue(label.var.checkValue)
-          if(label.tmp.var==1) assign("Wlabel.var", TRUE, envir=env)
-          else assign("Wlabel.var", FALSE, envir=env)
+          if(label.tmp.var==1) assign("Wlabel.var", "all", envir=env)
+          else assign("Wlabel.var", "none", envir=env)
 
-          assign("Wcol.var", Wcol.var.tmp, envir=env)
-          assign("Wcol.quanti.sup", Wcol.quanti.sup.tmp, envir=env)
+          #assign("Wcol.var", Wcol.var.tmp, envir=env)
+          #assign("Wcol.quanti.sup", Wcol.quanti.sup.tmp, envir=env)
 
-          if(tclvalue(inv.Value)=="aucun")  assign("Winvisible", NULL, envir=env)
-          else assign("Winvisible", tclvalue(inv.Value), envir=env)
+          #if(tclvalue(inv.Value)=="aucun")  assign("Winvisible", NULL, envir=env)
+          #else assign("Winvisible", tclvalue(inv.Value), envir=env)
         }
 
         # gestion des entrées de la partie graphique des individus
@@ -7359,10 +8164,10 @@ FactoDMFA<-function()
 
           label.tmp.indMoy<-tclvalue(label.indMoy.checkValue)
           label.tmp.quali<-tclvalue(label.quali.checkValue)
-          if(label.tmp.indMoy==1) assign("Rlabel.indMoy", TRUE, envir=env)
-          else assign("Rlabel.indMoy", FALSE, envir=env)
-          if(label.tmp.quali==1) assign("Rlabel.quali", TRUE, envir=env)
-          else assign("Rlabel.quali", FALSE, envir=env)
+          if(label.tmp.indMoy==1) assign("Rlabel.indMoy", "ind", envir=env)
+          else assign("Rlabel.indMoy", NULL, envir=env)
+          if(label.tmp.quali==1) assign("Rlabel.quali", "quali", envir=env)
+          else assign("Rlabel.quali", NULL, envir=env)
           
 ##          habillage.tmp<-listgraph.nom[as.numeric(tkcurselection(listgraph))+1]
 ##          if(length(habillage.tmp)==0) assign("Rhabillage","none", envir=env)
@@ -7406,7 +8211,7 @@ FactoDMFA<-function()
     
       GlabelFrame<-tkframe(PlotGrpeFrame,borderwidth=2)
       label.grpe.check<-tkcheckbutton(GlabelFrame)
-      if (Glabel) label.grpe.checkValue<-tclVar("1")
+      if (Glabel=="all") label.grpe.checkValue<-tclVar("1")
       else label.grpe.checkValue<-tclVar("0")
       tkconfigure(label.grpe.check, variable=label.grpe.checkValue)
       tkgrid(tklabel(GlabelFrame, text=gettextRcmdr("Draw labels of the groups")),label.grpe.check)
@@ -7436,64 +8241,64 @@ FactoDMFA<-function()
       WTitre.entry <-tkentry(WTitleFrame,width="40",textvariable=WTitre)
       tkgrid(tklabel(WTitleFrame,text=gettextRcmdr("Title of the graph")),WTitre.entry)
   
-      WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
-      WlimCosValue<-tclVar(paste(Wlim.cos))
-      WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)
-      tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)
+      #WcosFrame<-tkframe(PlotVarFrame,borderwidth=2)
+      #WlimCosValue<-tclVar(paste(Wlim.cos))
+      #WlimCos.entry<-tkentry(WcosFrame, width=5, textvariable=WlimCosValue)
+      #tkgrid(tklabel(WcosFrame,text=gettextRcmdr("Draw variables with a cos2 >:")),WlimCos.entry)
   
       WlabelFrame<-tkframe(PlotVarFrame,borderwidth=2)
       label.var.check<-tkcheckbutton(WlabelFrame)
-      if (Wlabel.var) label.var.checkValue<-tclVar("1")
+      if (Wlabel.var=="all") label.var.checkValue<-tclVar("1")
       else label.var.checkValue<-tclVar("0")
       tkconfigure(label.var.check, variable=label.var.checkValue)
       tkgrid(tklabel(WlabelFrame, text=gettextRcmdr("Draw the labels of the variables")),label.var.check)
       
-    WcolFrame<-tkframe(PlotVarFrame,borderwidth=2)
-    Wcol.var.value <- Wcol.var
-    Wcanvas.var <- tkcanvas(WcolFrame,width="80",height="25",bg=Wcol.var.value)
-    WChangeColor.var <- function()
-    {
-      Wcol.var.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Wcol.var.value,title=gettextRcmdr("Choose a color")))
-      if (nchar(Wcol.var.value)>0) {
-        tkconfigure(Wcanvas.var,bg=Wcol.var.value)
-        assign("Wcol.var.tmp", Wcol.var.value, envir=env)
-      }
-    }
-    WChangeColor.var.button <- tkbutton(WcolFrame,text=gettextRcmdr("Change Color"),command=WChangeColor.var)
-    tkgrid(tklabel(WcolFrame, text=gettextRcmdr("Color of the active variables")),Wcanvas.var,WChangeColor.var.button)
+#    WcolFrame<-tkframe(PlotVarFrame,borderwidth=2)
+#    Wcol.var.value <- Wcol.var
+#    Wcanvas.var <- tkcanvas(WcolFrame,width="80",height="25",bg=Wcol.var.value)
+#    WChangeColor.var <- function()
+#    {
+#      Wcol.var.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Wcol.var.value,title=gettextRcmdr("Choose a color")))
+#      if (nchar(Wcol.var.value)>0) {
+#        tkconfigure(Wcanvas.var,bg=Wcol.var.value)
+#        assign("Wcol.var.tmp", Wcol.var.value, envir=env)
+#      }
+#    }
+#    WChangeColor.var.button <- tkbutton(WcolFrame,text=gettextRcmdr("Change Color"),command=WChangeColor.var)
+#    tkgrid(tklabel(WcolFrame, text=gettextRcmdr("Color of the active variables")),Wcanvas.var,WChangeColor.var.button)
     
-    Wcol.quanti.sup.value<-Wcol.quanti.sup
-    Wcanvas.quanti.sup <- tkcanvas(WcolFrame,width="80",height="25",bg=Wcol.quanti.sup.value)
-    WChangeColor.quanti.sup <- function()
-    {
-      Wcol.quanti.sup.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Wcol.quanti.sup.value,title=gettextRcmdr("Choose a color")))
-      if (nchar(Wcol.quanti.sup.value)>0) {
-        tkconfigure(Wcanvas.quanti.sup,bg=Wcol.quanti.sup.value)
-        assign("Wcol.quanti.sup.tmp", Wcol.quanti.sup.value, envir=env)
-      }
-    }
-    WChangeColor.quanti.sup.button <- tkbutton(WcolFrame,text=gettextRcmdr("Change Color"),command=WChangeColor.quanti.sup)
-    if(!is.null(variableillu)) tkgrid(tklabel(WcolFrame, text=gettextRcmdr("color for supplementary variables")),Wcanvas.quanti.sup,WChangeColor.quanti.sup.button)
+#    Wcol.quanti.sup.value<-Wcol.quanti.sup
+#    Wcanvas.quanti.sup <- tkcanvas(WcolFrame,width="80",height="25",bg=Wcol.quanti.sup.value)
+#    WChangeColor.quanti.sup <- function()
+#    {
+#      Wcol.quanti.sup.value<-tclvalue(tcl("tk_chooseColor",initialcolor=Wcol.quanti.sup.value,title=gettextRcmdr("Choose a color")))
+#      if (nchar(Wcol.quanti.sup.value)>0) {
+#        tkconfigure(Wcanvas.quanti.sup,bg=Wcol.quanti.sup.value)
+#        assign("Wcol.quanti.sup.tmp", Wcol.quanti.sup.value, envir=env)
+#      }
+#    }
+#    WChangeColor.quanti.sup.button <- tkbutton(WcolFrame,text=gettextRcmdr("Change Color"),command=WChangeColor.quanti.sup)
+#    if(!is.null(variableillu)) tkgrid(tklabel(WcolFrame, text=gettextRcmdr("color for supplementary variables")),Wcanvas.quanti.sup,WChangeColor.quanti.sup.button)
          
-      WinvisibleFrame<-tkframe(PlotVarFrame,borderwidth=2)
-      inv.aucun.check<-tkradiobutton(WinvisibleFrame)
-      inv.act.check<-tkradiobutton(WinvisibleFrame)
-      inv.sup.check<-tkradiobutton(WinvisibleFrame)
-      if(is.null(Winvisible)) inv.Value<-tclVar("aucun")
-      else inv.Value<-tclVar(Winvisible) 
-      tkconfigure(inv.aucun.check,variable=inv.Value,value="aucun")
-      tkconfigure(inv.act.check,variable=inv.Value, value="actif")
-      tkconfigure(inv.sup.check,variable=inv.Value, value="sup")
-      tkgrid(tklabel(WinvisibleFrame, text=gettextRcmdr("Hide some elements:")), columnspan=6, sticky="w")
-      tkgrid(tklabel(WinvisibleFrame, text="None"),inv.aucun.check, tklabel(WinvisibleFrame, text=gettextRcmdr("active variables")),inv.act.check, tklabel(WinvisibleFrame, text=gettextRcmdr("supplementary variables")),inv.sup.check, sticky="w")
+#      WinvisibleFrame<-tkframe(PlotVarFrame,borderwidth=2)
+#      inv.aucun.check<-tkradiobutton(WinvisibleFrame)
+#      inv.act.check<-tkradiobutton(WinvisibleFrame)
+#      inv.sup.check<-tkradiobutton(WinvisibleFrame)
+#      if(is.null(Winvisible)) inv.Value<-tclVar("aucun")
+#      else inv.Value<-tclVar(Winvisible) 
+#      tkconfigure(inv.aucun.check,variable=inv.Value,value="aucun")
+#      tkconfigure(inv.act.check,variable=inv.Value, value="actif")
+#      tkconfigure(inv.sup.check,variable=inv.Value, value="sup")
+#      tkgrid(tklabel(WinvisibleFrame, text=gettextRcmdr("Hide some elements:")), columnspan=6, sticky="w")
+#      tkgrid(tklabel(WinvisibleFrame, text="None"),inv.aucun.check, tklabel(WinvisibleFrame, text=gettextRcmdr("active variables")),inv.act.check, tklabel(WinvisibleFrame, text=gettextRcmdr("supplementary variables")),inv.sup.check, sticky="w")
         
       #mise en page des différents frames de PlotVarFrame
       tkgrid(WchoixFrame)
       tkgrid(WTitleFrame)
-      tkgrid(WcolFrame)
-      tkgrid(WcosFrame)
+      #tkgrid(WcolFrame)
+      #tkgrid(WcosFrame)
       tkgrid(WlabelFrame)
-      tkgrid(WinvisibleFrame)            
+      #tkgrid(WinvisibleFrame)            
       tkgrid(tklabel(PlotVarFrame, text=" "))
         
       ##########################  
@@ -7516,13 +8321,13 @@ FactoDMFA<-function()
       
       RlabelFrame<-tkframe(PlotIndFrame,borderwidth=2)
       label.indMoy.check<-tkcheckbutton(RlabelFrame)
-      if (Rlabel.indMoy) label.indMoy.checkValue<-tclVar("1")
+      if (!is.null(Rlabel.indMoy)) label.indMoy.checkValue<-tclVar("1")
       else label.indMoy.checkValue<-tclVar("0") 
       tkconfigure(label.indMoy.check, variable=label.indMoy.checkValue)
       tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the mean individuals")),label.indMoy.check)
       label.quali.check<-tkcheckbutton(RlabelFrame)
-      if (Rlabel.quali) label.quali.checkValue<-tclVar("1")
-      else label.quali.checkValue<-tclVar("1")
+      if (!is.null(Rlabel.quali)) label.quali.checkValue<-tclVar("1")
+      else label.quali.checkValue<-tclVar("0")
       tkconfigure(label.quali.check, variable=label.quali.checkValue)
       if (!is.null(variablefact)) tkgrid(tklabel(RlabelFrame, text=gettextRcmdr("Draw labels for the qualitative variables")), label.quali.check)
               
@@ -7616,7 +8421,7 @@ FactoDMFA<-function()
 
 
 
-    #! fonction associer au bouton Appliquer, execute sans détruire l'interface graphique
+    #! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
   OnAppliquer<-function()
   {
       #liste de l'ensemble des variables créées
@@ -7670,7 +8475,7 @@ FactoDMFA<-function()
   
     # récupération des paramètres de la fenêtre principale
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     ncp<-as.numeric(tclvalue(ncp.val))
     reduction<-TRUE
     if(tclvalue(reduitValue)=="0") reduction<-FALSE
@@ -7702,7 +8507,7 @@ FactoDMFA<-function()
       donnee.depart<-activeDataSet()
       activeDataSet(paste(activeDataSet(),'.DMFA', sep=""))
 
-      # gestion de la commande réalisant l'AFM     
+      # gestion de la commande réalisant l'AFMD     
       commande.DMFA<-paste(nom.res, '<-DMFA(', activeDataSet(), ', num.fact=',length(variables)+1,', ncp=', ncp,', scale.unit = ', reduction,sep='')
       if(!is.null(individuillu)) commande.DMFA<-paste(commande.DMFA, ', ind.sup=', nrow(get(.activeDataSet))-length(individuillu)+1, ': ', nrow(get(.activeDataSet)),sep='')
       if (!is.null(variableillu)) commande.DMFA<-paste(commande.DMFA, ', quanti.sup =',length(variables)+2,':',length(variables)+1+length(variableillu),sep='')
@@ -7712,11 +8517,12 @@ FactoDMFA<-function()
       logger(commande.DMFA)
 
       #gestion des graphiques   
-      if (nom.res%in%ls(pos=1)) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
-      if((Gchoix)&(nom.res%in%ls(pos=1))){
+      if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
+      if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotG<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group"', sep='')
-        if (!Glabel) commande.plotG <- paste(commande.plotG,', label="none"', sep="")
+        commande.plotG<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group"', ',label="', Glabel,'"', sep='')
+#        if (!Glabel) commande.plotG <- paste(commande.plotG,', label="none"', sep="")
+#        else commande.plotG <- paste(commande.plotG,', label="', Glabel,'"', sep="")
         if (is.null(GTitle)) commande.plotG <- paste(commande.plotG,')', sep="")
         else {
           if (GTitle ==" ") commande.plotG <- paste(commande.plotG,')', sep="")
@@ -7726,9 +8532,13 @@ FactoDMFA<-function()
         logger(commande.plotG)
       }}
             
-      if((Wchoix)&(nom.res%in%ls(pos=1))&(length(variables)>0)){
+      if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)&(length(variables)>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var"', sep="")
+#        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel.var, collapse='", ")'), '"), lim.cos2.var=', Wlim.cos, sep="")
+#        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel.var, collapse='", ")'), '")', sep="")
+        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", label=c("', paste(Wlabel.var, collapse='", ")'), '")', sep="")        
+
+#        if (!is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')        
         if (is.null(WTitle)) commande.plotW <- paste(commande.plotW,')', sep="")
         else {
           if (WTitle ==" ") commande.plotW <- paste(commande.plotW,')', sep="")
@@ -7738,7 +8548,7 @@ FactoDMFA<-function()
         logger(commande.plotW)
       }}
       
-      if((Rchoix)&(nom.res%in%ls(pos=1))){
+      if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
         if ((Rhabillage!="none") & (Rhabillage!="ind")) {
           Rhabillage<-which(colnames(get(.activeDataSet))==Rhabillage)
@@ -7752,9 +8562,10 @@ FactoDMFA<-function()
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
-          if (Rlabel.indMoy&Rlabel.quali&!is.null(variablefact)) commande.DMFA<-paste(commande.DMFA, ', label = c("ind","quali")',sep='')
-          if (!Rlabel.indMoy&Rlabel.quali&!is.null(variablefact)) commande.DMFA<-paste(commande.DMFA, ', label = "quali"',sep='')
-          if (Rlabel.indMoy&(!Rlabel.quali|is.null(variablefact))) commande.DMFA<-paste(commande.DMFA, ', label = "ind"',sep='')
+          if (!is.null(Rlabel.indMoy) & !is.null(Rlabel.quali)) commande.plotI<-paste(commande.plotI, ', label = c("',Rlabel.indMoy, '","', Rlabel.quali,'")',sep='')
+          if (!is.null(Rlabel.indMoy) & is.null(Rlabel.quali)) commande.plotI<-paste(commande.plotI, ', label = c("',Rlabel.indMoy, '")',sep='')  
+          if (is.null(Rlabel.indMoy) & !is.null(Rlabel.quali)) commande.plotI<-paste(commande.plotI, ', label = c("',Rlabel.quali,'")',sep='')   
+          if (is.null(Rlabel.indMoy) & is.null(Rlabel.quali)) commande.plotI<-paste(commande.plotI, ', label = "none"',sep='')                          
           if (is.null(RTitle)) commande.plotI <- paste(commande.plotI,')', sep="")
           else {
             if (RTitle ==" ") commande.plotI <- paste(commande.plotI,')', sep="")
@@ -7766,7 +8577,7 @@ FactoDMFA<-function()
       }
       
       # gestion de l'édition de certains resultats
-    if (!RFichier){
+    if (RFichier==""){
       if(Rpropre) doItAndPrint(paste(nom.res, '$eig', sep=""))
       if(Rgroupe) doItAndPrint(paste(nom.res, '$group', sep=""))
       if(Rindividu) doItAndPrint(paste(nom.res, '$ind', sep=""))
@@ -7779,10 +8590,9 @@ FactoDMFA<-function()
       if(Rdescdim) doItAndPrint(paste('dimdesc(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '))', sep=""))
     }
     else {
-      Fich = RRFichier
-      Fich = paste('"',Fich,sep='')
-      if (substr(Fich,nchar(Fich)-3,nchar(Fich))!='.csv') Fich = paste(Fich,'.csv',sep='')
-      Fich = paste(Fich,'"',sep='')
+      Fich = RFichier
+      if (substr(Fich,1,1)!='"') Fich = paste('"',Fich,sep='')
+      if (substr(Fich,nchar(Fich),nchar(Fich))!='"') Fich = paste(Fich,'"',sep='')
       append = FALSE
       if(Rpropre){
         doItAndPrint(paste('write.infile(', nom.res, '$eig, file =',Fich,',append=',append,')', sep=""))
@@ -7830,7 +8640,7 @@ FactoDMFA<-function()
   }
 
 
-    #! fonction associer au bouton OK, execute et détruit l'interface graphique
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()
@@ -8838,6 +9648,133 @@ tkgrid(AnalyseFrame, sticky="n",column=1)
   }
 }
 
+  #! fonction HCPC
+  
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
+  {
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))    
+    compteur.hcpc<-0
+    Rclassif<-0
+    Rmeth <- -1
+    Rconsolid<-0 
+    Rgraphhcpc<-0  
+    Rreshcpc<-0
+    Rminhcpc<-3
+    Rmaxhcpc<-10
+
+    OnHCPC <- function()
+    {
+
+      HcpcWin<-tktoplevel()
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))
+
+      onOKHcpc <- function()
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env) 
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+      
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)
+        else assign("Rmeth", -1, envir=env)
+        
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)
+        else assign("Rconsolid",FALSE,envir=env)
+        
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)
+        else assign("Rgraphhcpc",FALSE,envir=env)
+        
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)
+        else assign("Rreshcpc",FALSE,envir=env)        
+        
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)
+        
+        assign("Rclassif",TRUE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)
+
+      onCancelHcpc <- function()
+      {
+        assign("Rclassif",FALSE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)
+ 
+      tkgrid(tklabel(HcpcWin, text=""))
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")      
+
+      meth1 <- tkradiobutton (HcpcWin)
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcWin)
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("interactive")
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="interactive")
+      tkconfigure(meth2,variable=methValue,value="automatic")
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcWin)
+      if(Rconsolid) consolidValue<-tclVar("1")
+      else consolidValue<-tclVar("0")      
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)   
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))
+      reshcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rreshcpc) reshcpcValue<-tclVar("1")
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)          
+    
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the HMFA',sep=""))),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=""))  
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcWin,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check)
+      tkgrid(reshcpc.lab,reshcpc.check) 
+      tkgrid(tklabel(HcpcWin,text=""))     
+      tkgrid(OKHcpc.but, CancelHcpc.but)
+      tkgrid(tklabel(HcpcWin, text=""))
+      
+      tkgrid.configure(minmaxhcpc.label,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,column=6,columnspan=2,sticky="w") 
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3) 
+
+}      
+    Hcpc2Frame<-tkframe(HcpcFrame)
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)
+    tkgrid(Hcpc.but, sticky="ew")
+}) 
+
   OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
   resu.lab<-tklabel(OptionFrame,text=gettextRcmdr("Name of the result object: "))
   resu.val<-tclVar("res")
@@ -8871,10 +9808,18 @@ tkgrid(AnalyseFrame, sticky="n",column=1)
   tkgrid.columnconfigure(OptionFrame,8, minsize=25)
 ################################################################
 
+  #Frame pour HCPC
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after HMFA"), firstLabel=gettextRcmdr("Perform Clustering after HMFA")) 
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
+  
+#################################################################  
+
 Analyse.funct<-function(){
     Htype<-as.vector(Htype)
     nom.res<-tclvalue(resu.val)
-    if (nom.res%in%ls(pos=1)) justDoIt(paste('remove (',nom.res,')'))
+    if (length(ls(pat=nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     Sgraph<-FALSE
     if(tclvalue(graphValue)=="1") Sgraph<-TRUE
     Sncp<-as.numeric(tclvalue(ncp.val))
@@ -8937,6 +9882,23 @@ Analyse.funct<-function(){
     justDoIt(paste('remove(',activeDataSet(),'.HMFA)',sep=""))
     logger(paste('remove(',activeDataSet(),'.HMFA)',sep=""))
 
+
+   #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)      
+      if(Rreshcpc==TRUE){
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }        
+    }
+
+
+
     if (Sfichier==""){
       if(Seig) doItAndPrint(paste( nom.res, '$eig', sep=""))
       if(Sgroup) doItAndPrint(paste( nom.res, '$group', sep=""))
@@ -8979,6 +9941,14 @@ Analyse.funct<-function(){
     }
 
 }
+
+    #! fonction associée au bouton OK, execute et détruit l'interface graphique
+  onOK<-function()
+  {
+    Analyse.funct()
+    # destuction de la fenêtre Top
+    closeDialog(top)
+  }
 
 ################################################################
 Reinitializ.funct<-function(){
@@ -9050,11 +10020,8 @@ Groupe2.Lab<-tklabel(LabelFrame, text = gettextRcmdr("Select one group for the 3
         if(tclvalue(descdim.Value)=="1") assign("Sdescdim", TRUE, envir=env)
         else assign("Sdescdim", FALSE, envir=env)
         
-        if (tclvalue(FichierValue)=="1"){
-          assign("RFichier", TRUE, envir=env)
-          assign("RRFichier", tclvalue(tkgetSaveFile()), envir=env)
-        }
-        else assign("RFichier", FALSE, envir=env)
+        if (tclvalue(Fichier)=="") assign("Sfichier", NULL, envir=env)
+        assign("Sfichier", tclvalue(Fichier), envir=env)
         
         tkdestroy(SortieWin)      
       }
@@ -9120,6 +10087,7 @@ Groupe2.Lab<-tklabel(LabelFrame, text = gettextRcmdr("Select one group for the 3
         tkgrid(descdim.lab,descdim.check,sticky="w")
         tkgrid(tklabel(SortieWin, text = " "))
         tkgrid(SfichierFrame)
+        tkgrid(tklabel(SortieWin, text = " "))
         tkgrid(SortieOK.but)
    }
     
@@ -9134,6 +10102,7 @@ Groupe2.Lab<-tklabel(LabelFrame, text = gettextRcmdr("Select one group for the 3
 ValideGroupe1.but <- tkbutton(ValidFrame,text=gettextRcmdr("Valid the group"),command=ValideGroupe1.funct, borderwidth=3)
 Next.but <- tkbutton(NextFrame,text=gettextRcmdr("Next level of the hierarchy"),command=Next.funct, borderwidth=3)
 Analyse.but <- tkbutton(AnalyseFrame,text=gettextRcmdr("Run the HMFA"),command=Analyse.funct, borderwidth=3)
+OKCancelHelp(helpSubject="HMFA")
 Reinitializ.but <- tkbutton(BoutonFrame,text=gettextRcmdr("Restart"),command=Reinitializ.funct)
 ##tkgrid(ValideGroupe1.but)
 tkgrid(Next.but)
@@ -9246,9 +10215,259 @@ tkgrid(ligneB)
 tkgrid(ValidFrame, sticky = "n",column=1)
 tkgrid(NextFrame, sticky = "n",column=1)
 tkgrid(ligneB)
+tkgrid(tklabel(top,text=""))
 tkgrid(OptionFrame, sticky = "n",column=1)
+tkgrid(tklabel(top,text=""))
+tkgrid(HcpcFrame, column=1, columnspan=1)
+tkgrid(tklabel(top,text=""))
 tkgrid(BasFrame, sticky = "n",column=1)
 tkgrid(AnalyseFrame, sticky = "n",column=1)
+tkgrid(tklabel(top,text=""))
+tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )
+tkgrid(tklabel(top,text="")) # Ligne de blanc
 }
 ################################### Fin fonction HMFA##################
 
+#######################################################################
+################        Fonction FactoHCPC             ################
+
+FactoHCPC<-function(){
+    require(tcltk)
+    require(FactoMineR)
+    top<-tktoplevel(borderwidth=5)
+    tkwm.title(top,"HCPC")
+
+# définition des polices
+  font2<-tkfont.create(family="times",size=12,weight="bold")
+  fontheading<-tkfont.create(family="times",size=13,weight="bold")
+
+recupres<-function(envir = .GlobalEnv, ...){
+    classres <- ls(envir = envir, all.names = TRUE)
+    if (length(classres) == 0) 
+        return(classres)
+    names(which(sapply(classres, function(.x) inherits(get(.x, 
+        envir = envir),c("PCA","CA","MCA","MFA","HMFA")))))
+}
+      
+tousres<-c(listDataSets(),recupres())
+  
+if (length(which(sapply(ls(envir = .GlobalEnv, all.names = TRUE),function(.x) inherits(get(.x,envir= .GlobalEnv),"CA"))))>0)
+  resca<-TRUE 
+else resca<-FALSE
+
+
+objintFrame <- tkframe(top)
+    listobjint<-tklistbox(objintFrame,selectmode="single",exportselection=FALSE,yscrollcommand=function(...) tkset(scr,...))
+    scr <- tkscrollbar(objintFrame,repeatinterval=5,command=function(...)tkyview(listobjint,...))
+    for (i in (1:length(tousres))){
+        tkinsert(listobjint,"end",tousres[i])
+    }
+    tkselection.set(listobjint,0)
+    tkgrid(tklabel(objintFrame, text = "Select an object", fg = "blue"), columnspan = 1, sticky = "w")    
+    tkgrid(listobjint, scr,sticky = "nw")
+    tkgrid.configure(scr, sticky = "wns")
+    tkgrid.configure(listobjint,sticky = "ew")
+    tkselection.set(listobjint,0)  
+
+
+HcpcFrame<-tkframe(top,relief="ridge",borderwidth=2)   
+ 
+      tkgrid(tklabel(HcpcFrame, text = gettextRcmdr("Main options"), fg = "blue"), column=1, sticky = "w")      
+
+      if(resca==TRUE){
+        lignes <- tkradiobutton (HcpcFrame)
+        lignes.lab <- tklabel(HcpcFrame,text=gettextRcmdr("rows"))
+        colonnes <- tkradiobutton (HcpcFrame)
+        colonnes.lab <- tklabel(HcpcFrame,text=gettextRcmdr("columns"))
+      }
+      else{
+        lignes <- tkradiobutton (HcpcFrame,state="disabled")
+        lignes.lab <- tklabel(HcpcFrame,text=gettextRcmdr("rows"))
+        colonnes <- tkradiobutton (HcpcFrame,state="disabled")
+        colonnes.lab <- tklabel(HcpcFrame,text=gettextRcmdr("columns"))
+      }      
+      classifCAValue <- tclVar("rows")
+      classifCA.lab <- tklabel(HcpcFrame,text=gettextRcmdr("For the result of a CA, perform clustering on: "))
+      tkconfigure(lignes,variable=classifCAValue,value="rows")
+      tkconfigure(colonnes,variable=classifCAValue,value="columns")      
+      
+      meth1 <- tkradiobutton (HcpcFrame)
+      meth1.lab <- tklabel(HcpcFrame,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcFrame)
+      meth2.lab <- tklabel(HcpcFrame,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("0")
+      meth.lab <- tklabel(HcpcFrame,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="0")
+      tkconfigure(meth2,variable=methValue,value="-1")
+      
+      minmaxhcpc.label<-tklabel(HcpcFrame,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcFrame,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcFrame,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcFrame,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcFrame)
+      consolidValue<-tclVar("0")    
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcFrame,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcFrame)
+      graphhcpcValue <- tclVar("1")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue) 
+      
+      resu.val<-tclVar("results")
+      resu<-tkentry(HcpcFrame,width=6,textvariable=resu.val)
+      resu.lab<-tklabel(HcpcFrame,text="Keep the results in: ")                 
+
+      tkgrid(classifCA.lab,lignes.lab,lignes)
+      tkgrid(colonnes.lab,colonnes) 
+      tkgrid(tklabel(HcpcFrame,text=""))           
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcFrame,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcFrame,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check) 
+      tkgrid(resu.lab,resu)
+      tkgrid(tklabel(HcpcFrame,text=""))     
+      
+      tkgrid.configure(minmaxhcpc.label,meth.lab,classifCA.lab,consolid.lab,graphhcpc.lab,resu.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(meth1,meth2,lignes,colonnes,consolid.check,graphhcpc.check,column=8,sticky="w")
+      tkgrid.configure(meth1.lab,lignes.lab,column=7,columnspan=1,sticky="w")
+      tkgrid.configure(meth2.lab,colonnes.lab,column=7,columnspan=1,sticky="w") 
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(resu,column=8,columnspan=1,sticky="w")
+      
+      tkgrid.columnconfigure(HcpcFrame,0, minsize=5)
+      tkgrid.columnconfigure(HcpcFrame,5, minsize=5)
+      tkgrid.columnconfigure(HcpcFrame,8, minsize=5) 
+
+#Fonction outputs
+    env<-environment()
+    Gclust <- TRUE
+    Gdescvar <- TRUE
+    Gdescaxes <- TRUE
+    Gdescind <- TRUE
+
+    OnHCPCSorties<-function()
+    {
+      SortiesWin<- tktoplevel()
+      tkwm.title(SortiesWin, gettextRcmdr("Outputs options"))
+
+      onOKSorties<-function()
+      {
+        if(tclvalue(clust.bool)=="1") assign("Gclust", TRUE, envir=env)
+        else assign("Gclust", FALSE, envir=env)
+        
+        if(tclvalue(descvar.bool)=="1") assign("Gdescvar", TRUE, envir=env)
+        else assign("Gdescvar", FALSE, envir=env)
+        
+        if(tclvalue(descaxes.bool)=="1") assign("Gdescaxes", TRUE, envir=env)
+        else assign("Gdescaxes", FALSE, envir=env)
+        
+        if(tclvalue(descind.bool)=="1") assign("Gdescind", TRUE, envir=env)
+        else assign("Gdescind", FALSE, envir=env)        
+
+        tkdestroy(SortiesWin)
+      }
+      OKSorties.but<-tkbutton(SortiesWin, text="OK", width=8,command=onOKSorties)
+
+      tkgrid(tklabel(SortiesWin, text=""))
+      tkgrid(tklabel(SortiesWin, text = gettextRcmdr("Select outputs options"), fg = "red",font=font2), column=1, columnspan = 8, sticky = "w")
+
+      clust.lab <- tklabel(SortiesWin,text=gettextRcmdr("Print clusters individuals belong to "))
+      clust.check <- tkcheckbutton(SortiesWin)
+      if(Gclust) clust.bool<-tclVar("1")
+      else clust.bool<-tclVar("0")      
+      tkconfigure(clust.check,variable=clust.bool)
+      
+      descvar.lab <- tklabel(SortiesWin,text=gettextRcmdr("Print description of clusters by continuous variables "))
+      descvar.check <- tkcheckbutton(SortiesWin)
+      if(Gdescvar) descvar.bool<-tclVar("1")
+      else descvar.bool<-tclVar("0")      
+      tkconfigure(descvar.check,variable=descvar.bool)
+      
+      descaxes.lab <- tklabel(SortiesWin,text=gettextRcmdr("Print description of clusters by factors"))
+      descaxes.check <- tkcheckbutton(SortiesWin)
+      if(Gdescaxes) descaxes.bool<-tclVar("1")
+      else descaxes.bool<-tclVar("0")      
+      tkconfigure(descaxes.check,variable=descaxes.bool)
+      
+      descind.lab <- tklabel(SortiesWin,text=gettextRcmdr("Print parangons and most typical individuals for each cluster"))
+      descind.check <- tkcheckbutton(SortiesWin)
+      if(Gdescind) descind.bool<-tclVar("1")
+      else descind.bool<-tclVar("0")      
+      tkconfigure(descind.check,variable=descind.bool)                  
+
+      tkgrid(tklabel(SortiesWin,text=""))
+      tkgrid(clust.lab,clust.check)
+      tkgrid(descvar.lab,descvar.check)
+      tkgrid(descaxes.lab,descaxes.check)
+      tkgrid(descind.lab,descind.check)
+      tkgrid(tklabel(SortiesWin,text=""))     
+      tkgrid(OKSorties.but)
+      tkgrid(tklabel(SortiesWin,text=""))
+      tkfocus(SortiesWin)
+      
+      tkgrid.configure(clust.lab,descvar.lab,descaxes.lab,descind.lab,column=1,sticky="w")
+      tkgrid.configure(clust.check,descvar.check,descaxes.check,descind.check,column=8,sticky="w")
+      tkgrid.configure(OKSorties.but,column=4,columnspan=2)
+    }
+    
+    #SortiesFrame<-tkframe(HcpcFrame)
+    HcpcSorties.but<-tkbutton(HcpcFrame, text="Outputs", command=OnHCPCSorties, width=13,fg="darkred")
+    tkgrid(HcpcSorties.but)
+    tkgrid.configure(HcpcSorties.but, column=8, columnspan=1,sticky="w")
+    
+
+#Fonction qui lance l'HCPC
+ App<-function(){
+    objint<-c(tclvalue(tkcurselection(listobjint)))
+    obj<-tousres[as.numeric(tkcurselection(listobjint))+1]
+    resultat<-tclvalue(resu.val)
+    done = 1 
+    
+    commande.hcpc<-paste(resultat, '<-HCPC(', obj, ' ,nb.clust=', tclvalue(methValue), ',consol=', tclvalue(consolidValue),',min=', as.numeric(tclvalue(minhcpc)),',max=',as.numeric(tclvalue(maxhcpc)),',cluster.CA="',tclvalue(classifCAValue),'",graph=', tclvalue(graphhcpcValue), ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc) 
+    
+    if(Gclust) doItAndPrint(paste(resultat,'$data.clust[,ncol(',resultat,'$data.clust),drop=F]', sep=""))     
+    if(Gdescvar) doItAndPrint(paste(resultat,'$desc.var', sep=""))
+    if(Gdescaxes) doItAndPrint(paste(resultat,'$desc.axes', sep=""))
+    if(Gdescind) doItAndPrint(paste(resultat,'$desc.ind', sep=""))
+
+    return(done)
+ }
+ 
+# Fonction principale qui lance HCPC et ferme la fenêtre------------------------------------------------------------------------------------------------------------
+onOK <- function(){
+  done = App()
+  if (done >0) tkdestroy(top)
+}
+
+ 
+#Mise en place des frames
+App.but <- tkbutton(top,borderwidth=3,width=12,text="Submit",command=App,fg="blue")
+OKCancelHelp(helpSubject="HCPC")
+titre<-tklabel(top, text=gettextRcmdr("Hierarchical Clustering on Principal Components (HCPC)"),font=fontheading)
+tkgrid.configure(titre,column=1,columnspan=3)
+tkgrid(tklabel(top,text=""))
+tkgrid(objintFrame,HcpcFrame,sticky="w")
+tkgrid.configure(objintFrame,column=1,columnspan=1,sticky="w")
+tkgrid.configure(HcpcFrame,column=2,columnspan=2,sticky="w")
+tkgrid(tklabel(top,text="")) 
+tkgrid(App.but)
+tkgrid.configure(App.but,column=1,columnspan=1,sticky="w")
+tkgrid(tklabel(top,text=""))
+tkgrid(buttonsFrame)
+tkgrid.configure(buttonsFrame, column=1,columnspan=2)
+tkfocus(top)
+
+tkgrid.columnconfigure(top,0, minsize=10)
+tkgrid.columnconfigure(top,8, minsize=10) 
+      
+}      
+######################### Fin fonction FactoHCPC #####################################

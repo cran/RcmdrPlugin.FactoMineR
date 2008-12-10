@@ -5,7 +5,7 @@
 \title{
 Graphical User Interface for FactoMineR}
 \description{
-FactoMineR Plugin
+FactoMineR "plug-in"
 }
 \details{
 \tabular{ll}{
