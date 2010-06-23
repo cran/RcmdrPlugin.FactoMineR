@@ -9,4 +9,5 @@
     item    FactoMineRMenu       command         "General Procrustes Analysis (GPA)"               FactoGPA                   "numericP(2)"          ""
     item    FactoMineRMenu       command         "Scatter plot with additional variables"               Factoprefpls                   "numericP(2)"          ""
     item    FactoMineRMenu       command         "Description of categories"                 Factocatdes                "factorsP()"          ""
+    item    FactoMineRMenu       command         "Hierarchical Clustering on Principal Components (HCPC)"                 FactoHCPC                "numericP() || factorsP()"          ""
     item    topMenu              cascade         "FactoMineR"                                FactoMineRMenu             ""          ""
