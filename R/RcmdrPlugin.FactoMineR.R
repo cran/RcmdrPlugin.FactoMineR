@@ -1122,7 +1122,7 @@ FactoPCA<-function()                                                            
       if (Rhabillage=="none") Rhabillage<-paste('"', Rhabillage, '"', sep="")
       if (Rhabillage=="ind") Rhabillage<-paste('"', Rhabillage, '"', sep="")
 
-      commande.plotInd<-paste('plot.PCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", habillage=', Rhabillage, ', col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.quali="', Rcol.quali, '", label=c("', paste(Rlabel, collapse='", "'), '")', sep="")
+      commande.plotInd<-paste('plot.PCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", habillage=', Rhabillage, ', col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.quali="', Rcol.quali, '", label=c("', paste(Rlabel, collapse='", "'), '",new.plot=TRUE)', sep="")
       if (!is.null(RXlimInd)) commande.plotInd<-paste(commande.plotInd, ', xlim=c(', paste(RXlimInd, collapse=", "), ')')
       if (!is.null(RYlimInd)) commande.plotInd<-paste(commande.plotInd, ', ylim=c(', paste(RYlimInd, collapse=", "), ')')
       if (!is.null(Rinvisible)) commande.plotInd<-paste(commande.plotInd, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -1138,7 +1138,7 @@ FactoPCA<-function()                                                            
 
     if((Wchoix)&length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0){  #command for the graph of variables
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotVar<-paste('plot.PCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel, collapse='", "'), '"), lim.cos2.var=', Wlim.cos, sep="")
+      commande.plotVar<-paste('plot.PCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", new.plot=TRUE, col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel, collapse='", "'), '"), lim.cos2.var=', Wlim.cos, sep="")
       if (is.null(WTitle)) commande.plotVar <- paste(commande.plotVar,')', sep="")
       else {
         if (WTitle ==" ") commande.plotVar <- paste(commande.plotVar,')', sep="")
@@ -1272,7 +1272,7 @@ FactoPCA<-function()                                                            
   reduit.check <- tkcheckbutton(OptionFrame)                                      #checkbutton
   reduitValue <- tclVar("1")                                                      #default value
   tkconfigure(reduit.check,variable=reduitValue)                                  #configuration
-  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:")) #label for axes
+  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions")) #label for axes
   Axe1<-tclVar("1")                                                               #default value for first axes
   Axe2<-tclVar("2")                                                               #default value for second axes
   Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)                   #entry for first axes
@@ -2205,7 +2205,7 @@ FactoCA<-function()
   ncp.lab<-tklabel(OptionFrame,text=gettextRcmdr("Number of dimensions: "))
   ncp.val<-tclVar("5") 
   ncp<-tkentry(OptionFrame,width=5,textvariable=ncp.val)
-  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:"))
+  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions"))
   Axe1<-tclVar("1")
   Axe2<-tclVar("2")
   Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)
@@ -3260,7 +3260,7 @@ onOK <- function(){
     if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
     if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.var="', Rcol.quali, '", col.quali.sup="', Rcol.qualisup, '", label=c("', paste(Rlabel, collapse='", "'), '"), invisible=c("', paste(Rinvis, collapse='", "'), '")', sep="")
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.ind="', Rcol.ind, '", col.ind.sup="', Rcol.ind.sup, '", col.var="', Rcol.quali, '", col.quali.sup="', Rcol.qualisup, '", label=c("', paste(Rlabel, collapse='", "'), '"), invisible=c("', paste(Rinvis, collapse='", "'), '", new.plot=TRUE)', sep="")
       if (!is.null(RTitle)) {
         if (RTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', RTitle,'"', sep="")
       }
@@ -3273,7 +3273,7 @@ onOK <- function(){
 
     if((Vchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="',Vcol.var,'", col.quali.sup="',Vcol.quali.sup,'", label=c("', paste(Vlabel, collapse='", "'), '"), invisible=c("', paste(Vinvis, collapse='", "'), '")', sep="")
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="',Vcol.var,'", col.quali.sup="',Vcol.quali.sup,'", label=c("', paste(Vlabel, collapse='", "'), '"), invisible=c("', paste(Vinvis, collapse='", "'), '", new.plot=TRUE)', sep="")
       if (!is.null(VTitle)) {
         if (VTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', VTitle,'"', sep="")
       }
@@ -3284,7 +3284,7 @@ onOK <- function(){
 
     if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="quanti.sup", col.quanti.sup="',Wcol.quanti.sup,'"',', label=c("', paste(Wlabel, collapse='", "'),'")', sep="")
+      commande.plotInd<-paste('plot.MCA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="quanti.sup", col.quanti.sup="',Wcol.quanti.sup,'"',', label=c("', paste(Wlabel, collapse='", "'),'", new.plot=TRUE)', sep="")
       if (!is.null(WTitle)) {
         if (WTitle !=" ") commande.plotInd <- paste(commande.plotInd,', title="', WTitle,'"', sep="")
       }
@@ -3402,7 +3402,7 @@ onOK <- function(){
   ncp.lab<-tklabel(OptionFrame,text=gettextRcmdr("Number of dimensions: "))
   ncp.val<-tclVar("5")
   ncp<-tkentry(OptionFrame,width=5,textvariable=ncp.val)
-  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:"))
+  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions"))
   Axe1<-tclVar("1")
   Axe2<-tclVar("2")
   Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)
@@ -3607,7 +3607,7 @@ FactoMFA<-function()
       tkgrid(tklabel(AjoutGpeQuantiWin, text=""))      
       tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Status of the group:")), tklabel(AjoutGpeQuantiWin, text="Active"),etat.actif.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Supplementary")),etat.illu.check, sticky="w")
       tkgrid(tklabel(AjoutGpeQuantiWin, text=""))      
-      tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Scaled the variable of the group:")), tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Yes")),norm.ok.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("No")),norm.nok.check, sticky="w")
+      tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Scale the variable of the group:")), tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Yes")),norm.ok.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("No")),norm.nok.check, sticky="w")
       tkgrid(tklabel(AjoutGpeQuantiWin, text=""))
       tkgrid(tklabel(AjoutGpeQuantiWin, text = gettextRcmdr("Select the variables for the group"), fg = "blue"), column=0, columnspan = 5, sticky = "w")
       tkgrid(listVarQuanti, scrVarQuanti, sticky = "nw")
@@ -3732,7 +3732,7 @@ FactoMFA<-function()
       tkgrid(tklabel(ModifGpeQuantiWin, text=""))      
       tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Status of the group:")), tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Active")),etatModif.actif.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Supplementary")),etatModif.illu.check, sticky="w")
       tkgrid(tklabel(ModifGpeQuantiWin, text=""))      
-      tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Scaled the variables of the group:")), tklabel(ModifGpeQuantiWin, text="Yes"),normModif.ok.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("No")),normModif.nok.check, sticky="w")
+      tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Scale the variables of the group:")), tklabel(ModifGpeQuantiWin, text="Yes"),normModif.ok.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("No")),normModif.nok.check, sticky="w")
       tkgrid(tklabel(ModifGpeQuantiWin, text=""))
       tkgrid(tklabel(ModifGpeQuantiWin, text = gettextRcmdr("Select the variables of the group"), fg = "blue"), column=0, columnspan = 5, sticky = "w")
       tkgrid(listModifVarQuanti, scrModifVarQuanti, sticky = "nw")
@@ -5006,7 +5006,7 @@ FactoMFA<-function()
       if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
       if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotG<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", lab.grpe=', Glabel, sep="")
+        commande.plotG<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", new.plot=TRUE, lab.grpe=', Glabel, sep="")
         if (is.null(GTitle)) commande.plotG <- paste(commande.plotG,')', sep="")
         else {
           if (GTitle ==" ") commande.plotG <- paste(commande.plotG,')', sep="")
@@ -5018,7 +5018,7 @@ FactoMFA<-function()
       
       if((Achoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotA<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="axes", habillage="', Ahabillage, '"', sep="")
+        commande.plotA<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="axes", new.plot=TRUE, habillage="', Ahabillage, '"', sep="")
         if (is.null(ATitle)) commande.plotA <- paste(commande.plotA,')', sep="")
         else {
           if (ATitle ==" ") commande.plotA <- paste(commande.plotA,')', sep="")
@@ -5030,7 +5030,7 @@ FactoMFA<-function()
       
       if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)&(nb.GQI+nb.GQA>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotW<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", lab.var=', Wlabel.var, ', habillage="', Whabillage, '", lim.cos2.var=', Wlim.cos, sep="")
+        commande.plotW<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", new.plot=TRUE, lab.var=', Wlabel.var, ', habillage="', Whabillage, '", lim.cos2.var=', Wlim.cos, sep="")
         if (!is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')
         if (is.null(WTitle)) commande.plotW <- paste(commande.plotW,')', sep="")
         else {
@@ -5052,7 +5052,7 @@ FactoMFA<-function()
         if (Rhabillage=="group") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
         if(RpartialSouris){
-          commande.plotI<-paste('plot.MFApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="")
+          commande.plotI<-paste('plotMFApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="")
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -5064,7 +5064,7 @@ FactoMFA<-function()
           }
         }
         else {
-          commande.plotI<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="") 
+          commande.plotI<-paste('plot.MFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", new.plot=TRUE, lab.ind.moy=', Rlabel.indMoy, ', lab.par=', Rlabel.indPar, ', lab.var=', Rlabel.quali,', habillage=', Rhabillage, sep="") 
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -5933,9 +5933,12 @@ FactoGPA<-function()
       name.group<-c(name.group, listQuantiAct.nom)
       for(i in 1:nb.GQA) {
         eval(parse(text=paste("liste.var.GQA<-", listQuantiAct.nom[i], ".var", sep="")))
-        group<-c(group, length(liste.var.GQA)-1)
         type<-c(type,liste.var.GQA[1])
-        variables<-c(variables, liste.var.GQA[-1])
+## modif 7 juin
+##        variables<-c(variables, liste.var.GQA[-1])
+##        group<-c(group, length(liste.var.GQA)-1)
+        group<-c(group, length(liste.var.GQA))
+        variables<-c(variables, liste.var.GQA)
         indice.grpe<-indice.grpe+1
       }
     }
@@ -5966,7 +5969,7 @@ FactoGPA<-function()
         if (Rhabillage=="group") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
         if(RpartialSouris){
-          commande.plotI<-paste('plot.GPApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', habillage=', Rhabillage, sep="")
+          commande.plotI<-paste('plotGPApartial(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), lab.ind.moy=', Rlabel.indMoy, ', habillage=', Rhabillage, sep="")
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')')
           if (Rchrono) commande.plotI<-paste(commande.plotI, ', chrono=', Rchrono, sep='')
@@ -7362,30 +7365,31 @@ FactoAFDM<-function()
       # gestion de la commande réalisant l'AFM     
       commande.AFDM<-paste(nom.res, '<-AFDM(', activeDataSet(),sep='')
       if(!is.null(individuillu)) commande.AFDM<-paste(commande.AFDM, ', ind.sup=', nrow(get(.activeDataSet))-length(individuillu)+1, ': ', nrow(get(.activeDataSet)),sep='')
-#      commande.AFDM<-paste(commande.AFDM, ', type=c(',sep='')
-#      if (!is.null(variables)){
-#        if (reduction) commande.AFDM<-paste(commande.AFDM, 'rep("s",',length(variables),')',sep='')
-#        else commande.AFDM<-paste(commande.AFDM, 'rep("c",',length(variables),')',sep='')
-#        if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, ', ',sep='')
-#      }
-#      if (!is.null(variables.q)) commande.AFDM<-paste(commande.AFDM, 'rep("n",',length(variables.q),')',sep='')
-#      if (!is.null(variableillu)){
-#        if (reduction) commande.AFDM<-paste(commande.AFDM, ', rep("s",',length(variableillu),')',sep='')
-#        else commande.AFDM<-paste(commande.AFDM, ', rep("c",',length(variableillu),')',sep='')
-#      }
-#      if (!is.null(variablefact)) commande.AFDM<-paste(commande.AFDM, ', rep("n",',length(variablefact),')',sep='')
-#      else commande.AFDM<-paste(commande.AFDM, '), ncp=', ncp,sep='')
       commande.AFDM<-paste(commande.AFDM, ', ncp=', ncp,sep='')
       if (!is.null(num.group.sup)) commande.AFDM<-paste(commande.AFDM, ', sup.var=',num.group.sup[1],':',num.group.sup[length(num.group.sup)],sep='')
       commande.AFDM<-paste(commande.AFDM, ', graph=FALSE)',sep='')
       justDoIt(commande.AFDM)
       logger(commande.AFDM)
 
+	  	      #Commande de la fonction HCPC
+
+    if(Rclassif==TRUE){
+      commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
+    justDoIt(commande.hcpc)
+    logger(commande.hcpc)      
+      if(Rreshcpc==TRUE){
+        doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.axes', sep=""))
+        doItAndPrint(paste(nom.res,'.hcpc$desc.ind', sep=""))
+      }        
+    }
+
       #gestion des graphiques   
       if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
       if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotG<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", lab.grpe=', Glabel, sep="")
+        commande.plotG<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", new.plot=TRUE, lab.grpe=', Glabel, sep="")
         commande.plotG <- paste(commande.plotG, ',col.hab = c(',sep='')
         auxi = 0
         if (length(variables)>0){
@@ -7417,7 +7421,7 @@ FactoAFDM<-function()
             
       if((Wchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)&(length(variables)>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotW<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", lab.var=', Wlabel.var, ', lim.cos2.var=', Wlim.cos, sep="")
+        commande.plotW<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", new.plot=TRUE, lab.var=', Wlabel.var, ', lim.cos2.var=', Wlim.cos, sep="")
 
         if (!is.null(Winvisible)) {
           commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')
@@ -7444,7 +7448,7 @@ FactoAFDM<-function()
         if (Rhabillage=="none") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         if (Rhabillage=="ind") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
-          commande.plotI<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", lab.ind=', Rlabel.indMoy, ', lab.var=', Rlabel.quali, ', habillage=', Rhabillage, sep="") 
+          commande.plotI<-paste('plot.AFDM(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", new.plot=TRUE, lab.ind=', Rlabel.indMoy, ', lab.var=', Rlabel.quali, ', habillage=', Rhabillage, sep="") 
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -7526,6 +7530,132 @@ FactoAFDM<-function()
       logger(paste('remove(',activeDataSet(),'.AFDM)',sep=""))   
   }
 
+  #! fonction HCPC
+  
+  Hcpc.funct<-defmacro(label, firstLabel, expr=
+  {
+    env<-environment()
+    .HcpcLabel<-tclVar(paste(firstLabel, "", sep=" "))    
+    compteur.hcpc<-0
+    Rclassif<-0
+    Rmeth <- -1
+    Rconsolid<-0 
+    Rgraphhcpc<-1  
+    Rreshcpc<-0
+    Rminhcpc<-3
+    Rmaxhcpc<-10
+
+    OnHCPC <- function()
+    {
+
+      HcpcWin<-tktoplevel()
+      tkwm.title(HcpcWin, gettextRcmdr("HCPC options"))
+
+      onOKHcpc <- function()
+      {
+        assign("compteur.hcpc", compteur.hcpc+1, envir=env) 
+        if(compteur.hcpc>0) tclvalue(.HcpcLabel)<-paste(label, "", sep=" ")
+        tkconfigure(Hcpc.but, fg="blue")
+      
+        if(tclvalue(methValue)=="interactive") assign("Rmeth", 0, envir=env)
+        else assign("Rmeth", -1, envir=env)
+        
+        if(tclvalue(consolidValue)=="1") assign("Rconsolid",TRUE, envir=env)
+        else assign("Rconsolid",FALSE,envir=env)
+        
+        if(tclvalue(graphhcpcValue)=="1") assign("Rgraphhcpc",TRUE,envir=env)
+        else assign("Rgraphhcpc",FALSE,envir=env)
+        
+        if(tclvalue(reshcpcValue)=="1") assign("Rreshcpc",TRUE,envir=env)
+        else assign("Rreshcpc",FALSE,envir=env)        
+        
+        assign("Rminhcpc",as.numeric(tclvalue(minhcpc)),envir=env)
+        assign("Rmaxhcpc",as.numeric(tclvalue(maxhcpc)),envir=env)
+        
+        assign("Rclassif",TRUE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      OKHcpc.but<-tkbutton(HcpcWin, text="OK", width=8,command=onOKHcpc)
+
+      onCancelHcpc <- function()
+      {
+        assign("Rclassif",FALSE,envir=env)
+        tkdestroy(HcpcWin)
+      }
+      CancelHcpc.but<-tkbutton(HcpcWin, text="Cancel", width=8,command=onCancelHcpc)
+ 
+      tkgrid(tklabel(HcpcWin, text=""))
+      tkgrid(tklabel(HcpcWin, text = gettextRcmdr("Hierarchical Clustering on Principal Components"), fg = "darkred"), column=1, columnspan = 8, sticky = "ew")      
+
+      meth1 <- tkradiobutton (HcpcWin)
+      meth1.lab <- tklabel(HcpcWin,text=gettextRcmdr("interactive"))
+      meth2 <- tkradiobutton (HcpcWin)
+      meth2.lab <- tklabel(HcpcWin,text=gettextRcmdr("automatic"))
+      methValue <- tclVar("interactive")
+      meth.lab <- tklabel(HcpcWin,text=gettextRcmdr("Choice of the number of clusters: "))
+      tkconfigure(meth1,variable=methValue,value="interactive")
+      tkconfigure(meth2,variable=methValue,value="automatic")
+
+      minmaxhcpc.label<-tklabel(HcpcWin,text=gettextRcmdr("The optimal number of clusters is chosen between:"))
+
+      minhcpc<-tclVar("3")
+      maxhcpc<-tclVar("10")
+      minhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=minhcpc)
+      maxhcpc.entry <-tkentry(HcpcWin,width="3",textvariable=maxhcpc)
+
+      consolid.lab <- tklabel(HcpcWin,text=gettextRcmdr("Consolidate clusters "))
+      consolid.check <- tkcheckbutton(HcpcWin)
+      if(Rconsolid) consolidValue<-tclVar("1")
+      else consolidValue<-tclVar("0")      
+      tkconfigure(consolid.check,variable=consolidValue)
+      
+      graphhcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print graphs "))
+      graphhcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rgraphhcpc) graphhcpcValue <- tclVar("1")
+      else graphhcpcValue <- tclVar("0")
+      tkconfigure(graphhcpc.check,variable=graphhcpcValue)   
+
+      reshcpc.lab <- tklabel(HcpcWin,text=gettextRcmdr("Print results for clusters "))
+      reshcpc.check <- tkcheckbutton(HcpcWin)
+      if(Rreshcpc) reshcpcValue<-tclVar("1")
+      else reshcpcValue <- tclVar("0")
+      tkconfigure(reshcpc.check,variable=reshcpcValue)          
+    
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("Select options for the HCPC"), fg = "blue"), column=1, columnspan=8, sticky="we")
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr(paste('Clustering is performed on the first ', tclvalue(ncp.val), ' dimensions of the AFDM',sep=""))),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=gettextRcmdr("(Change your choice in the main options to change this number)")),column=1,columnspan=4,sticky="w")
+      tkgrid(tklabel(HcpcWin,text=""))  
+      tkgrid(meth.lab,meth1.lab,meth1)
+      tkgrid(meth2.lab,meth2)
+      tkgrid(tklabel(HcpcWin,text=""))
+      tkgrid(minmaxhcpc.label,minhcpc.entry , maxhcpc.entry)
+      tkgrid(tklabel(HcpcWin,text=""))      
+      tkgrid(consolid.lab,consolid.check)
+      tkgrid(graphhcpc.lab,graphhcpc.check)
+      tkgrid(reshcpc.lab,reshcpc.check) 
+      tkgrid(tklabel(HcpcWin,text=""))     
+      tkgrid(OKHcpc.but, CancelHcpc.but)
+      tkgrid(tklabel(HcpcWin, text=""))
+      
+      tkgrid.configure(minmaxhcpc.label,meth.lab,consolid.lab,graphhcpc.lab,reshcpc.lab,column=1,columnspan=4,sticky="w")
+      tkgrid.configure(minhcpc.entry,column=7,columnspan=1,sticky="e")
+      tkgrid.configure(maxhcpc.entry,column=8,columnspan=1,sticky="w")
+      tkgrid.configure(meth1,meth2,consolid.check,graphhcpc.check,reshcpc.check,column=8,sticky="e")
+      tkgrid.configure(meth1.lab,column=6,columnspan=2,sticky="w")
+      tkgrid.configure(meth2.lab,column=6,columnspan=2,sticky="w") 
+      tkgrid.configure(OKHcpc.but,column=2,columnspan=1,sticky="w")
+      tkgrid.configure(CancelHcpc.but,column=6,columnspan=1,sticky="e")
+
+      tkgrid.columnconfigure(HcpcWin,0, minsize=3)
+      tkgrid.columnconfigure(HcpcWin,5, minsize=5)
+      tkgrid.columnconfigure(HcpcWin,8, minsize=3) 
+
+}      
+    Hcpc2Frame<-tkframe(HcpcFrame)
+    Hcpc.but<-tkbutton(Hcpc2Frame, textvariable=.HcpcLabel, command=OnHCPC, borderwidth=3)
+    tkgrid(Hcpc.but, sticky="ew")
+}) 
 
     #! fonction associée au bouton OK, execute et détruit l'interface graphique
   onOK<-function()
@@ -7613,6 +7743,12 @@ FactoAFDM<-function()
   tkgrid.columnconfigure(OptionFrame,5, minsize=40)
   tkgrid.columnconfigure(OptionFrame,8, minsize=25)
 
+    #Frame pour HCPC
+  HcpcFrame<-tkframe(top, borderwidth=2)
+  Hcpc.funct(label=gettextRcmdr("Perform Clustering after AFDM"), firstLabel=gettextRcmdr("Perform Clustering after AFDM")) 
+  tkgrid(Hcpc2Frame, columnspan=7)
+  tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
+  
   appliquer.but<-tkbutton(top, text="Apply",width=12,command=OnAppliquer, borderwidth=3, fg="#690f96")
   OKCancelHelp(helpSubject="AFDM")
 
@@ -7625,6 +7761,8 @@ FactoAFDM<-function()
   tkgrid(tklabel(top,text=""))    
   tkgrid(OptionFrame, column=1, columnspan=1)
   tkgrid(tklabel(top,text=""))   
+  tkgrid(HcpcFrame, column=1, columnspan=1)
+  tkgrid(tklabel(top,text="")) # Ligne de blanc
   tkgrid(appliquer.but, column=1, columnspan=1)
   tkgrid(tklabel(top,text=""))
   tkgrid(buttonsFrame, column=1, columnspan=1, sticky="ew" )  
@@ -8520,7 +8658,7 @@ FactoDMFA<-function()
       if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
       if((Gchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
       if (get(nom.res)$eig[1,2]!=100) {
-        commande.plotG<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group"', ',label="', Glabel,'"', sep='')
+        commande.plotG<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="group", new.plot=TRUE', ',label="', Glabel,'"', sep='')
 #        if (!Glabel) commande.plotG <- paste(commande.plotG,', label="none"', sep="")
 #        else commande.plotG <- paste(commande.plotG,', label="', Glabel,'"', sep="")
         if (is.null(GTitle)) commande.plotG <- paste(commande.plotG,')', sep="")
@@ -8536,7 +8674,7 @@ FactoDMFA<-function()
       if (get(nom.res)$eig[1,2]!=100) {
 #        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel.var, collapse='", ")'), '"), lim.cos2.var=', Wlim.cos, sep="")
 #        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", col.var="', Wcol.var, '", col.quanti.sup="', Wcol.quanti.sup, '", label=c("', paste(Wlabel.var, collapse='", ")'), '")', sep="")
-        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", label=c("', paste(Wlabel.var, collapse='", ")'), '")', sep="")        
+        commande.plotW<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="var", new.plot=TRUE, label=c("', paste(Wlabel.var, collapse='", ")'), '")', sep="")        
 
 #        if (!is.null(Winvisible)) commande.plotW<-paste(commande.plotW, ', invisible=c("', paste(Winvisible, collapse='", "'),'")', sep='')        
         if (is.null(WTitle)) commande.plotW <- paste(commande.plotW,')', sep="")
@@ -8558,7 +8696,7 @@ FactoDMFA<-function()
         if (Rhabillage=="ind") Rhabillage<-paste('"', Rhabillage, '"', sep="")
         
 
-          commande.plotI<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind"', sep="") 
+          commande.plotI<-paste('plot.DMFA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), choix="ind", new.plot=TRUE', sep="") 
           if (!is.null(RXlimInd)) commande.plotI<-paste(commande.plotI, ', xlim=c(', paste(RXlimInd, collapse=", "), ')', sep='')
           if (!is.null(RYlimInd)) commande.plotI<-paste(commande.plotI, ', ylim=c(', paste(RYlimInd, collapse=", "), ')', sep='')
           if (!is.null(Rinvisible)) commande.plotI<-paste(commande.plotI, ', invisible=c("', paste(Rinvisible, collapse='", "'),'")', sep='')
@@ -9079,7 +9217,7 @@ for (i in (1:ncol(TableFin))){
       tkgrid(tklabel(AjoutGpeQuantiWin, text=""))      
 ##      tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Status of the group:")), tklabel(AjoutGpeQuantiWin, text="Active"),etat.actif.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Supplementary")),etat.illu.check, sticky="w")
 ##      tkgrid(tklabel(AjoutGpeQuantiWin, text=""))      
-      tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Scaled the variable of the group:")), tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Yes")),norm.ok.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("No")),norm.nok.check, sticky="w")
+      tkgrid(tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Scale the variable of the group:")), tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("Yes")),norm.ok.check, tklabel(AjoutGpeQuantiWin, text=gettextRcmdr("No")),norm.nok.check, sticky="w")
       tkgrid(tklabel(AjoutGpeQuantiWin, text=""))
       tkgrid(tklabel(AjoutGpeQuantiWin, text = gettextRcmdr("Select the variables for the group"), fg = "blue"), column=0, columnspan = 5, sticky = "w")
       tkgrid(listVarQuanti, scrVarQuanti, sticky = "nw")
@@ -9205,7 +9343,7 @@ for (i in (1:ncol(TableFin))){
 ##      tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Status of the group:")), tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Active")),etatModif.actif.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Supplementary")),etatModif.illu.check, sticky="w")
 ##      tkgrid(tklabel(ModifGpeQuantiWin, text=""))      
 
-      tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Scaled the variables of the group:")), tklabel(ModifGpeQuantiWin, text="Yes"),normModif.ok.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("No")),normModif.nok.check, sticky="w")
+      tkgrid(tklabel(ModifGpeQuantiWin, text=gettextRcmdr("Scale the variables of the group:")), tklabel(ModifGpeQuantiWin, text="Yes"),normModif.ok.check, tklabel(ModifGpeQuantiWin, text=gettextRcmdr("No")),normModif.nok.check, sticky="w")
       tkgrid(tklabel(ModifGpeQuantiWin, text=""))
       tkgrid(tklabel(ModifGpeQuantiWin, text = gettextRcmdr("Select the variables of the group"), fg = "blue"), column=0, columnspan = 5, sticky = "w")
       tkgrid(listModifVarQuanti, scrModifVarQuanti, sticky = "nw")
@@ -9786,7 +9924,7 @@ tkgrid(AnalyseFrame, sticky="n",column=1)
   graph.check <- tkcheckbutton(OptionFrame)
   graphValue <- tclVar("1")
   tkconfigure(graph.check,variable=graphValue)
-  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions:"))
+  Axe.label<-tklabel(OptionFrame,text=gettextRcmdr("Graphical output: select the dimensions"))
   Axe1<-tclVar("1")
   Axe2<-tclVar("2")
   Axe1.entry <-tkentry(OptionFrame,width="5",textvariable=Axe1)
