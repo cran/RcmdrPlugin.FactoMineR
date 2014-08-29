@@ -1,0 +1,973 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: RcmdrPlugin.FactoMineR\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-08-26 11:49+0200\n"
+"PO-Revision-Date: 2014-08-27 10:59+0100\n"
+"Last-Translator: husson <husson@agrocampus-ouest.fr>\n"
+"Language-Team: LANGUAGE <husson@agrocampus-ouest.fr>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"X-Generator: Poedit 1.6.8\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+msgid "Read Text Data From File, Clipboard, or URL"
+msgstr "Lire un fichier texte depuis un fichier, un bloc-note ou une URL"
+
+msgid "Dataset"
+msgstr "Données"
+
+msgid "Local file system"
+msgstr "Système de dossier local"
+
+msgid "Clipboard"
+msgstr "Bloc-note"
+
+msgid "Internet URL"
+msgstr "URL Internet"
+
+msgid "Location of Data File"
+msgstr "Localisation du jeu de données"
+
+msgid "White space"
+msgstr "Espace"
+
+msgid "Commas"
+msgstr "Virgule"
+
+msgid "Tabs"
+msgstr "Tabulation"
+
+msgid "Field Separator"
+msgstr "Séparateur de champ"
+
+msgid "Period [.]"
+msgstr "Point [.]"
+
+msgid "Comma [,]"
+msgstr "Virgule [,]"
+
+msgid "Decimal-Point Character"
+msgstr "Caractère Décimal-Point"
+
+msgid "You must enter a name for the data set."
+msgstr "Vous devez entrer un nom pour le jeu de données."
+
+msgid "is not a valid name."
+msgstr "n'est pas un nom valide."
+
+msgid "Data set"
+msgstr "Jeu de données"
+
+msgid "Text Files"
+msgstr "Fichiers textes"
+
+msgid ".txt"
+msgstr ".txt"
+
+msgid ".TXT"
+msgstr ".TXT"
+
+msgid ".dat"
+msgstr ".dat"
+
+msgid ".DAT"
+msgstr ".DAT"
+
+msgid ".csv"
+msgstr ".csv"
+
+msgid ".CSV"
+msgstr ".CSV"
+
+msgid "All Files"
+msgstr "Tous les fichiers"
+
+msgid "*"
+msgstr "*"
+
+msgid "Enter name for data set:"
+msgstr "Entrer un nom pour le jeu de données:"
+
+msgid "Variable names in file:"
+msgstr "Noms des variables dans le fichier:"
+
+msgid "Row names in the first columns:"
+msgstr "Noms des lignes dans la première colonne:"
+
+msgid "Missing data indicator:"
+msgstr "Indicateur de données manquantes:"
+
+msgid "Other"
+msgstr "Autre"
+
+msgid "Specify:"
+msgstr "  Préciser:"
+
+msgid "No Factor available"
+msgstr "Aucun facteur disponible"
+
+msgid "Choice of supplementary factors"
+msgstr "Choix de variables qualitatives supplémentaires"
+
+msgid "Select supplementary factor(s)"
+msgstr "Sélectionner une(des) variable(s) qualitative(s) illustrative(s)"
+
+msgid "blue"
+msgstr "bleu"
+
+msgid "No factors available"
+msgstr "Pas de variable qualitative disponible"
+
+msgid "Select supplementary variables"
+msgstr "Sélectionner les variables illustratives"
+
+msgid "Supplementary qualitative variables"
+msgstr "Sélection de variables qualitatives illustratives"
+
+msgid "Supplementary factors"
+msgstr "Variables qualitatives illustratives"
+
+msgid "Supplementary quantitative variables"
+msgstr "Variables quantitatives illustratives"
+
+msgid "Supplementary variables"
+msgstr "Variables illustratives"
+
+msgid "Select supplementary variable(s)"
+msgstr "Sélectionner la(les) variable(s) illustrative(s)"
+
+msgid "Supplementary individuals"
+msgstr "Individus illustratifs"
+
+msgid "Select supplementary individual(s)"
+msgstr "Sélectionner le(s) individu(s) illustratif(s)"
+
+msgid "Graphical options"
+msgstr "Options graphiques"
+
+msgid "Plot individuals graph"
+msgstr "Graphe des individus"
+
+msgid "Title of the graph"
+msgstr "Titre du graphe"
+
+msgid "Hide some elements:"
+msgstr "Cacher des éléments :"
+
+msgid "Label for the active individuals"
+msgstr "Libellés des individus actifs"
+
+msgid "Label for the supplementary individuals"
+msgstr "Libellés des individus illustratifs"
+
+msgid "Label for the supplementary factor"
+msgstr "Libellés des facteurs illustratifs"
+
+msgid "Choose a color"
+msgstr "Choisir une couleur"
+
+msgid "Change Color"
+msgstr "Changer la couleur"
+
+msgid "Color of the active individuals"
+msgstr "Couleur des individus actifs"
+
+msgid "color for supplementary individuals"
+msgstr "Couleur des individus illustratifs"
+
+msgid "Color for factors"
+msgstr "Couleur des facteurs"
+
+msgid "by.individual"
+msgstr "par.individu"
+
+msgid "Coloring for individuals"
+msgstr "Coloration des individus"
+
+msgid "x limits of the graph:"
+msgstr "Echelle de l'axe x :"
+
+msgid "y limits of the graph:"
+msgstr "Echelle de l'axe y :"
+
+msgid "Plot variables graph"
+msgstr "Graphe des variables"
+
+msgid "Draw variables with a cos2 >:"
+msgstr "Dessiner les variables dont le cos2 est > à :"
+
+msgid "Labels for the active variables"
+msgstr "Libellés des variables actives"
+
+msgid "Labels for the supplementary variables"
+msgstr "Libellés des variables illustratives"
+
+msgid "Color for active variables"
+msgstr "Couleur des variables actives"
+
+msgid "Color for supplementary variables"
+msgstr "Couleur des variables illustratives"
+
+msgid "Eigenvalues"
+msgstr "Valeurs propres"
+
+msgid "Results for active variables"
+msgstr "Résultats des variables actives"
+
+msgid "Results for active individuals"
+msgstr "Résultats des individus actifs"
+
+msgid "Results for supplementary individuals"
+msgstr "Résultats des individus illustratifs"
+
+msgid "Results for supplementary variables"
+msgstr "Résultats des variables illustratives"
+
+msgid "Results for supplementary factors"
+msgstr "Résultats des variables qualitatives illustratives"
+
+msgid "Description of the dimensions"
+msgstr "Description des dimensions"
+
+msgid "Print results on a 'csv' file"
+msgstr "Ecrire les résultats dans un fichier 'csv'"
+
+msgid "Select output options"
+msgstr "Sélectionner les options de sorties"
+
+msgid "HCPC options"
+msgstr "Options de la classification"
+
+msgid "Hierarchical Clustering on Principal Components"
+msgstr "Classification Hiérarchique sur Composantes Principales"
+
+msgid "darkred"
+msgstr "rouge foncé"
+
+msgid "interactive"
+msgstr "interactif"
+
+msgid "automatic"
+msgstr "automatique"
+
+msgid "Choice of the number of clusters:"
+msgstr "Choix du nombre de classes :"
+
+msgid "The optimal number of clusters is chosen between:"
+msgstr "Le nombre de classes optimal est choisi entre :"
+
+msgid "Consolidate clusters"
+msgstr "Consolidation des classes"
+
+msgid "Print graphs"
+msgstr "Sorties graphiques"
+
+msgid "Print results for clusters"
+msgstr "Ecrire les résultats pour les classes"
+
+msgid "Options for the clustering"
+msgstr "Options pour la classification"
+
+msgid "(Modify in the main options to change this number)"
+msgstr "(Modifier dans le menu principal pour changer ce nombre)"
+
+msgid "PCA"
+msgstr "ACP"
+
+msgid "Restart"
+msgstr "Réinitialiser"
+
+msgid "Modify supplementary factors"
+msgstr "Modifier les variables qualitatives illustratives"
+
+msgid "Select supplementary factors"
+msgstr "Sélectionner des variables qualitatives illustratives"
+
+msgid "Modify supplementary variables"
+msgstr "Modifier les variables illustratives"
+
+msgid "Modify supplementary individuals"
+msgstr "Modifier les individus illustratifs"
+
+msgid "Outputs"
+msgstr "Sorties"
+
+msgid "Name of the result object:"
+msgstr "Nom de l'objet résultat :"
+
+msgid "Number of dimensions:"
+msgstr "Nombre de dimensions :"
+
+msgid "Scale the variables:"
+msgstr "Réduire les variables :"
+
+msgid "Graphical output: select the dimensions"
+msgstr "Sorties graphiques : choix des dimensions "
+
+msgid "Main options"
+msgstr "Options générales"
+
+msgid "Perform Clustering after PCA"
+msgstr "Réaliser une classification après l'ACP"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Principal Component Analysis (PCA)"
+msgstr "Analyse en Composantes Principales (ACP)"
+
+msgid "Select active variables (by default all the variables are active)"
+msgstr ""
+"Sélectionner les variables actives (par défaut, toutes les variables sont "
+"actives)"
+
+msgid "Select supplementary columns"
+msgstr "Selectionner les colonnes supplémentaires"
+
+msgid "Select supplementary column(s)"
+msgstr "Sélectionner la(les) colonne(s) illustrative(s)"
+
+msgid "Select supplementary rows"
+msgstr "Sélectionner des lignes illustratives"
+
+msgid "Select supplementary row(s)"
+msgstr "Sélectionner une(des) ligne(s) illustrative(s)"
+
+msgid "Graphical output"
+msgstr "Sorties graphiques"
+
+msgid "Plot"
+msgstr "Graphe"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Active rows"
+msgstr "Lignes actives"
+
+msgid "Supplementary rows"
+msgstr "Lignes illustratives"
+
+msgid "Active columns"
+msgstr "Colonnes actives"
+
+msgid "Supplementary columns"
+msgstr "Colonnes illustratives"
+
+msgid "Color for active rows"
+msgstr "Couleur des lignes actives"
+
+msgid "Color for supplementary rows"
+msgstr "Couleur des lignes illustratives"
+
+msgid "Color for active columns"
+msgstr "Couleur des colonnes actives"
+
+msgid "Color for supplementary columns"
+msgstr "Couleur des colonnes illustratives"
+
+msgid "Results for column variables"
+msgstr "Résultats des colonnes"
+
+msgid "Results for column supplementary variables"
+msgstr "Résultats des colonnes illustratives"
+
+msgid "Results for row variables"
+msgstr "Résultats des lignes"
+
+msgid "Results for row supplementary variables"
+msgstr "Résultats des lignes illustratives"
+
+msgid "Select the outputs options"
+msgstr "Choix des options de sortie"
+
+msgid "rows"
+msgstr "les lignes"
+
+msgid "columns"
+msgstr "les colonnes"
+
+msgid "Perform clustering on: "
+msgstr "Réaliser la classification sur : "
+
+msgid "CA"
+msgstr "AFC"
+
+msgid ""
+"Select the active rows and the active columns. \n"
+"By default all rows and all columns are active"
+msgstr ""
+"Sélectionner les lignes et colonnes actives. \n"
+"Par défaut, toutes les lignes et toutes les colonnes sont actives"
+
+msgid "Modify supplementary column variables"
+msgstr "Modifier les colonnes illustratives"
+
+msgid "Select supplementary column variables"
+msgstr "Sélection de colonnes illustratives"
+
+msgid "Modify supplementary row variables"
+msgstr "Modifier les lignes illustratives"
+
+msgid "Select supplementary row variables"
+msgstr "Sélectionner des lignes illustratives"
+
+msgid "Perform Clustering after CA"
+msgstr "Réaliser une classification après l'AFC"
+
+msgid "Correspondence Analysis (CA)"
+msgstr "Analyse Factorielle des Correspondances (AFC)"
+
+msgid "No quantitative variable available"
+msgstr "Aucune variable quantitative disponible"
+
+msgid "Select graphical options"
+msgstr "Sélectionner les options graphiques"
+
+msgid "Active individuals"
+msgstr "Individus actifs"
+
+msgid "Factors"
+msgstr "Variables qualitatives"
+
+msgid "Color for active individuals"
+msgstr "Couleur des individus actifs"
+
+msgid "Color for supplementary factors"
+msgstr "Couleur des variables qualitatives illustratives"
+
+msgid "Plot supplementary variables graph"
+msgstr "Graphe des variables illustratives"
+
+msgid "Labels for the supplementary quantitative variables"
+msgstr "Libellés des variables quantitatives illustratives"
+
+msgid "Active variables"
+msgstr "Variables actives"
+
+msgid "MCA"
+msgstr "ACM"
+
+msgid "Select supplementary quantitative variables"
+msgstr "Sélectionner des variables quantitatives illustratives"
+
+msgid "Perform Clustering after MCA"
+msgstr "Réaliser une classification après l'ACM"
+
+msgid "Multiple Correspondence Analysis (MCA)"
+msgstr "Analyse des Correspondances Multiples (ACM)"
+
+msgid "quantitative groups"
+msgstr "Groupes quantitatifs"
+
+msgid "quantitative group"
+msgstr "groupe quantitatif"
+
+msgid "Definition of a quantitatif group"
+msgstr "Définition d'un groupe quantitatif"
+
+msgid "Name for the group"
+msgstr "Nom du groupe"
+
+msgid "warning"
+msgstr "alerte"
+
+msgid "ok"
+msgstr "ok"
+
+msgid "Name of the group:"
+msgstr "Nom du groupe :"
+
+msgid "Status of the group:"
+msgstr "Statut du groupe :"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Supplementary"
+msgstr "Illustratif"
+
+msgid "Scale the variable of the group:"
+msgstr "Réduire les variables du groupe :"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Select the variables for the group"
+msgstr "Sélectionner les variables du groupe"
+
+msgid "Modification of a quantitative group"
+msgstr "Modification d'un groupe quantitatif"
+
+msgid "Scale the variables of the group:"
+msgstr "Réduire les variables du groupe :"
+
+msgid "Select the variables of the group"
+msgstr "Sélectionner les variables du groupe"
+
+msgid "qualitative groups"
+msgstr "groupes qualitatifs"
+
+msgid "qualitative group"
+msgstr "groupe qualitatif"
+
+msgid "Construction of a qualitative group"
+msgstr "Construction d'un groupe qualitatif"
+
+msgid "Modification of a qualitative group"
+msgstr "Modification d'un groupe qualitatif"
+
+msgid "Give a name for the group"
+msgstr "Donner un nom au groupe"
+
+msgid "Output options"
+msgstr "Options de résultats"
+
+msgid "Results for the groups"
+msgstr "Résultats des groupes"
+
+msgid "Inertia"
+msgstr "Inertie"
+
+msgid "Results for the active individuals"
+msgstr "Résultats des individus actifs"
+
+msgid "Results for the supplementary individuals"
+msgstr "Résultats des individus illustratifs"
+
+msgid "Summary of the quantitative variables"
+msgstr "Résumé des variables quantitatives"
+
+msgid "Results of the quantitative variables"
+msgstr "Résultats des variables quantitatives"
+
+msgid "Results of the supplementary quantitative variables"
+msgstr "Résultats des variables quantitatives illustratives"
+
+msgid "Summary of the qualitative variables"
+msgstr "Résumé des variables qualitatives"
+
+msgid "Results of the qualitative variables"
+msgstr "Résultats des variables qualitatives"
+
+msgid "Results of the supplementary qualitative variables"
+msgstr "Résultats des variables qualitatives supplémentaires"
+
+msgid "Results for the partial axes"
+msgstr "Résultats des axes partiels"
+
+msgid "Graph of the groups"
+msgstr "Graphe des groupes"
+
+msgid "Labels for the groups"
+msgstr "Libellés des groupes"
+
+msgid "Graph of the partial axes"
+msgstr "Graphe des axes partiels"
+
+msgid "Color the partial axes by group"
+msgstr "Colorier les axes partiels par groupe"
+
+msgid "Graph of the variables"
+msgstr "Graphe des variables"
+
+msgid "Labels for the variables"
+msgstr "Libellés des variables"
+
+msgid "Color the variables by group"
+msgstr "Colorier les variables par groupe"
+
+msgid "active variables"
+msgstr "variables actives"
+
+msgid "supplementary variables"
+msgstr "variables illustratives"
+
+msgid "Graph of the individuals"
+msgstr "Graphe des individus"
+
+msgid "Labels for the mean individuals"
+msgstr "Libellés des individus moyens"
+
+msgid "Labels for the partial individuals"
+msgstr "Libellés des individus partiels"
+
+msgid "Labels for the factors"
+msgstr "Libellés des variables qualitatives"
+
+msgid "Select drawing for the individuals"
+msgstr "Choisir le coloriage des individus"
+
+msgid "Select the individuals for which partial points are drawn"
+msgstr "Individus dont les points partiels sont représentés"
+
+msgid "Interactive selection of the individuals"
+msgstr "Sélection interactive des individus"
+
+msgid "Chronologic representation of the partial points"
+msgstr "Représentation chronologique des points partiels"
+
+msgid "MFA"
+msgstr "AFM"
+
+msgid "Quantitative groups"
+msgstr "Groupes quantitatifs"
+
+msgid "Add quanti. group"
+msgstr "Ajout groupe quanti"
+
+msgid "Add quanti group"
+msgstr "Ajout groupe quanti"
+
+msgid "Modify 1 group"
+msgstr "Modifier 1 groupe"
+
+msgid "Qualitative groups"
+msgstr "Groupes qualitatifs"
+
+msgid "Add quali. group"
+msgstr "Ajout groupe quali"
+
+msgid "Add quali group"
+msgstr "Ajout groupe quali"
+
+msgid "Select the dimensions for the graphs:"
+msgstr "Sélectionner les dimensions pour les graphes :"
+
+msgid "Perform Clustering after MFA"
+msgstr "Faire une classification après l'AFM"
+
+msgid "Multiple Factor Analysis (MFA)"
+msgstr "Analyse Factorielle Multiple (AFM)"
+
+msgid "groups"
+msgstr "groupes"
+
+msgid "group"
+msgstr "groupe"
+
+msgid "Definition of a group"
+msgstr "Définir un groupe"
+
+msgid "1 group"
+msgstr "1 groupe"
+
+msgid "Modification of a group"
+msgstr "Modification d'un groupe"
+
+msgid "RV coefficients between partial configurations"
+msgstr "Coefficients RV entre les configurations partielles"
+
+msgid "Standardized RV coefficients between partial configurations"
+msgstr "Coefficients RV standardisés entre les configurations partielles"
+
+msgid "Procrustes similarity indexes between partial configurations"
+msgstr "Indice de similarité procustéens entre les configurations partielles"
+
+msgid "Isotropic scaling factors"
+msgstr "Facteurs de réduction isotropique"
+
+msgid "Initial partial configurations"
+msgstr "Configurations partielles initiales"
+
+msgid "Consensus configuration"
+msgstr "Configuration consensus"
+
+msgid "Partial configurations after transformations"
+msgstr "Configurations partielles après transformations"
+
+msgid ""
+"Procrustes Analysis of Variance tables, per configuration, per objet, per "
+"dimension"
+msgstr ""
+"Analyses procustéenne de tables de variance, par configuration, par objet, "
+"par dimension"
+
+msgid ""
+"Correlations between initial partial configurations and consensus dimensions"
+msgstr ""
+"Corrélations entre les configurations partielles initiales et les dimensions "
+"de consensus"
+
+msgid "GPA"
+msgstr "APG"
+
+msgid "Add 1 group"
+msgstr "Ajouter 1 groupe"
+
+msgid "Maximum number of iteration for the algorithm:"
+msgstr "Nombre maximal d'itérations pour l'algorithme :"
+
+msgid "Stopping threshold for the algorithm:"
+msgstr "Seuil d'arrêt pour l'algorithme :"
+
+msgid "General Procrustes Analysis (GPA)"
+msgstr "Analyse Procustéenne Généralisée (APG)"
+
+msgid "FAMD"
+msgstr "AFDM"
+
+msgid "Results for the variables"
+msgstr "Résultats des variables"
+
+msgid "Graph of all the variables"
+msgstr "Graphe de toutes les variables"
+
+msgid "Color of the quantitative variables"
+msgstr "Couleur des variables quantitatives"
+
+msgid "color for supplementary quantitative variables"
+msgstr "Couleur des variables quantitatives illustratives"
+
+msgid "color for qualitative variables"
+msgstr "Couleur des variables qualitatives"
+
+msgid "color for supplementary qualitative variables"
+msgstr "Couleur des variables qualitatives illustratives"
+
+msgid "Graph of the quantitative variables"
+msgstr "Graphe des variables quantitatives"
+
+msgid "Color of the active variables"
+msgstr "Couleur des variables actives"
+
+msgid "color for supplementary variables"
+msgstr "Couleur des variables illustratives"
+
+msgid "Perform Clustering after FAMD"
+msgstr "Faire une classification après l'AFDM"
+
+msgid "Factor Analysis for Mixed Data (FAMD)"
+msgstr "Analyse Factorielle de Données Mixtes (AFDM)"
+
+msgid "Factor Analysis of Mixed Data (FAMD)"
+msgstr "Analyse Factorielle de Données Mixtes (AFDM)"
+
+msgid "DMFA"
+msgstr "AFMD"
+
+msgid "Group of individuals"
+msgstr "Groupes d'individus"
+
+msgid "Results for partial variables"
+msgstr "Résultats des variables partielles"
+
+msgid "Covariance matrices by group"
+msgstr "Matrices de covariance par groupe"
+
+msgid "Graph the groups"
+msgstr "Graphe des groupes"
+
+msgid "Scale the quantative variables:"
+msgstr "Réduire les variables quantitatives :"
+
+msgid "Dual Multiple Factor Analysis (DMFA)"
+msgstr "Analyse Factorielle Multiple Duale (AFMD)"
+
+msgid "Plot the graphs: "
+msgstr "Tracer les graphes : "
+
+msgid "Perform Clustering after HMFA"
+msgstr "Faire une classification après l'AFMH"
+
+msgid "Select one group for the 2nd level of the hierarchy"
+msgstr "Sélectionner un groupe pour le 2ème niveau de hiérarchie"
+
+msgid "Select one group for the 3rd level of the hierarchy"
+msgstr "Sélectionner un groupe pour le 3ème niveau de hiérarchie"
+
+msgid "Results for individuals"
+msgstr "Résultats des individus"
+
+msgid "Results for partial representation"
+msgstr "Résultats des représentations partielles"
+
+msgid "Results for quantitative variables"
+msgstr "Résultats des variables quantitatives"
+
+msgid "Results for qualitative variables"
+msgstr "Résultats des variables qualitatives"
+
+msgid "Valid the group"
+msgstr "Valider le groupe"
+
+msgid "Next level of the hierarchy"
+msgstr "Niveau de hiérarchie suivant"
+
+msgid "Run the HMFA"
+msgstr "Lancer l'AFMH"
+
+msgid "For the result of a CA, perform clustering on:"
+msgstr "Pour les résultats d'une AFC, réaliser la classification sur :"
+
+msgid "Outputs options"
+msgstr "Options principales"
+
+msgid "Select outputs options"
+msgstr "Choisir les options de sortie"
+
+msgid "red"
+msgstr "rouge"
+
+msgid "Print clusters individuals belong to "
+msgstr "Classes auxquelles les individus appartiennent "
+
+msgid "Print description of clusters by continuous variables "
+msgstr "Description des classes par les variables quantitatives "
+
+msgid "Print description of clusters by factors"
+msgstr "Description des classes par les variables qualitatives"
+
+msgid "Print parangons and most typical individuals for each cluster"
+msgstr "Parangons et individus les plus typiques de chaque classe "
+
+msgid "Hierarchical Clustering on Principal Components (HCPC)"
+msgstr "Classification Hiérarchique sur Composantes Principales (HCPC)"
+
+msgid "Description of categories"
+msgstr "Description des modalités"
+
+msgid "P-value:"
+msgstr "Seuil de risque:"
+
+msgid "Description by qualitative variables"
+msgstr "Description par les variables qualitatives"
+
+msgid "Description by categories"
+msgstr "Description par les modalités"
+
+msgid "Description by quantitative variables"
+msgstr "Description par les variables quantitatives"
+
+msgid "Options for the outputs"
+msgstr "Options de résultats"
+
+msgid "No variable selected for the variable to describe"
+msgstr "Aucune variable sélectionnée pour la variable à décrire"
+
+msgid "Choose the variable to describe:"
+msgstr "Choisir la variable à décrire"
+
+msgid "Choose the quantitative variables (by default all)"
+msgstr "Choisir les variables quantitatives (par défaut toutes)"
+
+msgid "Choose the qualitative variables (by default all)"
+msgstr "Choisir les variables qualitatives (par défaut toutes)"
+
+msgid "Tutorial"
+msgstr "Didacticiel"
+
+msgid "Clustering is performed on the first %s dimensions of PCA"
+msgstr ""
+"La classification est effectuée sur les %s premières dimensions de l'ACP"
+
+msgid "Clustering is performed on the first %s dimensions of CA"
+msgstr ""
+"La classification est effectuée sur les %s premières dimensions de l'AFC"
+
+msgid "Clustering is performed on the first %s dimensions of MCA"
+msgstr ""
+"La classification est effectuée sur les %s premières dimensions de l'ACM"
+
+msgid "Clustering is performed on the first %s dimensions of MFA"
+msgstr ""
+"La classification est effectuée sur les %s premières dimensions de l'AFM"
+
+msgid "Clustering is performed on the first %s dimensions of FAMD"
+msgstr ""
+"La classification est effectuée sur les %s premières dimensions de l'AFDM"
+
+msgid "Select the group variable"
+msgstr "Choisir le groupe de variables :"
+
+msgid "Select quantitative variables"
+msgstr "Choisir les variables quantitatives :"
+
+msgid "Factor Analysis of Mixed Data(FAMD)"
+msgstr "Analyse Factorielle de Données Mixtes (AFDM)"
+
+msgid "Perform clustering on:"
+msgstr "Faire la classification sur : "
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "No variable selected for the 'x' axis"
+msgstr "Aucune variable sélectionnée pour la variable 'x'"
+
+msgid "No variable selected for the 'y' axis"
+msgstr "Aucune variable sélectionnée pour la variable 'y'"
+
+msgid "Plot the graph of the individuals"
+msgstr "Graphe des individus"
+
+msgid "Plot the graph of the additional variables"
+msgstr "Graphe des variables supplémentaires"
+
+msgid "Same scale for 'x' and 'y'"
+msgstr "Même échelle pour 'x' et 'y'"
+
+msgid "Scatter plot with additional variables"
+msgstr "Nuage de points et variables supplémentaires"
+
+msgid "Variables (double-click to select the two variables)"
+msgstr "Variables (double-cliquer pour choisir les deux variables)"
+
+msgid "'x' variable:"
+msgstr "Variable 'x' :"
+
+msgid "'y' variable:"
+msgstr "Variable 'y' :"
+
+msgid "by.group"
+msgstr "par groupe"
+
+msgid "None"
+msgstr "Aucun"
+
+msgid "Select factors"
+msgstr "Choisir les variables qualitatives"
+
+msgid "Select an object"
+msgstr "Choisir un objet"
+
+msgid "Confidence ellipses around rows"
+msgstr "Ellipses de confiance autour des lignes"
+
+msgid "Confidence ellipses around columns"
+msgstr "Ellipses de confiance autour des colonnes"
+
+#~ msgid "Draw the labels of the variables"
+#~ msgstr "Labels des variables"
+
+#~ msgid "Draw labels of the variables"
+#~ msgstr "Ecrire le libellé des variables"
+
+#~ msgid "Draw labels of the groups"
+#~ msgstr "Libellé des groupes"
+
+#~ msgid "Draw labels for the qualitative variables"
+#~ msgstr "Labels des variables qualitatives"
+
+#~ msgid "Threshold for the algorithm: "
+#~ msgstr "Seuil d'arrêt pour l'algorithme :"
+
+#~ msgid "Select supplementary individuals"
+#~ msgstr "Individus illustratifs"
+
+#~ msgid " dimensions of PCA"
+#~ msgstr " premières dimensions de l'ACP"
+
+#~ msgid "Threshold with respect to which the algorithm stops: "
+#~ msgstr "Seuil en-dessous duquel l'algorithme s'arrête : "

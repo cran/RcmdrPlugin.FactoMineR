@@ -1,13 +1,17 @@
+#########  Add menu for FactoMineR  #########
     menu    FactoMineRMenu       topMenu         ""                                              ""                     ""          ""
+    item    FactoMineRMenu       command         "Read Text Data From File, Clipboard, or URL"              readDataSetFacto                   ""          ""
     item    FactoMineRMenu       command         "Principal Component Analysis (PCA)"              FactoPCA                   "numericP(2)"          ""
     item    FactoMineRMenu       command         "Correspondence Analysis (CA)"                   FactoCA                    "numericP(2)"          ""
     item    FactoMineRMenu       command         "Multiple Correspondence Analysis (MCA)"          FactoMCA                   "factorsP(2)"          ""
     item    FactoMineRMenu       command         "Multiple Factor Analysis (MFA)"                  FactoMFA                   "numericP() || factorsP()"          ""
-    item    FactoMineRMenu       command         "Hierarchical Multiple Factor Analysis (HMFA)"                  FactoHMFA                   "numericP() || factorsP()"          ""
+##    item    FactoMineRMenu       command         "Hierarchical Multiple Factor Analysis (HMFA)"                  FactoHMFA                   "numericP() || factorsP()"          ""
     item    FactoMineRMenu       command         "Dual Multiple Factor Analysis (DMFA)"             FactoDMFA                   "numericP(2) || factorsP()"          ""
-    item    FactoMineRMenu       command         "Factor Analysis of Mixed Data (FAMD)"             FactoAFDM                   "numericP() || factorsP()"          ""
-    item    FactoMineRMenu       command         "General Procrustes Analysis (GPA)"               FactoGPA                   "numericP(2)"          ""
-    item    FactoMineRMenu       command         "Scatter plot with additional variables"               Factoprefpls                   "numericP(2)"          ""
-    item    FactoMineRMenu       command         "Description of categories"                 Factocatdes                "factorsP()"          ""
+    item    FactoMineRMenu       command         "Factor Analysis of Mixed Data (FAMD)"             FactoFAMD                   "numericP() || factorsP()"          ""
     item    FactoMineRMenu       command         "Hierarchical Clustering on Principal Components (HCPC)"                 FactoHCPC                "numericP() || factorsP()"          ""
+    item    FactoMineRMenu       command         "General Procrustes Analysis (GPA)"               FactoGPA                   "numericP(2)"          ""
+    item    FactoMineRMenu       command         "Description of categories"                 Factocatdes                "factorsP()"          ""
+    item    FactoMineRMenu       command         "Scatter plot with additional variables"               Factoprefpls                   "numericP(2)"          ""
     item    topMenu              cascade         "FactoMineR"                                FactoMineRMenu             ""          ""
+
+#########  End add menu for FactoMineR #########
