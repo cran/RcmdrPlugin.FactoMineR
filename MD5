@@ -1,4 +1,4 @@
-f7db5f3e1245b98764b48527e69d6876 *DESCRIPTION
+20e2f3b1da0dd3a896c5080a4f125f9d *DESCRIPTION
 fcdbf1e8de6c1009e704f1df2006ecb6 *NAMESPACE
 8be5a74cf1222cde0d48de64750d5803 *R/FactoCA.R
 29974481f0ab479f5bd9dd6866594e69 *R/FactoDMFA.R
@@ -16,6 +16,7 @@ c19bbff4e44017e4d9d300d860ff8f30 *R/RcmdrPlugin.FactoMineR-internal.R
 1371e8fdac9245403d0cd1ad3547a56a *R/readDataSetFacto.R
 b1c927404cf755b96feab9dfbdafe260 *inst/etc/menus.txt
 e9aae881614b7e77d6c931b1d5080861 *inst/po/fr/LC_MESSAGES/R-RcmdrPlugin.FactoMineR.mo
+cd5cce6534efcf711524abf7e62987c0 *inst/po/sl/R-RcmdrPlugin.FactoMineR.mo
 4f48a47e17dc7fa395a7f376d32a7a42 *man/FactoCA.Rd
 b3118a3b31ec18863bc00684cb661c9a *man/FactoDMFA.Rd
 5eaf5cdc43837fc99c66f715775fba60 *man/FactoFAMD.Rd
@@ -31,3 +32,4 @@ ea17c136e80a045b1b141c107f2c2e9a *man/Factocatdes.Rd
 c29bfcecd1c095cd7ba523dd941c5c5c *po/R-RcmdrPlugin.FactoMineR.pot
 2f71e600b9b7aec0e1dd3ed9e273559a *po/R-fr.mo
 3ffba3ced4719bb8b5ef01786f545e1f *po/R-fr.po
+666ac28333d66508d14f9b811410db28 *po/R-sl.po

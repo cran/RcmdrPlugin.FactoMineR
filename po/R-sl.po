@@ -1,0 +1,962 @@
+# Matjaž Jeran <matjaz.jeran@amis.net>, 2015.
+msgid ""
+msgstr ""
+"Project-Id-Version: RcmdrPlugin.FactoMineR\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-08-26 11:49+0200\n"
+"Last-Translator: Matjaž Jeran <matjaz.jeran@amis.net>\n"
+"PO-Revision-Date: 2015-11-30 20:53+0100\n"
+"Language-Team: Slovenian <lugos-slo@lugos.si>\n"
+"Language: sl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"MIME-Version: 1.0\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%"
+"100==4 ? 3 : 0);\n"
+"X-Generator: Lokalize 2.0\n"
+
+msgid "Read Text Data From File, Clipboard, or URL"
+msgstr "Beri podatke z besedilne datoteke, odložišča ali spletnega naslova"
+
+msgid "Dataset"
+msgstr "Zbirka podatkov"
+
+msgid "Local file system"
+msgstr "Lokalni sistem datotek"
+
+msgid "Clipboard"
+msgstr "Odložišče"
+
+msgid "Internet URL"
+msgstr "spletni naslov"
+
+msgid "Location of Data File"
+msgstr "Lokacija podatkovne datoteke"
+
+msgid "White space"
+msgstr "Prazen prostor"
+
+msgid "Commas"
+msgstr "Vejice"
+
+msgid "Tabs"
+msgstr "Tabulatorji"
+
+msgid "Field Separator"
+msgstr "Razmejevalniki polj"
+
+msgid "Period [.]"
+msgstr "Pika [.]"
+
+msgid "Comma [,]"
+msgstr "Vejica [,]"
+
+msgid "Decimal-Point Character"
+msgstr "Znak za decimalno piko"
+
+msgid "You must enter a name for the data set."
+msgstr "Vnesti morate ime podatkovne datoteke."
+
+msgid "is not a valid name."
+msgstr "ni veljavno ime."
+
+msgid "Data set"
+msgstr "Zbirka podatkov"
+
+msgid "Text Files"
+msgstr "Besedilne datoteke"
+
+msgid ".txt"
+msgstr ".txt"
+
+msgid ".TXT"
+msgstr ".TXT"
+
+msgid ".dat"
+msgstr ".dat"
+
+msgid ".DAT"
+msgstr ".DAT"
+
+msgid ".csv"
+msgstr ".csv"
+
+msgid ".CSV"
+msgstr ".CSV"
+
+msgid "All Files"
+msgstr "Vse datoteke"
+
+msgid "*"
+msgstr "*"
+
+msgid "Enter name for data set:"
+msgstr "Vnesite ime podatkovne zbirke:"
+
+msgid "Variable names in file:"
+msgstr "Imena spremenljivk v datoteki:"
+
+msgid "Row names in the first columns:"
+msgstr "Imena vrstic v prvih stolpcih:"
+
+msgid "Missing data indicator:"
+msgstr "Oznaka manjkajoče vrednosti:"
+
+msgid "Other"
+msgstr "Ostalo"
+
+msgid "Specify:"
+msgstr "Opišite:"
+
+msgid "No Factor available"
+msgstr "Ni nobenega faktorja"
+
+msgid "Choice of supplementary factors"
+msgstr "Izbira dodatnih faktorjev"
+
+msgid "Select supplementary factor(s)"
+msgstr "Izberite dodatne faktor(je)"
+
+msgid "blue"
+msgstr "modro"
+
+msgid "No factors available"
+msgstr "Nobenega faktorja ni na voljo"
+
+msgid "Select supplementary variables"
+msgstr "Izberite dodatne spremenljivke"
+
+msgid "Supplementary qualitative variables"
+msgstr "Dodatke kvalitativne spremenljivke"
+
+msgid "Supplementary factors"
+msgstr "Dodatni faktorji"
+
+msgid "Supplementary quantitative variables"
+msgstr "Dodatne kvalitativne spremenljivke"
+
+msgid "Supplementary variables"
+msgstr "Dodatne spremenljivke"
+
+msgid "Select supplementary variable(s)"
+msgstr "Izberite dodatne spremenljivke"
+
+msgid "Supplementary individuals"
+msgstr "Dodatni posamezniki"
+
+msgid "Select supplementary individual(s)"
+msgstr "Izberite dodatne(ga) posameznik(a/e)"
+
+msgid "Graphical options"
+msgstr "Možnosti grafike"
+
+msgid "Plot individuals graph"
+msgstr "Nariši posamične grafikone"
+
+msgid "Title of the graph"
+msgstr "Naslov grafikona"
+
+msgid "Hide some elements:"
+msgstr "Skrij nekatere elemente:"
+
+msgid "Label for the active individuals"
+msgstr "Oznake za aktivne posameznike"
+
+msgid "Label for the supplementary individuals"
+msgstr "Oznake za dodatne posameznike"
+
+msgid "Label for the supplementary factor"
+msgstr "Oznake za dodatne faktorje"
+
+msgid "Choose a color"
+msgstr "Izberite barvo"
+
+msgid "Change Color"
+msgstr "Zamenjaj barvo"
+
+msgid "Color of the active individuals"
+msgstr "Barva za aktivne posameznike"
+
+msgid "color for supplementary individuals"
+msgstr "Barva za dodatne posameznike"
+
+msgid "Color for factors"
+msgstr "Barva za faktorje"
+
+msgid "by.individual"
+msgstr "po posamezniku"
+
+msgid "Coloring for individuals"
+msgstr "Barvanje posameznikov"
+
+msgid "x limits of the graph:"
+msgstr "Omejitve osi x:"
+
+msgid "y limits of the graph:"
+msgstr "Omejitve osi y:"
+
+msgid "Plot variables graph"
+msgstr "Nariši prikaz spremenljivk"
+
+msgid "Draw variables with a cos2 >:"
+msgstr "Nariši spremenljivke kjer je cos2 >:"
+
+msgid "Labels for the active variables"
+msgstr "Oznake za aktivne posameznike"
+
+msgid "Labels for the supplementary variables"
+msgstr "Oznake za dodatne posameznike"
+
+msgid "Color for active variables"
+msgstr "Barva za aktivne spremenljivke"
+
+msgid "Color for supplementary variables"
+msgstr "Barva za dodatne spremenljivke"
+
+msgid "Eigenvalues"
+msgstr "Lastne vrednosti"
+
+msgid "Results for active variables"
+msgstr "Rezultati za aktivne spremenljivke"
+
+msgid "Results for active individuals"
+msgstr "Rezultati za aktivne posameznike"
+
+msgid "Results for supplementary individuals"
+msgstr "Rezultati za dodatne posameznike"
+
+msgid "Results for supplementary variables"
+msgstr "Rezultati za dodatne spremenljivke"
+
+msgid "Results for supplementary factors"
+msgstr "Rezultati za dodatne faktorje"
+
+msgid "Description of the dimensions"
+msgstr "Opis dimenzij"
+
+msgid "Print results on a 'csv' file"
+msgstr "Piši rezultate v datoteko 'csv'"
+
+msgid "Select output options"
+msgstr "Izberite možnosti izhoda"
+
+msgid "HCPC options"
+msgstr "Možnosti HGGK - HCPC"
+
+msgid "Hierarchical Clustering on Principal Components"
+msgstr "Hierarhično grupiranje na glavnih komponentah"
+
+msgid "darkred"
+msgstr "temno rdeče"
+
+msgid "interactive"
+msgstr "interaktivno"
+
+msgid "automatic"
+msgstr "avtomatično"
+
+msgid "Choice of the number of clusters:"
+msgstr "Izbrano število grup:"
+
+msgid "The optimal number of clusters is chosen between:"
+msgstr "Optimalno število grup je med:"
+
+msgid "Consolidate clusters"
+msgstr "Konsolidiraj grupe"
+
+msgid "Print graphs"
+msgstr "Tiskaj prikaze"
+
+msgid "Print results for clusters"
+msgstr "Tiskaj rezultate za grupe"
+
+msgid "Options for the clustering"
+msgstr "Možnosti grupiranja"
+
+msgid "(Modify in the main options to change this number)"
+msgstr "(To število lahko spremenite v glavnem menuju)"
+
+msgid "PCA"
+msgstr "AGK - PCA"
+
+msgid "Restart"
+msgstr "Ponovno poskusi"
+
+msgid "Modify supplementary factors"
+msgstr "Spremeni dodatne faktorje"
+
+msgid "Select supplementary factors"
+msgstr "Izberi dodatne faktorje"
+
+msgid "Modify supplementary variables"
+msgstr "Spremeni dodatne faktorje"
+
+msgid "Modify supplementary individuals"
+msgstr "Spremeni dodatne posameznike"
+
+msgid "Outputs"
+msgstr "Izhodi"
+
+msgid "Name of the result object:"
+msgstr "Ime predmeta rezultata:"
+
+msgid "Number of dimensions:"
+msgstr "Število dimenzij:"
+
+msgid "Scale the variables:"
+msgstr "Pretvori spremenljivke v lestvice:"
+
+msgid "Graphical output: select the dimensions"
+msgstr "Grafični izhod: izberite dimenzije"
+
+msgid "Main options"
+msgstr "Glavne možnosti"
+
+msgid "Perform Clustering after PCA"
+msgstr "Po AGK - PCA izvedite še grupiranje"
+
+msgid "Apply"
+msgstr "Izvedi"
+
+msgid "Principal Component Analysis (PCA)"
+msgstr "Analiza glavnih komponent (AGK - PCA)"
+
+msgid "Select active variables (by default all the variables are active)"
+msgstr "Izberite aktivne spremenljivke (privzeto so vse aktivne)"
+
+msgid "Select supplementary columns"
+msgstr "Izberite dodatne stolpce"
+
+msgid "Select supplementary column(s)"
+msgstr "Izberite dodat(e)n(e) stolpec/stolpce"
+
+msgid "Select supplementary rows"
+msgstr "Izberite dodatne vrstice"
+
+msgid "Select supplementary row(s)"
+msgstr "Izberite dodatno/e vrstico/e"
+
+msgid "Graphical output"
+msgstr "Grafični izhod"
+
+msgid "Plot"
+msgstr "Riši"
+
+msgid "Label"
+msgstr "Oznaka"
+
+msgid "Active rows"
+msgstr "Aktivne vrstice"
+
+msgid "Supplementary rows"
+msgstr " Dodatne vrstice"
+
+msgid "Active columns"
+msgstr "Aktivni stolpci"
+
+msgid "Supplementary columns"
+msgstr "  Dodatni stolpci"
+
+msgid "Color for active rows"
+msgstr "Barva za aktivne vrstice"
+
+msgid "Color for supplementary rows"
+msgstr "Barva za dodatne vrstice"
+
+msgid "Color for active columns"
+msgstr "Barva za aktivne stolpce"
+
+msgid "Color for supplementary columns"
+msgstr "Barva za dodatne stolpce"
+
+msgid "Results for column variables"
+msgstr "Rezultati za spremenljivke v stolpcih"
+
+msgid "Results for column supplementary variables"
+msgstr "Rezultati za dodatne spremenljivke v stolpcih"
+
+msgid "Results for row variables"
+msgstr "Rezultati za spremenljivke v vrsticah"
+
+msgid "Results for row supplementary variables"
+msgstr "Rezultati za dodatne spremenljivke v vrsticah"
+
+msgid "Select the outputs options"
+msgstr "Možnosti izhodov"
+
+msgid "rows"
+msgstr "vrstice"
+
+msgid "columns"
+msgstr "stolpci"
+
+msgid "Perform clustering on: "
+msgstr "Izvedi grupiranje po:"
+
+msgid "CA"
+msgstr "KA - CA"
+
+msgid ""
+"Select the active rows and the active columns. \n"
+"By default all rows and all columns are active"
+msgstr ""
+"Izberite aktivne vrstice in aktivne stolpce.\n"
+"Privzeto so vse vrstice in vsi stolpci aktivni"
+
+msgid "Modify supplementary column variables"
+msgstr "Spremeni dodatne spremenljivke v stolpcih"
+
+msgid "Select supplementary column variables"
+msgstr "Izberite dodatne spremenljivke v stolpcih"
+
+msgid "Modify supplementary row variables"
+msgstr "Spremeni dodatne spremenljivke v vrsticah"
+
+msgid "Select supplementary row variables"
+msgstr "Izberi dodatne spremenljivke v vrsticah"
+
+msgid "Perform Clustering after CA"
+msgstr "Izvedi grupiranje po KA - CA"
+
+msgid "Correspondence Analysis (CA)"
+msgstr "Korespondenčna analiza (KA - CA)"
+
+msgid "No quantitative variable available"
+msgstr "Nobene kvantitativne spremenljivke ni na voljo"
+
+msgid "Select graphical options"
+msgstr "Izberite možnosti prikaza"
+
+msgid "Active individuals"
+msgstr "Aktivni posamezniki"
+
+msgid "Factors"
+msgstr "Faktorji"
+
+msgid "Color for active individuals"
+msgstr "Barve za aktivne posameznike"
+
+msgid "Color for supplementary factors"
+msgstr "Barve za dodatne faktorje"
+
+msgid "Plot supplementary variables graph"
+msgstr "Nariši prikaz dodatnih spremenljivk"
+
+msgid "Labels for the supplementary quantitative variables"
+msgstr "Oznake za dodatne kvantitativne spremenljivke"
+
+msgid "Active variables"
+msgstr "Aktivne spremenljivke"
+
+msgid "MCA"
+msgstr "VKA - MCA"
+
+msgid "Select supplementary quantitative variables"
+msgstr "Izberite dodatne kvantitativne spremenljivke"
+
+msgid "Perform Clustering after MCA"
+msgstr "Izvedi grupiranje po VKA"
+
+msgid "Multiple Correspondence Analysis (MCA)"
+msgstr "Večkratna korespondenčna analiza (VKA - MCA)"
+
+msgid "quantitative groups"
+msgstr "kvantitativne grupe"
+
+msgid "quantitative group"
+msgstr "kvantitativna grupa"
+
+msgid "Definition of a quantitatif group"
+msgstr "Definicija kvantitativne grupe"
+
+msgid "Name for the group"
+msgstr "Ime grupe"
+
+msgid "warning"
+msgstr "opozorilo"
+
+msgid "ok"
+msgstr "OK"
+
+msgid "Name of the group:"
+msgstr "Ime grupe:"
+
+msgid "Status of the group:"
+msgstr "Status grupe:"
+
+msgid "Active"
+msgstr "Aktivna"
+
+msgid "Supplementary"
+msgstr "Dodatna"
+
+msgid "Scale the variable of the group:"
+msgstr "Pretvori spremenljivko grupe v lestvico:"
+
+msgid "Yes"
+msgstr "Da"
+
+msgid "No"
+msgstr "Ne"
+
+msgid "Select the variables for the group"
+msgstr "Izberi spremenljivke za grupo"
+
+msgid "Modification of a quantitative group"
+msgstr "Sprememba kvantitativne grupe"
+
+msgid "Scale the variables of the group:"
+msgstr "Pretvori spremenljivke grupe v lestvice:"
+
+msgid "Select the variables of the group"
+msgstr "Izberi spremenljivke v grupi"
+
+msgid "qualitative groups"
+msgstr "kvalitativne grupe"
+
+msgid "qualitative group"
+msgstr "kvalitativna grupa"
+
+msgid "Construction of a qualitative group"
+msgstr "Tvorba kvalitativne grupe"
+
+msgid "Modification of a qualitative group"
+msgstr "Sprememba kvalitativne grupe"
+
+msgid "Give a name for the group"
+msgstr "Daj ime grupi"
+
+msgid "Output options"
+msgstr "Nastavitve izhoda"
+
+msgid "Results for the groups"
+msgstr "Rezultati grup"
+
+msgid "Inertia"
+msgstr "Vztrajnost"
+
+msgid "Results for the active individuals"
+msgstr "Rezultati za aktivne posameznike"
+
+msgid "Results for the supplementary individuals"
+msgstr "Rezultati za dodatne posameznike"
+
+msgid "Summary of the quantitative variables"
+msgstr "Izvleček za kvantitativne spremenljivke"
+
+msgid "Results of the quantitative variables"
+msgstr "Rezultati za kvantitativne spremenljivke"
+
+msgid "Results of the supplementary quantitative variables"
+msgstr "Rezultati za dodatne kvantitativne spremenljivke"
+
+msgid "Summary of the qualitative variables"
+msgstr "Izvleček za kvalitativne spremenljivke"
+
+msgid "Results of the qualitative variables"
+msgstr "Rezultati za kvalitativne spremenljivke"
+
+msgid "Results of the supplementary qualitative variables"
+msgstr "Rezultati za dodatne kvalitativne spremenljivke"
+
+msgid "Results for the partial axes"
+msgstr "Rezultati za delne osi"
+
+msgid "Graph of the groups"
+msgstr "Prikaz grup"
+
+msgid "Labels for the groups"
+msgstr "Oznake grup"
+
+msgid "Graph of the partial axes"
+msgstr "Prikaz delnih osi"
+
+msgid "Color the partial axes by group"
+msgstr "Barva delnih osi grup"
+
+msgid "Graph of the variables"
+msgstr "Prikaz spremenljivk"
+
+msgid "Labels for the variables"
+msgstr "Oznake spremenljivk"
+
+msgid "Color the variables by group"
+msgstr "Barva spremenljivk v grupi"
+
+msgid "active variables"
+msgstr "aktivne spremenljivke"
+
+msgid "supplementary variables"
+msgstr "dodatne spremenljivke"
+
+msgid "Graph of the individuals"
+msgstr "Prikaz posameznikov"
+
+msgid "Labels for the mean individuals"
+msgstr "Oznake povprečnih posameznikov"
+
+msgid "Labels for the partial individuals"
+msgstr "Oznake za delne posameznike"
+
+msgid "Labels for the factors"
+msgstr "Oznake faktorjev"
+
+msgid "Select drawing for the individuals"
+msgstr "Izberi prikaz za posameznike"
+
+msgid "Select the individuals for which partial points are drawn"
+msgstr "Izberite posameznike za katere so delne točke narisane"
+
+msgid "Interactive selection of the individuals"
+msgstr "Interaktivna izbira posameznikov"
+
+msgid "Chronologic representation of the partial points"
+msgstr "Kronološki prikaz delnih točk"
+
+msgid "MFA"
+msgstr "VFA - MFA"
+
+msgid "Quantitative groups"
+msgstr "Kvantitativne grupe"
+
+msgid "Add quanti. group"
+msgstr "Dodaj kvanti. gr"
+
+msgid "Add quanti group"
+msgstr "Dodaj kvanti gr"
+
+msgid "Modify 1 group"
+msgstr "Spremeni 1 grupo"
+
+msgid "Qualitative groups"
+msgstr "Kvalitativne grupe"
+
+msgid "Add quali. group"
+msgstr "Dodaj kvali. gr"
+
+msgid "Add quali group"
+msgstr "Dodaj kvali gr"
+
+msgid "Select the dimensions for the graphs:"
+msgstr "Izberite dimenzije prikazov:"
+
+msgid "Perform Clustering after MFA"
+msgstr "Izvedite grupiranje po VFA - MFA"
+
+msgid "Multiple Factor Analysis (MFA)"
+msgstr "Večkratna faktorska analiza (VFA - MFA)"
+
+msgid "groups"
+msgstr "grupe"
+
+msgid "group"
+msgstr "grupa"
+
+msgid "Definition of a group"
+msgstr "Definicija grupe"
+
+msgid "1 group"
+msgstr "1 grupa"
+
+msgid "Modification of a group"
+msgstr "Sprememba grupe"
+
+msgid "RV coefficients between partial configurations"
+msgstr "Koeficienti RV med delnimi konfiguracijami"
+
+msgid "Standardized RV coefficients between partial configurations"
+msgstr "Standardizirani koeficienti RV med delnimi konfiguracijami"
+
+msgid "Procrustes similarity indexes between partial configurations"
+msgstr "Procrustovi indeksi podobnosti med delnimi konfiguracijami"
+
+msgid "Isotropic scaling factors"
+msgstr "Izotropski faktorji lestvičenja"
+
+msgid "Initial partial configurations"
+msgstr "Začetne delne konfiguracije"
+
+msgid "Consensus configuration"
+msgstr "Usklajene konfiguracije"
+
+msgid "Partial configurations after transformations"
+msgstr "Delne konfiguracije po transformacijah"
+
+msgid ""
+"Procrustes Analysis of Variance tables, per configuration, per objet, per "
+"dimension"
+msgstr ""
+"Procrustova analiza tabel varianc po konfiguracijah, po predmetih in po "
+"dimenzijah"
+
+msgid ""
+"Correlations between initial partial configurations and consensus dimensions"
+msgstr ""
+"Korelacije med začetnimi delnimi konfiguracijami in usklajenimi dimenzijami"
+
+msgid "GPA"
+msgstr "SPA - GPA"
+
+msgid "Add 1 group"
+msgstr "Dodaj 1 grupo"
+
+msgid "Maximum number of iteration for the algorithm:"
+msgstr "Največje dovoljeno število iteracij tega algoritma:"
+
+msgid "Stopping threshold for the algorithm:"
+msgstr "Prag ustavljanja tega algoritma:"
+
+msgid "General Procrustes Analysis (GPA)"
+msgstr "Splošna Procrustova analiza (SPA - GPA)"
+
+msgid "FAMD"
+msgstr "FAMP - FAMD"
+
+msgid "Results for the variables"
+msgstr "Rezultati spremenljivk"
+
+msgid "Graph of all the variables"
+msgstr "Prikaz vseh spremenljivk"
+
+msgid "Color of the quantitative variables"
+msgstr "Barva kvalitativnih spremenljivk"
+
+msgid "color for supplementary quantitative variables"
+msgstr "barva dodatnih kvalitativnih spremenljivk"
+
+msgid "color for qualitative variables"
+msgstr "barva kvalitativnih spremenljivk"
+
+msgid "color for supplementary qualitative variables"
+msgstr "barva dodatnih kvalitativnih spremenljivk"
+
+msgid "Graph of the quantitative variables"
+msgstr "Prikaz kvalitativnih spremenljivk"
+
+msgid "Color of the active variables"
+msgstr "Barva aktivnih spremenljivk"
+
+msgid "color for supplementary variables"
+msgstr "Barva dodatnih aktivnih spremenljivk"
+
+msgid "Perform Clustering after FAMD"
+msgstr "Izvedi grupiranje po FAMP - FAMD"
+
+msgid "Factor Analysis for Mixed Data (FAMD)"
+msgstr "Faktorska analiza za mešane podatke (FAMP - FAMD)"
+
+msgid "Factor Analysis of Mixed Data (FAMD)"
+msgstr "Faktorska analiza mešanih podatkov (FAMP - FAMD)"
+
+msgid "DMFA"
+msgstr "DVFA - DMFA"
+
+msgid "Group of individuals"
+msgstr "Grupa posameznikov"
+
+msgid "Results for partial variables"
+msgstr "Rezultati delnih spremenljivk"
+
+msgid "Covariance matrices by group"
+msgstr "Kovariančna matrika po grupah"
+
+msgid "Graph the groups"
+msgstr "Prikaz grup"
+
+msgid "Scale the quantative variables:"
+msgstr "Pretvori kvantitativne spremenljivke v lestvice:"
+
+msgid "Dual Multiple Factor Analysis (DMFA)"
+msgstr "Dualna večkratna faktorska analiza (DVFA - DMFA)"
+
+msgid "Plot the graphs: "
+msgstr "Nariši prikaze:"
+
+msgid "Perform Clustering after HMFA"
+msgstr "Izvedi grupiranje po HMFA"
+
+msgid "Select one group for the 2nd level of the hierarchy"
+msgstr "Izberi eno grupo za drugo raven hierarhije"
+
+msgid "Select one group for the 3rd level of the hierarchy"
+msgstr "Izberi eno grupo za tretjo raven hierarhije"
+
+msgid "Results for individuals"
+msgstr "Rezultati posameznikov"
+
+msgid "Results for partial representation"
+msgstr "Rezultati delnih predstavnikov"
+
+msgid "Results for quantitative variables"
+msgstr "Rezultati kvantitativnih spremenljivk"
+
+msgid "Results for qualitative variables"
+msgstr "Rezultati kvantitativnih spremenljivk"
+
+msgid "Valid the group"
+msgstr "Preveri grupo"
+
+msgid "Next level of the hierarchy"
+msgstr "Naslednja raven hierarhije"
+
+msgid "Run the HMFA"
+msgstr "Poženi HMFA"
+
+msgid "For the result of a CA, perform clustering on:"
+msgstr "Za rezultat KA - CA, izvedi še grupiranje:"
+
+msgid "Outputs options"
+msgstr "Možnosti izhoda"
+
+msgid "Select outputs options"
+msgstr "Izberite možnosti izhoda"
+
+msgid "red"
+msgstr "rdeče"
+
+msgid "Print clusters individuals belong to "
+msgstr "Tiskaj grupe kamor spadajo posamezniki"
+
+msgid "Print description of clusters by continuous variables "
+msgstr "Tiskaj opise grup z zveznimi spremenljivkami"
+
+msgid "Print description of clusters by factors"
+msgstr "Tiskaj opise grup po faktorjih"
+
+msgid "Print parangons and most typical individuals for each cluster"
+msgstr "Tiskaj vzornike in najbolj tipične posameznike vsake grupe"
+
+msgid "Hierarchical Clustering on Principal Components (HCPC)"
+msgstr "Hierarhično grupiranje na glavnih komponentah (HGGK - HCPC)"
+
+msgid "Description of categories"
+msgstr "Opisi kategorij"
+
+msgid "P-value:"
+msgstr "Vrednost P:"
+
+msgid "Description by qualitative variables"
+msgstr "Opisi po kvalitativnih spremenljivkah"
+
+msgid "Description by categories"
+msgstr "Opisi po kategorijah"
+
+msgid "Description by quantitative variables"
+msgstr "Opisi po kvantitativnih spremenljivkah"
+
+msgid "Options for the outputs"
+msgstr "Možnosti izhoda"
+
+msgid "No variable selected for the variable to describe"
+msgstr "Nobene spremenljivke še ni izbrane za opis"
+
+msgid "Choose the variable to describe:"
+msgstr "Izberite spremenljivko za opis:"
+
+msgid "Choose the quantitative variables (by default all)"
+msgstr "Izberite kvantitativne spremenljivke (privzeto vse)"
+
+msgid "Choose the qualitative variables (by default all)"
+msgstr "Izberite kvalitativne spremenljivke (privzeto vse)"
+
+msgid "Tutorial"
+msgstr "Učbenik"
+
+msgid "Clustering is performed on the first %s dimensions of PCA"
+msgstr "Grupiranje se izvede na prvih %s dimenzijah AGK - PCA"
+
+msgid "Clustering is performed on the first %s dimensions of CA"
+msgstr "Grupiranje se izvede na prvih %s dimenzijah KA - CA"
+
+msgid "Clustering is performed on the first %s dimensions of MCA"
+msgstr "Grupiranje se izvede na prvih %s dimenzijah MCA"
+
+msgid "Clustering is performed on the first %s dimensions of MFA"
+msgstr "Grupiranje se izvede na prvih %s dimenzijah VFA - MFA"
+
+msgid "Clustering is performed on the first %s dimensions of FAMD"
+msgstr "Grupiranje se izvede na prvih %s dimenzijah FAMP - FAMD"
+
+msgid "Select the group variable"
+msgstr "Izberite grupno spremenljivko"
+
+msgid "Select quantitative variables"
+msgstr "Izberite kvantitativne spremenljivke"
+
+msgid "Factor Analysis of Mixed Data(FAMD)"
+msgstr "Faktorska analiza mešanih podatkov (FAMP - FAMD)"
+
+msgid "Perform clustering on:"
+msgstr "Grupiraj po:"
+
+msgid "Delete"
+msgstr "Briši"
+
+msgid "No variable selected for the 'x' axis"
+msgstr "Nobene spremenljivke ni izbrane za os x"
+
+msgid "No variable selected for the 'y' axis"
+msgstr "Nobene spremenljivke ni izbrane za os y"
+
+msgid "Plot the graph of the individuals"
+msgstr "Nariši prikaz posameznikov"
+
+msgid "Plot the graph of the additional variables"
+msgstr "Nariši prikaz dodatnih spremenljivk"
+
+msgid "Same scale for 'x' and 'y'"
+msgstr "Enako merilo za 'x' in 'y'"
+
+msgid "Scatter plot with additional variables"
+msgstr "Raztreseni grafikon za dodatne spremenljivke"
+
+msgid "Variables (double-click to select the two variables)"
+msgstr "Spremenljivke (dvakrat kliknite za izbiro dveh spremenljivk)"
+
+msgid "'x' variable:"
+msgstr "Spremenljivka 'x' :"
+
+msgid "'y' variable:"
+msgstr "Spremenljivka 'y' :"
+
+msgid "by.group"
+msgstr "po grupi"
+
+msgid "None"
+msgstr "Noben"
+
+msgid "Select factors"
+msgstr "Izberite faktorje"
+
+msgid "Select an object"
+msgstr "Izberite predmet"
+
+msgid "Confidence ellipses around rows"
+msgstr "Elipse zaupanja okrog vrstic"
+
+msgid "Confidence ellipses around columns"
+msgstr "Elipse zaupanja okrog stolpcev"
+
+#~ msgid "Draw the labels of the variables"
+#~ msgstr "Nariši oznake spremenljivk"
+
+#~ msgid "Draw labels of the variables"
+#~ msgstr "Nariši oznake spremenljivk"
+
+#~ msgid "Draw labels of the groups"
+#~ msgstr "Nariši oznake grup"
+
+#~ msgid "Draw labels for the qualitative variables"
+#~ msgstr "Nariši oznake kvalitativnih spremeljivk"
+
+#~ msgid "Threshold for the algorithm: "
+#~ msgstr "Prag algoritma: "
+
+#~ msgid "Select supplementary individuals"
+#~ msgstr "Izberite dodatne posameznike"
+
+#~ msgid " dimensions of PCA"
+#~ msgstr " začetne dimenzije AGK - PCA"
+
+#~ msgid "Threshold with respect to which the algorithm stops: "
+#~ msgstr "Prag zaustavitve algoritma: "
