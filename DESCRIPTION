@@ -1,7 +1,7 @@
 Package: RcmdrPlugin.FactoMineR
 Type: Package
-Version: 1.6-0
-Date: 2016-01-04
+Version: 1.7
+Date: 2020-02-02
 Title: Graphical User Interface for FactoMineR
 Author: Francois Husson, Julie Josse, Sebastien Le
 Maintainer: Francois Husson <francois.husson@agrocampus-ouest.fr>
@@ -9,10 +9,10 @@ Imports: Rcmdr (>= 2.0-0), tcltk
 Depends: FactoMineR
 Description: Rcmdr Plugin for the 'FactoMineR' package.
 License: GPL (>= 2)
-URL: http://factominer.free.fr, http://www.agrocampus-ouest.fr/math/
+URL: http://factominer.free.fr/graphs/RcmdrPlugin.html
 LazyLoad: no
 Encoding: latin1
 NeedsCompilation: no
-Packaged: 2016-01-06 09:04:58 UTC; husson
+Packaged: 2020-02-03 07:33:31 UTC; husson
 Repository: CRAN
-Date/Publication: 2016-01-06 10:15:30
+Date/Publication: 2020-02-03 08:00:02 UTC

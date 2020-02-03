@@ -1532,6 +1532,14 @@ function()
       commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
     justDoIt(commande.hcpc)
     logger(commande.hcpc)      
+	if ((Axe[1]!=1)||(Axe[2]!=2)){
+	  command.plothcpc <- paste('plot(',nom.res,'.hcpc, axes=c(', paste(Axe, collapse=", "), '),new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc)
+      logger(command.plothcpc)
+	  command.plothcpc2 <- paste('plot(',nom.res,'.hcpc, choice="map",axes=c(', paste(Axe, collapse=", "), '),draw.tree=FALSE, new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc2)
+      logger(command.plothcpc2)
+	}
       if(Rreshcpc==TRUE){
         doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
         doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
@@ -1551,6 +1559,7 @@ function()
           if (GTitle ==" ") commande.plotG <- paste(commande.plotG,')', sep="")
           else commande.plotG <- paste(commande.plotG,', title="', GTitle,'")', sep="")
         }
+	    commande.plotG <- paste0("print(",commande.plotG,")")
         justDoIt(commande.plotG)
         logger(commande.plotG)
       }}
@@ -1563,6 +1572,7 @@ function()
           if (ATitle ==" ") commande.plotA <- paste(commande.plotA,')', sep="")
           else commande.plotA <- paste(commande.plotA,', title="', ATitle,'")', sep="")
         }
+	    commande.plotA <- paste0("print(",commande.plotA,")")
         justDoIt(commande.plotA)
         logger(commande.plotA) 
       }}
@@ -1576,6 +1586,7 @@ function()
           if (WTitle ==" ") commande.plotW <- paste(commande.plotW,')', sep="")
           else commande.plotW <- paste(commande.plotW,', title="', WTitle,'")', sep="")
         }
+	    commande.plotW <- paste0("print(",commande.plotW,")")
         justDoIt(commande.plotW)
         logger(commande.plotW)
       }}
@@ -1615,6 +1626,7 @@ function()
             else commande.plotI <- paste(commande.plotI,', title="', RTitle,'")', sep="")
           }
         }
+	    commande.plotI <- paste0("print(",commande.plotI,")")
         justDoIt(commande.plotI)
         logger(commande.plotI)
       }}

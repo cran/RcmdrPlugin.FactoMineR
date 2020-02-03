@@ -721,7 +721,7 @@ FactoCA <- function(){
     if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) {if (get(nom.res)$eig[1,2]==100) doItAndPrint(paste('"No graph can be plot: data are unidimensional"'))}
     if((Rchoix)&(length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0)){
     if (get(nom.res)$eig[1,2]!=100) {
-      if (is.null(Rell)) commande.plot<-paste('plot.CA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.row="', Rcol.row, '", col.col="', Rcol.col, '", label=c("', paste(Rlabel, collapse='", "'), '")', sep="")
+      if (Rell==c("")) commande.plot<-paste('plot.CA(', nom.res, ', axes=c(', paste(Axe, collapse=", "), '), col.row="', Rcol.row, '", col.col="', Rcol.col, '", label=c("', paste(Rlabel, collapse='", "'), '")', sep="")
 	  else commande.plot<-paste('ellipseCA(', nom.res,', ellipse=c("', paste(Rell, collapse='", "'), '"), axes=c(', paste(Axe, collapse=", "), '), col.row="', Rcol.row, '", col.col="', Rcol.col, '", label=c("', paste(Rlabel, collapse='", "'), '")', sep="")
       if (!is.null(RXlimInd)) commande.plot<-paste(commande.plot, ', xlim=c(', paste(RXlimInd, collapse=", "), ')')
       if (!is.null(RYlimInd)) commande.plot<-paste(commande.plot, ', ylim=c(', paste(RYlimInd, collapse=", "), ')')
@@ -733,6 +733,7 @@ FactoCA <- function(){
         if (RTitle ==" ") commande.plot <- paste(commande.plot,')', sep="")
         else commande.plot <- paste(commande.plot,', title="', RTitle,'")', sep="")
       }
+	  if (Rell==c("")) commande.plot <- paste0("print(",commande.plot,")")
       justDoIt(commande.plot)
       logger(commande.plot)
     }}
@@ -743,6 +744,14 @@ FactoCA <- function(){
       commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',cluster.CA="',RclassifCA,'",graph=', Rgraphhcpc, ')', sep="")
     justDoIt(commande.hcpc)
     logger(commande.hcpc)      
+	if ((Axe[1]!=1)||(Axe[2]!=2)){
+	  command.plothcpc <- paste('plot(',nom.res,'.hcpc, axes=c(', paste(Axe, collapse=", "), '),new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc)
+      logger(command.plothcpc)
+	  command.plothcpc2 <- paste('plot(',nom.res,'.hcpc, choice="map",axes=c(', paste(Axe, collapse=", "), '),draw.tree=FALSE, new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc2)
+      logger(command.plothcpc2)
+	}
       if(Rreshcpc==TRUE){
         doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
         doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))

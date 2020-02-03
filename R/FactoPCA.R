@@ -914,6 +914,16 @@ function()                                                                      
       commande.hcpc<-paste(nom.res,'.hcpc', '<-HCPC(', nom.res, ' ,nb.clust=', Rmeth, ',consol=', Rconsolid,',min=', Rminhcpc,',max=',Rmaxhcpc,',graph=', Rgraphhcpc, ')', sep="")
     justDoIt(commande.hcpc)
     logger(commande.hcpc)
+	
+	if ((Axe[1]!=1)||(Axe[2]!=2)){
+	  command.plothcpc <- paste('plot(',nom.res,'.hcpc, axes=c(', paste(Axe, collapse=", "), '),new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc)
+      logger(command.plothcpc)
+	  command.plothcpc2 <- paste('plot(',nom.res,'.hcpc, choice="map",axes=c(', paste(Axe, collapse=", "), '),draw.tree=FALSE, new.plot=TRUE)',sep="")
+      justDoIt(command.plothcpc2)
+      logger(command.plothcpc2)
+	}
+	
       if(Rreshcpc==TRUE){                          #if Rreshcpc is TRUE then results are printed
         doItAndPrint(paste(nom.res,'.hcpc$data.clust[,ncol(res.hcpc$data.clust),drop=F]', sep=""))
         doItAndPrint(paste(nom.res,'.hcpc$desc.var', sep=""))
@@ -943,6 +953,7 @@ function()                                                                      
         if (RTitle ==" ") commande.plotInd <- paste(commande.plotInd,')', sep="")
         else commande.plotInd <- paste(commande.plotInd,', title="', RTitle,'")', sep="")
       }
+	  commande.plotInd <- paste0("print(",commande.plotInd,")")
       justDoIt(commande.plotInd)
       logger(commande.plotInd)
     }}
@@ -956,6 +967,7 @@ function()                                                                      
         if (WTitle ==" ") commande.plotVar <- paste(commande.plotVar,')', sep="")
         else commande.plotVar <- paste(commande.plotVar,', title="', WTitle,'")', sep="")
       }
+	  commande.plotVar <- paste0("print(",commande.plotVar,")")
       justDoIt(commande.plotVar)
       logger(commande.plotVar)
     }}
@@ -1134,5 +1146,4 @@ function()                                                                      
   tkgrid(buttonsFrame, appliquer.but)
   tkgrid.configure(buttonsFrame, column=1,sticky="e")
   tkgrid.configure(appliquer.but, column=2,sticky="w")
-
 }
