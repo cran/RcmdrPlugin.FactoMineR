@@ -3,7 +3,7 @@ function(){
     top<-tktoplevel(borderwidth=5)
     tkwm.title(top,"HCPC")
 
-# définition des polices
+# definition des polices
   font2<-tkfont.create(family="times",size=12,weight="bold")
   fontheading<-tkfont.create(family="times",size=13,weight="bold")
 
@@ -208,7 +208,7 @@ HcpcFrame<-tkframe(top,relief="ridge",borderwidth=2)
     return(done)
  }
  
-# Fonction principale qui lance HCPC et ferme la fenêtre------------------------------------------------------------------------------------------------------------
+# Fonction principale qui lance HCPC et ferme la fenetre------------------------------------------------------------------------------------------------------------
 onOK <- function(){
   done = App()
   if (done >0) tkdestroy(top)

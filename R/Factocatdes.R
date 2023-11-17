@@ -61,7 +61,7 @@ tkwm.title(top,.Facto_gettext("Description of categories"))
     tkgrid(resu.lab,resu,sticky="w")
 
 
-#################### Fonctions liées au bouton 'Sorties' --------------------------------------------------------------------------------------------------
+#################### Fonctions liees au bouton 'Sorties' --------------------------------------------------------------------------------------------------
 
 env<-environment()
 if (length(vars.fact)>1){

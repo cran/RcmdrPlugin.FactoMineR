@@ -2,10 +2,10 @@ FactoMCA <-
 function()
 {
 
-#    Création des fonctions pour les options via nouvelle fenêtre graphique
+#    Creation des fonctions pour les options via nouvelle fenetre graphique
 
 
-  #! fonction pour le choix des variables qualitatives supplémentaires
+  #! fonction pour le choix des variables qualitatives supplementaires
   Fillu.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
@@ -18,7 +18,7 @@ function()
 
       FilluWin<-tktoplevel()
       tkwm.title(FilluWin,.Facto_gettext("Choice of supplementary factors"))
-      #création de la fonction FOK.funct
+      #creation de la fonction FOK.funct
       FOK.funct<-function()
       {
         fact.select<-listfact.nom[as.numeric(tkcurselection(listfact))+1]
@@ -36,7 +36,7 @@ function()
         tkdestroy(FilluWin)
       }
 
-      # création et mise en page de la fenetre Fillu
+      # creation et mise en page de la fenetre Fillu
       listfact<-tklistbox(FilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrfact,...)) # Liste vide
       scrfact <-tkscrollbar(FilluWin,repeatinterval=5,command=function(...)tkyview(listfact,...))
       listfact.nom<-NULL
@@ -69,7 +69,7 @@ function()
    tkgrid(Fillu.but, sticky="ew")
   })
 
-  #! fonction pour le choix des variables quantitatives supplémentaires
+  #! fonction pour le choix des variables quantitatives supplementaires
   Dillu.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
@@ -79,7 +79,7 @@ function()
     {
       DilluWin<-tktoplevel()
       tkwm.title(DilluWin,.Facto_gettext("Select supplementary quantitative variables"))
-      #création de la fonction DOK.funct
+      #creation de la fonction DOK.funct
       DOK.funct<-function()
       {
         vsup.select<-listvar.nom[as.numeric(tkcurselection(listvar))+1]
@@ -97,7 +97,7 @@ function()
         tkdestroy(DilluWin)
       }
 
-      # création et mise en page de la fenetre Dillu
+      # creation et mise en page de la fenetre Dillu
       listvar<-tklistbox(DilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrvar,...)) # Liste vide
       scrvar <-tkscrollbar(DilluWin,repeatinterval=5,command=function(...)tkyview(listvar,...))
       listvar.nom<-NULL
@@ -135,7 +135,7 @@ function()
   })
 
 
-  #! fonction pour le choix des individus supplémentaires
+  #! fonction pour le choix des individus supplementaires
   Iillu.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
@@ -145,7 +145,7 @@ function()
     {
       IilluWin<-tktoplevel()
       tkwm.title(IilluWin,.Facto_gettext("Select supplementary individual(s)"))
-      #création de la fonction IOK.funct
+      #creation de la fonction IOK.funct
       IOK.funct<-function()
       {
         ind.select<-rows[as.numeric(tkcurselection(listind))+1]
@@ -162,7 +162,7 @@ function()
         tkdestroy(IilluWin)
       }
 
-      # création et mise en page de la fenetre Fillu
+      # creation et mise en page de la fenetre Fillu
       listind<-tklistbox(IilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrind,...)) # Liste vide
       scrind <-tkscrollbar(IilluWin,repeatinterval=5,command=function(...)tkyview(listind,...))
       indice<-0
@@ -197,7 +197,7 @@ function()
   {
     env<-environment()
     compteur.graph<-0
-    #déclaration des variables
+    #declaration des variables
     Rchoix<-TRUE
     RTitle<-NULL
     Rlabel<-c("ind", "ind.sup", "quali.sup","var")
@@ -235,14 +235,14 @@ function()
       tkwm.title(PlotWin, .Facto_gettext("Select graphical options"))
       tkwm.geometry(PlotWin, "-100+50")
 
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOKsub<-function()
       {
         assign("compteur.graph", compteur.graph+1, envir=env)
         if(compteur.graph>0) tclvalue(.PlotLabel)<-paste(label, "", sep=" ")
         tkconfigure(Plot.but, fg="blue")
 
-        # gestion des entrées de la partie graphique des individus
+        # gestion des entrees de la partie graphique des individus
         if(tclvalue(ind.check.value)==1) assign("Rchoix", TRUE, envir=env)
         else assign("Rchoix", FALSE, envir=env)
 
@@ -457,7 +457,7 @@ function()
     YlimIndMax.entry <-tkentry(RlimFrame,width="5",textvariable=YlimIndMax)
     tkgrid(tklabel(RlimFrame,text=.Facto_gettext("y limits of the graph:")),YlimIndMin.entry,YlimIndMax.entry)
 
-    #mise en page des différents frames de PlotIndFrame
+    #mise en page des differents frames de PlotIndFrame
     #tkgrid(tklabel(PlotIndFrame, text=.Facto_gettext("Individuals graph"), font=font2))
     #tkgrid(tklabel(PlotIndFrame, text=" "))
     tkgrid(RchoixFrame)
@@ -511,7 +511,7 @@ function()
     ChangeColor.quanti.sup.button <- tkbutton(WcolFrame,text=.Facto_gettext("Change Color"),command=ChangeColor.quanti.sup)
     tkgrid(tklabel(WcolFrame, text=.Facto_gettext("Color for supplementary variables")),canvas.quanti.sup,ChangeColor.quanti.sup.button)
 
-    #mise en page des différents frames de PlotVarFrame
+    #mise en page des differents frames de PlotVarFrame
     tkgrid(WchoixFrame)
     tkgrid(WTitleFrame)
     #tkgrid(WcosFrame)
@@ -520,7 +520,7 @@ function()
     tkgrid(WcolFrame)
     tkgrid(tklabel(PlotVarFrame, text=" "))
     
-################Début à changer
+################Debut a changer
     PlotVVarFrame<-tkframe(PlotWin, borderwidth=5, relief="groove")
     VchoixFrame<-tkframe(PlotVVarFrame,borderwidth=2)
     var.check<-tkcheckbutton(VchoixFrame)
@@ -589,7 +589,7 @@ function()
     ChangeColor.quali.sup.button <- tkbutton(VcolFrame,text=.Facto_gettext("Change Color"),command=ChangeColor.quali.sup)
     tkgrid(tklabel(VcolFrame, text=.Facto_gettext("Color for supplementary variables")),canvas.quali.sup,ChangeColor.quali.sup.button)
 
-    #mise en page des différents frames de PlotVarFrame
+    #mise en page des differents frames de PlotVarFrame
     tkgrid(VchoixFrame)
     tkgrid(VTitleFrame)
     tkgrid(VlabelFrame)
@@ -597,7 +597,7 @@ function()
     tkgrid(VcolFrame)
     tkgrid(tklabel(PlotVVarFrame, text=" "))
     
-################Fin à changer
+################Fin a changer
 
     # construction de la partie graphique des variables
 
@@ -617,7 +617,7 @@ function()
   })
 
 
-  #! fonction pour la réinitialisation des paramètre
+  #! fonction pour la reinitialisation des parametre
   Reinitializ.funct<-function()
   {
     tkdestroy(top)
@@ -625,12 +625,12 @@ function()
   }
 
 
-  #! fonction pour le choix des éléments de sortie
+  #! fonction pour le choix des elements de sortie
   Sortie.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
     compteur.sortie<-0
-    #déclaration des variables
+    #declaration des variables
     Rpropre<-FALSE
     RFichier <- ""
         Rvariable<-FALSE
@@ -647,7 +647,7 @@ function()
       SortieWin<-tktoplevel()
       tkwm.title(SortieWin,"Displayed outputs")
 
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOK.sortie<-function()
       {
         assign("compteur.sortie", compteur.sortie+1, envir=env)
@@ -879,21 +879,21 @@ function()
     tkgrid(Hcpc.but, sticky="ew")
 }) 
 
-  #! fonction associée au bouton OK, execute et détruit l'interface graphique
+  #! fonction associee au bouton OK, execute et detruit l'interface graphique
 onOK <- function(){
   done = OnAppliquer()
   tkdestroy(top)
 }
 
-  #! fonction associer au bouton Appliquer, execute sans détruire la fenêtre top
+  #! fonction associer au bouton Appliquer, execute sans detruire la fenetre top
   OnAppliquer<-function()
   {
-    # liste de toutes les variables interne créées      (** mise en forme incomplète)
+    # liste de toutes les variables interne creees      (** mise en forme incomplete)
       # sur la fenetre principale
 #         listdesc         **
 #         resu.val         **
 #         ncp.val          **
-      # dans les boutons des fenêtres illustratives
+      # dans les boutons des fenetres illustratives
 #         variablefact     **
 #         variableillu     **
 #         individuillu     **
@@ -917,7 +917,7 @@ onOK <- function(){
 #           Rqualisup
 
 
-    # récupération des paramètres de la fenêtre principale
+    # recuperation des parametres de la fenetre principale
     nom.res<-tclvalue(resu.val)
     if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     if(length(as.numeric(tkcurselection(listdesc)))<2) varActives<-listdesc.nom
@@ -926,7 +926,7 @@ onOK <- function(){
     ncp<-as.numeric(tclvalue(ncp.val))
     Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
 
-    # gestion du tableau de données pour l'ACM
+    # gestion du tableau de donnees pour l'ACM
     if(!is.null(individuillu)) {
       ind.actif<-rows[-which(rows %in% individuillu)]
       if(!is.null(variableillu)) {
@@ -953,7 +953,7 @@ onOK <- function(){
     donnee.depart<-activeDataSet()
     activeDataSet(paste(activeDataSet(),'.', 'MCA', sep=""))
 
-    # gestion de la commande réalisant l'ACM
+    # gestion de la commande realisant l'ACM
     if(!is.null(individuillu)) {
       ind.actif<-rows[-which(rows %in% individuillu)]
       if(!is.null(variableillu)) {
@@ -1049,7 +1049,7 @@ onOK <- function(){
       logger(commande.plotW)
     }}
 
-    # gestion de l'édition de certains resultats
+    # gestion de l'edition de certains resultats
     doItAndPrint(paste('summary(',nom.res,', nb.dec = 3, nbelements=10, nbind = 10, ncp = 3, file="")', sep=""))
     if (RFichier==""){
       if(Rpropre) doItAndPrint(paste( nom.res, '$eig', sep=""))
@@ -1092,7 +1092,7 @@ onOK <- function(){
       if(Rdescdim) doItAndPrint(paste('write.infile(dimdesc(', nom.res, ', axes=1:',ncp,'), file =',Fich,',append=',append,')', sep=""))
     }
 
-    # Re-chargement du tableau de départ et supression du tableau temporaire
+    # Re-chargement du tableau de depart et supression du tableau temporaire
     activeDataSet(donnee.depart)
     justDoIt(paste('remove(',activeDataSet(),'.MCA)',sep=""))
     logger(paste('remove(',activeDataSet(),'.MCA)',sep=""))
@@ -1100,22 +1100,22 @@ onOK <- function(){
 
 
 ################################################################################
-#                   Création de la fenêtre top                                 #
+#                   Creation de la fenetre top                                 #
 ################################################################################
   top<-tktoplevel(borderwidth=10)
   tkwm.title(top, .Facto_gettext("MCA"))
   tkwm.geometry(top, "-100+50")
 
-  # définition des polices
+  # definition des polices
   font2<-tkfont.create(family="times",size=12,weight="bold")
   fontheading<-tkfont.create(family="times",size=18,weight="bold")
 
-  # récupération du jeu de données actif
+  # recuperation du jeu de donnees actif
   donnee<-get(getRcmdr(".activeDataSet"))
   vars<-colnames(donnee)
   rows<-rownames(donnee)
 
-  # création de la liste pour le choix des variables acives
+  # creation de la liste pour le choix des variables acives
   listdesc<-tklistbox(top,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scr,...))
   scr <-tkscrollbar(top,repeatinterval=5,command=function(...)tkyview(listdesc,...))
   listdesc.nom<-NULL
@@ -1126,7 +1126,7 @@ onOK <- function(){
       }
   }
 
-  # création de tous les boutons d'options dans IlluFrame
+  # creation de tous les boutons d'options dans IlluFrame
   IlluFrame<- tkframe(top, borderwidth=2)
        # mise en page de IlluFrame
 
@@ -1148,7 +1148,7 @@ onOK <- function(){
   tkgrid.columnconfigure(IlluFrame,2, minsize=40)
   tkgrid.columnconfigure(IlluFrame,4, minsize=40)
 
-  # création des options dans OptionFrame
+  # creation des options dans OptionFrame
   OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
   resu.lab<-tklabel(OptionFrame,text=.Facto_gettext("Name of the result object: "))
   resu.val<-tclVar("res")

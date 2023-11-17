@@ -9,13 +9,8 @@ RcmdrPlugin.FactoMineR package
 RcmdrPlugin.FactoMineR package
 }
 \details{
-\tabular{ll}{
-Package: \tab RcmdrPlugin.FactoMineR\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2014-08-13\cr
-License: \tab What license is it under?\cr
-}
+RcmdrPlugin.FactoMineR gives a plugin to easier use the FactoMineR package. The package Factoshiny should be preferred at RcmdrPlugin.FactoMineR.
+
 }
 \author{
 Francois Husson

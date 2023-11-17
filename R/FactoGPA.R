@@ -16,7 +16,7 @@ function()
   }
 ################################################################################
 
-#    Création des fonctions pour les options via nouvelle fenêtre graphique   
+#    Creation des fonctions pour les options via nouvelle fenetre graphique   
 
 
   #! suppression de groupes quantitatif
@@ -65,7 +65,7 @@ function()
       AjoutGpeQuantiWin<-tktoplevel()
       tkwm.title(AjoutGpeQuantiWin,.Facto_gettext("Definition of a group"))
       
-      #création de la fonction AGA.OK
+      #creation de la fonction AGA.OK
       AGQ.OK<-function()
       {
         assign("compteur.GQ", compteur.GQ+1, envir=env)
@@ -91,7 +91,7 @@ function()
       nomGrpeQuanti.val<-tclVar(paste("Gc", compteur.GQ, sep=""))
       nomGrpeQuanti<-tkentry(AjoutGpeQuantiWin,width=15,textvariable=nomGrpeQuanti.val)
                   
-      # création de la liste pour le choix des variables acives
+      # creation de la liste pour le choix des variables acives
       listVarQuanti<-tklistbox(AjoutGpeQuantiWin, selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrVarQuanti,...))
       scrVarQuanti<-tkscrollbar(AjoutGpeQuantiWin,repeatinterval=5,command=function(...)tkyview(listVarQuanti,...))
       listVarQuanti.nom<-NULL
@@ -136,7 +136,7 @@ function()
       ModifGpeQuantiWin<-tktoplevel()
       tkwm.title(ModifGpeQuantiWin,.Facto_gettext("Modification of a group"))
       
-      #création de la fonction AGA.OK
+      #creation de la fonction AGA.OK
       MGQ.OK<-function() {
         nom.groupe<-nom.correct(tclvalue(nomModifGrpeQuanti.val), liste=c(listQuantiAct.nom))
         if (nom.groupe=="") tkmessageBox(message=.Facto_gettext("Name for the group"), icon="warning", type="ok") 
@@ -169,7 +169,7 @@ function()
       nomModifGrpeQuanti.val<-tclVar(grpeAModifier)
       nomModifGrpeQuanti<-tkentry(ModifGpeQuantiWin,width=15,textvariable=nomModifGrpeQuanti.val)
             
-      # création de la liste pour le choix des variables acives
+      # creation de la liste pour le choix des variables acives
       listModifVarQuanti<-tklistbox(ModifGpeQuantiWin, selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrModifVarQuanti,...))
       scrModifVarQuanti<-tkscrollbar(ModifGpeQuantiWin,repeatinterval=5,command=function(...)tkyview(listModifVarQuanti,...))
       listModifVarQuanti.nom<-NULL
@@ -207,7 +207,7 @@ function()
   })    
   
   
-    #! fonction pour la réinitialisation des paramètre
+    #! fonction pour la reinitialisation des parametre
   Reinitializ.funct<-function()
   {
     tkdestroy(top)
@@ -215,12 +215,12 @@ function()
   }
 
 
-  #! fonction pour le choix des éléments de sortie
+  #! fonction pour le choix des elements de sortie
   Sortie.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
     compteur.sortie<-0
-    #déclaration des variables
+    #declaration des variables
     RFichier <- ""
     Rdep<-FALSE
     RRVs<-FALSE
@@ -239,7 +239,7 @@ function()
       SortieWin<-tktoplevel()
       tkwm.title(SortieWin,.Facto_gettext("Output options"))
 
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOK.sortie<-function()
       {
         assign("compteur.sortie", compteur.sortie+1, envir=env)
@@ -371,7 +371,7 @@ function()
     env<-environment()
     compteur.graph<-0
     .PlotLabel<-tclVar(paste(firstLabel, "", sep=" "))
-    #déclaration des variables
+    #declaration des variables
         
     Rchoix<-TRUE
     RTitle<-NULL
@@ -390,15 +390,15 @@ function()
       tkwm.geometry(PlotWin, "-100+50")
       PlotWin2<-tkframe(PlotWin)
 
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOKsub<-function()
       {
         assign("compteur.graph", compteur.graph+1, envir=env)
         if(compteur.graph>0) tclvalue(.PlotLabel)<-paste(label, .Facto_gettext(""), sep=" ")
         tkconfigure(Plot.but, fg="blue")
-        #récupération des dimensions à représenter
+        #recuperation des dimensions a representer
             
-        # gestion des entrées de la partie graphique des individus
+        # gestion des entrees de la partie graphique des individus
         if(tclvalue(ind.check.value)==1) assign("Rchoix", TRUE, envir=env)
         else assign("Rchoix", FALSE, envir=env)
 
@@ -436,7 +436,7 @@ function()
         tkdestroy(PlotWin)
       }
     
-      # création l'interface "options graphiques"
+      # creation l'interface "options graphiques"
     
               
       ##########################  
@@ -531,7 +531,7 @@ function()
       tkgrid(tklabel(RpartialFrame, text=.Facto_gettext("Interactive selection of the individuals")), partial.souris.check)
       tkgrid(tklabel(RpartialFrame, text=.Facto_gettext("Chronologic representation of the partial points")), partial.chrono.check)
   
-      #mise en page des différents frames de PlotIndFrame
+      #mise en page des differents frames de PlotIndFrame
       tkgrid(RchoixFrame)
       tkgrid(RTitleFrame)
       tkgrid(tklabel(PlotIndFrame, text=" "))
@@ -557,10 +557,10 @@ function()
 
 
 
-    #! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
+    #! fonction associee au bouton Appliquer, execute sans detruire l'interface graphique
   OnAppliquer<-function()
   {  
-    # récupération des paramètres de la fenêtre principale
+    # recuperation des parametres de la fenetre principale
     nom.res<-tclvalue(resu.val)
     if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))       #if object res already exists, it's removed
     nbiter<-as.numeric(tclvalue(nbiter.val))
@@ -568,14 +568,14 @@ function()
     tolerance<-as.numeric(tclvalue(tolerance.val))
     Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
     
-    # gestion du tableau de données pour la GPA
+    # gestion du tableau de donnees pour la GPA
     group<-NULL
     type<-NULL
     name.group<-NULL
     num.group.sup<-NULL
     variables<-NULL
     indice.grpe<-1
-      #récupération des groupes quanti actif
+      #recuperation des groupes quanti actif
     nb.GQA<-length(listQuantiAct.nom)
     if(nb.GQA>=1) {
       name.group<-c(name.group, listQuantiAct.nom)
@@ -591,7 +591,7 @@ function()
       }
     }
     
-      #construction du tableau de données.GPA
+      #construction du tableau de donnees.GPA
       commande.data<-paste(activeDataSet(),'.GPA', '<-', activeDataSet(),'[ , c("',paste(variables, collapse='", "'), '")]', sep="")
       
       justDoIt(commande.data)
@@ -599,7 +599,7 @@ function()
       donnee.depart<-activeDataSet()
       activeDataSet(paste(activeDataSet(),'.GPA', sep=""))
 
-      # gestion de la commande réalisant la GPA     
+      # gestion de la commande realisant la GPA     
       commande.GPA<-paste(nom.res, '<-GPA(', activeDataSet(), ', group=c(',paste(group, collapse=", "), '), name.group=c("',paste(name.group, collapse='", "'), '"), scale=',scaling,', graph=FALSE',sep="")
       if (nbiter!=200) commande.GPA<-paste(commande.GPA, ', nbiteration =',nbiter,sep='')
       if (tolerance!=1e-10) commande.GPA<-paste(commande.GPA, ', tolerance =',tolerance,sep='')
@@ -643,7 +643,7 @@ function()
         logger(commande.plotI)
       }
       
-      # gestion de l'édition de certains resultats
+      # gestion de l'edition de certains resultats
     if (RFichier==""){
       if(RRV) doItAndPrint(paste(nom.res, '$RV', sep=""))
       if(RRVs) doItAndPrint(paste( nom.res, '$RVs', sep=""))
@@ -695,14 +695,14 @@ function()
       if(RPANOVA) doItAndPrint(paste('write.infile(', nom.res, '$PANOVA, file =',Fich,',append=',append,')', sep=""))
     }
 
-      # Re-chargement du tableau de départ et supression du tableau temporaire
+      # Re-chargement du tableau de depart et supression du tableau temporaire
       activeDataSet(donnee.depart)
       justDoIt(paste('remove(',activeDataSet(),'.GPA)',sep=""))
       logger(paste('remove(',activeDataSet(),'.GPA)',sep=""))   
   }
 
 
-    #! fonction associée au bouton OK, execute et détruit l'interface graphique
+    #! fonction associee au bouton OK, execute et detruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()
@@ -711,22 +711,22 @@ function()
 
 
 
-#                   Création de la fenêtre top                                 #
+#                   Creation de la fenetre top                                 #
 ################################################################################
   top<-tktoplevel(borderwidth=10)
   tkwm.title(top,.Facto_gettext("GPA"))
   tkwm.geometry(top, "-50+50")
   
-  # définition des polices
+  # definition des polices
   font2<-tkfont.create(family="times",size=12,weight="bold")
   fontheading<-tkfont.create(family="times",size=11,weight="bold")
 
-  # récupération du jeu de données actif
+  # recuperation du jeu de donnees actif
   donnee<-get(getRcmdr(".activeDataSet"))
   vars<-colnames(donnee)
   rows<-rownames(donnee)
   
-  # création du frame contenant les listes groupes quanti
+  # creation du frame contenant les listes groupes quanti
   ListeQuantiFrame<- tkframe(top, borderwidth=2, relief="groove")
   label.quantiFrame.var<-tclVar(.Facto_gettext("group"))
   label.quantiFrame<-tklabel(ListeQuantiFrame, textvariable=label.quantiFrame.var,fg = "darkred", font=fontheading)
@@ -757,7 +757,7 @@ function()
   tkgrid.columnconfigure(ListeQuantiFrame,5, minsize=35)
  
     
-   # création de tous les boutons d'options dans IlluFrame
+   # creation de tous les boutons d'options dans IlluFrame
   IlluFrame<- tkframe(top, borderwidth=2)
     # mise en page de IlluFrame
   PLOT.GPA(label=.Facto_gettext("Graphical options"), firstLabel=.Facto_gettext("Graphical options"))
@@ -770,7 +770,7 @@ function()
   tkgrid.columnconfigure(IlluFrame,4, minsize=25)  
 
 
-    # création des options dans OptionFrame  
+    # creation des options dans OptionFrame  
   OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
   resu.lab<-tklabel(OptionFrame,text=.Facto_gettext("Name of the result object: "))
   resu.val<-tclVar("res")

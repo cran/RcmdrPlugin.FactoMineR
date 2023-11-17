@@ -1,10 +1,10 @@
 FactoCA <- function(){
 
 ################################################################################
-#    Création des fonctions pour les options via nouvelle fenêtre graphique    #
+#    Creation des fonctions pour les options via nouvelle fenetre graphique    #
 ################################################################################
 
- #! fonction pour le choix des variables colonnes supplémentaires 
+ #! fonction pour le choix des variables colonnes supplementaires 
   Cillu.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
@@ -14,7 +14,7 @@ FactoCA <- function(){
     { 
       CilluWin<-tktoplevel()
       tkwm.title(CilluWin,.Facto_gettext("Select supplementary column(s)"))
-      #création de la fonction COK.funct
+      #creation de la fonction COK.funct
       COK.funct<-function()
       {
         vsup.select<-listvar.nom[as.numeric(tkcurselection(listvar))+1]
@@ -33,7 +33,7 @@ FactoCA <- function(){
         tkdestroy(CilluWin)
       }
       
-      # création et mise en page de la fenetre Cillu
+      # creation et mise en page de la fenetre Cillu
       listvar<-tklistbox(CilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrvar,...)) # Liste vide
       scrvar <-tkscrollbar(CilluWin,repeatinterval=5,command=function(...)tkyview(listvar,...)) 
       listvar.nom<-NULL
@@ -67,7 +67,7 @@ FactoCA <- function(){
   })
   
 
-  #! fonction pour le choix des variables lignes supplémentaires 
+  #! fonction pour le choix des variables lignes supplementaires 
   Lillu.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
@@ -77,7 +77,7 @@ FactoCA <- function(){
     {   
       LilluWin<-tktoplevel()
       tkwm.title(LilluWin,.Facto_gettext("Select supplementary rows"))
-      #création de la fonction LOK.funct
+      #creation de la fonction LOK.funct
       LOK.funct<-function()
       {
         Ligne.select<-rows[as.numeric(tkcurselection(listLigne))+1]
@@ -96,7 +96,7 @@ FactoCA <- function(){
         tkdestroy(LilluWin)
       }
       
-      # création et mise en page de la fenetre Lillu
+      # creation et mise en page de la fenetre Lillu
       listLigne<-tklistbox(LilluWin,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrLigne,...)) # Liste vide
       scrLigne <-tkscrollbar(LilluWin,repeatinterval=5,command=function(...)tkyview(listLigne,...)) 
       indice<-0
@@ -133,7 +133,7 @@ FactoCA <- function(){
   {
     env<-environment()
     compteur.graph<-0
-    #déclaration des variables
+    #declaration des variables
     Rchoix<-TRUE
     RTitle<-NULL
     Rlabel<-c("col", "col.sup", "row", "row.sup")
@@ -154,7 +154,7 @@ FactoCA <- function(){
       tkwm.title(PlotWin,.Facto_gettext("Outputs"))
       tkwm.geometry(PlotWin, "-100+50")
       
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOKsub<-function()
       {
         assign("compteur.graph", compteur.graph+1, envir=env)
@@ -162,7 +162,7 @@ FactoCA <- function(){
         if(compteur.graph>0) tclvalue(.PlotLabel)<-paste(label, "", sep=" ")
         tkconfigure(Plot.but, fg="blue")
 
-        # gestion des entrées de la partie graphique
+        # gestion des entrees de la partie graphique
         if(tclvalue(ind.check.value)==1) assign("Rchoix", TRUE, envir=env)
         else assign("Rchoix", FALSE, envir=env)
 
@@ -347,7 +347,7 @@ FactoCA <- function(){
         YlimIndMax.entry <-tkentry(RlimFrame,width="5",textvariable=YlimIndMax)
         tkgrid(tklabel(RlimFrame,text=.Facto_gettext("y limits of the graph:")),YlimIndMin.entry,YlimIndMax.entry)
   
-      #mise en page des différents frames de PlotIndFrame
+      #mise en page des differents frames de PlotIndFrame
       tkgrid(RchoixFrame)
       tkgrid(tklabel(PlotWin, text=" "))
       tkgrid(RTitleFrame)
@@ -370,12 +370,12 @@ FactoCA <- function(){
   })
 
     
-     #! fonction pour le choix des éléments de sortie
+     #! fonction pour le choix des elements de sortie
   Sortie.funct<-defmacro(label, firstLabel, expr=
   {
     env<-environment()
     compteur.sortie<-0
-    #déclaration des variables
+    #declaration des variables
     Rpropre<-FALSE
     RFichier <- ""
     Rcol<-FALSE
@@ -391,7 +391,7 @@ FactoCA <- function(){
       SortieWin<-tktoplevel()
       tkwm.title(SortieWin,.Facto_gettext("Outputs options"))
 
-      #création de la fonction onOKsub
+      #creation de la fonction onOKsub
       onOK.sortie<-function()
       {
         assign("compteur.sortie", compteur.sortie+1, envir=env)
@@ -634,7 +634,7 @@ FactoCA <- function(){
 })   
 
   
-  #! fonction pour la réinitialisation des paramètre
+  #! fonction pour la reinitialisation des parametre
   Reinitializ.funct<-function()
   {
     tkdestroy(top)
@@ -642,11 +642,11 @@ FactoCA <- function(){
   }
 
   
-#! fonction associée au bouton Appliquer, execute sans détruire l'interface graphique
+#! fonction associee au bouton Appliquer, execute sans detruire l'interface graphique
   OnAppliquer<-function()
   {
 
-        # liste de toutes les variables interne créées      (** mise en forme incomplète)
+        # liste de toutes les variables interne creees      (** mise en forme incomplete)
       # sur la fenetre principale
 #         listColonne      **
 #         listLigne        **
@@ -654,7 +654,7 @@ FactoCA <- function(){
 #         ncp.val          **
 #         Axe1
 #         Axe2
-      # dans les boutons des fenêtres illustratives
+      # dans les boutons des fenetres illustratives
 #         variableColIllu    **
 #         variableLigneIllu  **
       # dans le bouton Plot PCA
@@ -675,7 +675,7 @@ FactoCA <- function(){
 #           Rrowsup
 
 
-    # récupération des paramètres de la fenêtre principale
+    # recuperation des parametres de la fenetre principale
     nom.res<-tclvalue(resu.val)
     if (length(which(ls(envir = .GlobalEnv, all.names = TRUE)==nom.res))>0) justDoIt(paste('remove (',nom.res,')'))
     if(length(as.numeric(tkcurselection(listColonne)))<2) colActives<-listColonne.nom
@@ -688,7 +688,7 @@ FactoCA <- function(){
     
     Axe<-c(as.numeric(tclvalue(Axe1)), as.numeric(tclvalue(Axe2)))
     
-    # gestion du tableau de données pour l'AFC
+    # gestion du tableau de donnees pour l'AFC
     if(!is.null(variableColIllu)) {
       if(!is.null(variableLigneIllu)) commande.data<-paste(activeDataSet(),'.CA', '<-', activeDataSet(), '[c("', paste(rowActives, collapse='", "'), '", "', paste(variableLigneIllu, collapse='", "'), '") ,c("', paste(colActives, collapse='", "'), '", "', paste(variableColIllu, collapse='", "'), '")]', sep="")
       else  commande.data<-paste(activeDataSet(),'.CA', '<-', activeDataSet(), '[c("', paste(rowActives, collapse='", "'), '") ,c("', paste(colActives, collapse='", "'), '", "', paste(variableColIllu, collapse='", "'), '")]', sep="")
@@ -702,7 +702,7 @@ FactoCA <- function(){
     donnee.depart<-activeDataSet()
     activeDataSet(paste(activeDataSet(),'.', 'CA', sep=""))
     
-    # gestion de la commande réalisant l'AFC
+    # gestion de la commande realisant l'AFC
     ncp<-as.numeric(tclvalue(ncp.val))
    
     if(!is.null(variableColIllu)) {
@@ -760,7 +760,7 @@ FactoCA <- function(){
       }        
     }    
     
-    # gestion de l'édition de certains resultats
+    # gestion de l'edition de certains resultats
     doItAndPrint(paste('summary(',nom.res,', nb.dec = 3, nbelements=10, nbind = 10, ncp = 3, file="")', sep=""))
     if (RFichier==""){
       if(Rpropre) doItAndPrint(paste(nom.res, '$eig', sep=""))
@@ -798,39 +798,39 @@ FactoCA <- function(){
       if(Rdescdim) doItAndPrint(paste('write.infile(dimdesc(', nom.res, ', axes=1:',ncp,'), file =',Fich,',append=',append,')', sep=""))
     }
 
-    # Re-chargement du tableau de départ
+    # Re-chargement du tableau de depart
     activeDataSet(donnee.depart)
     justDoIt(paste('remove(',activeDataSet(),'.CA)',sep=""))
     logger(paste('remove(',activeDataSet(),'.CA)',sep=""))    
   }
   
-  #! fonction associée au bouton OK, execute et détruit l'interface graphique
+  #! fonction associee au bouton OK, execute et detruit l'interface graphique
   onOK<-function()
   {
     OnAppliquer()   
-    # destuction de la fenêtre Top
+    # destuction de la fenetre Top
     tkdestroy(top)
   
   }
 
 
 ################################################################################
-#                   Création de la fenêtre top                                 #
+#                   Creation de la fenetre top                                 #
 ################################################################################
   top<-tktoplevel(borderwidth=10)
   tkwm.title(top,.Facto_gettext("CA"))
   tkwm.geometry(top, "-100+50")
         
-  # définition des polices
+  # definition des polices
   font2<-tkfont.create(family="times",size=12,weight="bold")
   fontheading<-tkfont.create(family="times",size=18,weight="bold")
 
-  # récupération du jeu de données actif
+  # recuperation du jeu de donnees actif
   donnee<-get(getRcmdr(".activeDataSet"))
   vars<-colnames(donnee)
   rows<-rownames(donnee)
 
-  # création du frame contenant les listes colonnes et lignes
+  # creation du frame contenant les listes colonnes et lignes
   ListeFrame<- tkframe(top, borderwidth=2)
     # liste des variables colonnes
   listColonne<-tklistbox(ListeFrame,selectmode="extended",exportselection="FALSE",yscrollcommand=function(...)tkset(scrColonne,...))
@@ -860,7 +860,7 @@ FactoCA <- function(){
   tkgrid.columnconfigure(ListeFrame,2, minsize=95)
   
   
-  # création de tous les boutons d'options dans IlluFrame
+  # creation de tous les boutons d'options dans IlluFrame
   IlluFrame<- tkframe(top, borderwidth=2)
   Cillu.funct(label=.Facto_gettext("Supplementary columns"), firstLabel=.Facto_gettext("Supplementary columns"))
   Lillu.funct(label=.Facto_gettext("Supplementary rows"), firstLabel=.Facto_gettext("Supplementary rows"))    
@@ -882,7 +882,7 @@ FactoCA <- function(){
   tkgrid(Hcpc2Frame, columnspan=7)
   tkgrid.configure(Hcpc2Frame,column=4, columnspan=1)
 
-  # création des options dans OptionFrame  
+  # creation des options dans OptionFrame  
   OptionFrame<-tkframe(top, borderwidth=2, relief="groove")
   resu.lab<-tklabel(OptionFrame,text=.Facto_gettext("Name of the result object: "))
   resu.val<-tclVar("res")

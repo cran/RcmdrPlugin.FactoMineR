@@ -69,7 +69,7 @@ doubleclick<-function(){
 }
 tkbind(listdesc,"<Double-ButtonPress-1>",doubleclick)
 
-###### Fonction principale qui lance prefpls sans fermer la fenêtre------------------------------------------------------------------------------------------------------------
+###### Fonction principale qui lance prefpls sans fermer la fenetre------------------------------------------------------------------------------------------------------------
 App<-function(){
     variable<-vars.desc[as.numeric(tkcurselection(listdesc))+1]
     if (length(variable)<2) variable = vars.desc
@@ -101,14 +101,14 @@ App<-function(){
 }
 
 
-###### Fonction principale qui lance prefpls et ferme la fenêtre------------------------------------------------------------------------------------------------------------
+###### Fonction principale qui lance prefpls et ferme la fenetre------------------------------------------------------------------------------------------------------------
 onOK <- function(){
   done = App()
   if (done >0) tkdestroy(top)
 }
 
 
-##### Positionnement des widgets et frames sur la fenêtre 'top' ------------------------------------------------------------------------------------------
+##### Positionnement des widgets et frames sur la fenetre 'top' ------------------------------------------------------------------------------------------
 App.but <- tkbutton(top,borderwidth=3,width=12,text=.Facto_gettext("Apply"),command=App,fg="blue")
 
 OKCancelHelp(helpSubject="prefpls")
